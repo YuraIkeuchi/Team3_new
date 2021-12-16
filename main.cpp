@@ -369,9 +369,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		Object::PreDraw(dxCommon->GetCmdList());
 		dxCommon->PreDraw();
-		ImGui::Begin("position");
-		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
-		ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
+		ImGui::Begin("test");
+		if (ImGui::TreeNode("Debug"))
+		{
+			if (ImGui::TreeNode("Player"))
+			{
+				ImGui::Indent();
+				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
+				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+			ImGui::TreePop();
+		}
+		ImGui::Indent();
+		ImGui::Unindent();
 		ImGui::End();
 		//プリティ部形状の設定コマンド
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
