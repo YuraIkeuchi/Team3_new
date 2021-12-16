@@ -20,6 +20,7 @@ public:
 	void Update();
 	bool PushKey(BYTE keyNumber);
 	bool TriggerKey(BYTE keyNumber);
+	MouseMove GetMouseMove();
 private://メンバ変数
 	//キーボードのデパイス
 	ComPtr<IDirectInputDevice8> devkeyboard;

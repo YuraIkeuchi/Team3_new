@@ -27,15 +27,13 @@ public:
 	//描画後処理
 	void PostDraw();
 
-	//デバイスの初期化
+	//デバイス初期化
 	bool InitializeDevice();
 
-
-	//スワップチェーンの生成
+	//スワップチェーン生成
 	bool CreateSwapChain();
 
-
-	//コマンド関連の初期化
+	//コマンド関連初期化
 	bool InitializeCommand();
 
 	//レンダーターゲット生成

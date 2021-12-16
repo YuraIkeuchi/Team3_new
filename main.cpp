@@ -172,7 +172,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
 	audio->LoopWave(0, 0.5f);
-
 	Object* object[OBJECT_NUM];
 	for (int i = 0; i < _countof(object); i++) {
 		if (!object[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
@@ -371,9 +370,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Object::PreDraw(dxCommon->GetCmdList());
 		dxCommon->PreDraw();
 		ImGui::Begin("position");
-		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 100, -100);
+		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
+	
+	/*	ImGui::Begin("position");
+		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 100, -100);*/
 		ImGui::End();
+		ImGui::Begin("position");
+		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 
+		/*	ImGui::Begin("position");
+			ImGui::SliderFloat("Position.x", &PlayerPosition.x, 100, -100);*/
+		ImGui::End();
 		//プリティ部形状の設定コマンド
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		for (int i = 0; i < _countof(object); i++) {
