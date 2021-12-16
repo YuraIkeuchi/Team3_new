@@ -21,7 +21,7 @@ void Input::Initialize(WinApp* winApp)
 	result = devkeyboard->SetCooperativeLevel(winApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 }
 
-void Input::Update() 
+void Input::Update()
 {
 	HRESULT result;
 	memcpy(keyPre, key, sizeof(key));
@@ -49,4 +49,53 @@ bool Input::TriggerKey(BYTE keyNumber) {
 
 	// トリガーでない
 	return false;
+}
+
+//マウス関係
+bool Input::PushMouseLeft()
+{
+	//0でなければ押している
+	if (mouseState.rgbButtons[0]) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Input::PushMouseMiddle()
+{
+	//0でなければ押している
+	if (mouseState.rgbButtons[2]) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Input::TriggerMouseLeft()
+{	// 前回が0で、今回が0でなければトリガー
+	if (!mouseStatePre.rgbButtons[0] && mouseState.rgbButtons[0]) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Input::TriggerMouseMiddle()
+{	// 前回が0で、今回が0でなければトリガー
+	if (!mouseStatePre.rgbButtons[2] && mouseState.rgbButtons[2]) {
+		return true;
+	}
+
+	return false;
+}
+
+Input::MouseMove Input::GetMouseMove()
+{
+	MouseMove tmp;
+	tmp.lX = mouseState.lX;
+	tmp.lY = mouseState.lY;
+	tmp.lZ = mouseState.lZ;
+
+	return tmp;
 }

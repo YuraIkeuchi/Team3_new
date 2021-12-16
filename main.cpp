@@ -371,15 +371,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		dxCommon->PreDraw();
 		ImGui::Begin("position");
 		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
-	
-	/*	ImGui::Begin("position");
-		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 100, -100);*/
-		ImGui::End();
-		ImGui::Begin("position");
-		ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
-
-		/*	ImGui::Begin("position");
-			ImGui::SliderFloat("Position.x", &PlayerPosition.x, 100, -100);*/
+		ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 		ImGui::End();
 		//プリティ部形状の設定コマンド
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

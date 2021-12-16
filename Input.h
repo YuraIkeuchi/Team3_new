@@ -20,12 +20,19 @@ public:
 	void Update();
 	bool PushKey(BYTE keyNumber);
 	bool TriggerKey(BYTE keyNumber);
+	bool PushMouseLeft();
+	bool PushMouseMiddle();
+	bool TriggerMouseLeft();
+	bool TriggerMouseMiddle();
 	MouseMove GetMouseMove();
 private://メンバ変数
 	//キーボードのデパイス
 	ComPtr<IDirectInputDevice8> devkeyboard;
 	BYTE key[256] = {};
 	BYTE keyPre[256] = {};
+	ComPtr<IDirectInputDevice8> devMouse;
+	DIMOUSESTATE2 mouseState = {};
+	DIMOUSESTATE2 mouseStatePre = {};
 private:
 	WinApp* winApp = nullptr;
 };
