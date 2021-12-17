@@ -302,47 +302,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			PlayerPosition.y = -10.0f;
 		}
 
-		//for (int i = 0; i < OBJECT_NUM; i++) {
-		//	//上
-		//	if ((ObjectPosition[i].y - PlayerPosition.y <= 5.2) && (ObjectPosition[i].y - PlayerPosition.y >= 1.0)
-		//		&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
-		//		JumpG = JumpG * -1;
-		//	}
+		for (int i = 0; i < OBJECT_NUM; i++) {
+			//上
+			if ((ObjectPosition[i].y - PlayerPosition.y <= 5.2) && (ObjectPosition[i].y - PlayerPosition.y >= 1.0)
+				&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
+				JumpG = JumpG * -1;
+			}
 
-		//	//下
-		//	if ((ObjectPosition[i].y - PlayerPosition.y >= -5.2) && (ObjectPosition[i].y - PlayerPosition.y <= -1.0)
-		//		&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
-		//		JumpG = 0.0f;
-		//		DownHitFlag = 1;
-		//		if (PlayerPosition.y <= ObjectPosition[i].y / 2) {
-		//			PlayerPosition.y = ObjectPosition[i].y / 2;
-		//		}
-		//	} else {
-		//		DownHitFlag = 0;
-		//	}
+			//下
+			if ((ObjectPosition[i].y - PlayerPosition.y >= -5.2) && (ObjectPosition[i].y - PlayerPosition.y <= -1.0)
+				&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
+				JumpG = 0.0f;
+				DownHitFlag = 1;
+				if (PlayerPosition.y <= ObjectPosition[i].y / 2) {
+					PlayerPosition.y = ObjectPosition[i].y / 2;
+				}
+			} else {
+				DownHitFlag = 0;
+			}
 
-		//	//右
-		//	if ((ObjectPosition[i].x - PlayerPosition.x <= 5) && (ObjectPosition[i].x - PlayerPosition.x >= 4)
-		//		&& (ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
-		//		RightHitFlag = 1;
-		//	} else {
-		//		RightHitFlag = 0;
-		//	}
+			//右
+			if ((ObjectPosition[i].x - PlayerPosition.x <= 5) && (ObjectPosition[i].x - PlayerPosition.x >= 4)
+				&& (ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
+				RightHitFlag = 1;
+				break;
+			} else {
+				RightHitFlag = 0;
+			}
 
-		//	//左
-		//	if ((ObjectPosition[i].x - PlayerPosition.x >= -5) && (ObjectPosition[i].x - PlayerPosition.x <= -4) &&
-		//		(ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
-		//		LeftHitFlag = 1;
-		//	} else {
-		//		LeftHitFlag = 0;
-		//	}
-		//}
-
-		if (KingBoxCollision(PlayerPosition, { 2.5,2.5,2.5 }, ObjectPosition[0], { 2.5,2.5,2.5 }) == TRUE) {
-			PlayerPosition.x = OldPlayerPosition.x;
-			PlayerPosition.y = OldPlayerPosition.y;
+			//左
+			if ((ObjectPosition[i].x - PlayerPosition.x >= -5) && (ObjectPosition[i].x - PlayerPosition.x <= -4) &&
+				(ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
+				LeftHitFlag = 1;
+				break;
+			} else {
+				LeftHitFlag = 0;
+			}
 		}
 
+	
 		for (int i = 0; i < _countof(object); i++) {
 			object[i]->Update();
 			//ルートシグネチャの設定コマンド
