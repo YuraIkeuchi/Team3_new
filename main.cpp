@@ -32,19 +32,8 @@
 #pragma comment(lib,"dxguid.lib")
 using namespace DirectX;
 using namespace Microsoft::WRL;
-LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	switch (msg) {
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, msg, wparam, lparam);
-}
 
-//テクスチャの最大枚数
-const int SpriteSRVCount = 512;
-
+#pragma region//関数
 int collision2(const float& X1, const float& Y1, const float& R1, const float& X2, const float& Y2, const float& R2) {
 	int a = X1 - X2;
 	int b = Y1 - Y2;
@@ -54,7 +43,8 @@ int collision2(const float& X1, const float& Y1, const float& R1, const float& X
 		return TRUE;
 	}
 }
-
+#pragma endregion
+#pragma region//WinMain
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	//ポインタ置き場
@@ -70,16 +60,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	MSG msg{};
 	//でバッグレイヤーのやつ
 #ifdef _DEBUG
-
 #endif
-
 	//directx初期化
 	HRESULT result;
-
-	//描画初期化処理
-	//頂点データ3点分の座標
-//#pragma regin 描画初期化処理
-	//頂点データ構造体
+#pragma region//構造体
 	struct Vertex
 	{
 		XMFLOAT3 pos;
@@ -92,11 +76,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		XMFLOAT4 color;
 		XMMATRIX mat;
 	};
-
 	const int constantBufferNum = 128;
-
 	const int OBJECT_NUM = 2;
-
+#pragma endregion
+#pragma region//行列
 	//射影変換行列の作り
 	XMMATRIX matprojection = XMMatrixPerspectiveFovLH(XMConvertToRadians(60.0f), (float)WinApp::window_width / WinApp::window_height, 0.1f, 1000.0f);
 
@@ -110,11 +93,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ワールド変換行列
 	XMMATRIX matworld0;
 	matworld0 = XMMatrixIdentity();
-
 	XMFLOAT3 position;
-
 	position = { 0.0f,0.0f,0.0f };
-
 	//2
 	XMMATRIX matRot1;
 	XMMATRIX matTrans1;
@@ -122,19 +102,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	matRot1 = XMMatrixRotationY(XMConvertToRadians(90.0f));
 	matTrans1 = XMMatrixTranslation(-20.0f, 0, 0);
 	matworld1 = matRot1 * matTrans1;
-
 	//カメラの回転角
 	float angle = 0.0f;
-	//スプライト共通データ
+#pragma endregion
+#pragma region//スプライト共通データ
 	if (!Sprite::StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 0;
 	}
-	int map[3][3] = {
-		0,0,0,
-		1,0,1,
-		0,0,1
-	};
 
 	const int SpriteMax = 10;
 	Sprite* sprite[SpriteMax] = { nullptr };
@@ -145,7 +120,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(1, L"Resources/END.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
-	//オーディオ
+#pragma endregion
+#pragma region//オーディオ
 	const int AudioMax = 3;
 	Audio* audio = new Audio;
 	if (!audio->Initialize()) {
@@ -154,23 +130,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
 	audio->LoopWave(0, 0.5f);
-	Object* object[OBJECT_NUM];
-	for (int i = 0; i < _countof(object); i++) {
-		if (!object[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-			assert(0);
-			return 1;
-		}
-		object[i] = Object::Create();
-		object[i]->Update();
-	}
-
-	Object* player;
-	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-		assert(0);
-		return 1;
-	}
-	player = Object::Create();
-	player->Update();
+#pragma endregion
+#pragma region//デスクリプタやシェーダリソースビュー
 	//定数バッファ用でスクリプタヒープの生成
 	ComPtr<ID3D12DescriptorHeap>basicDescHeap;
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
@@ -196,11 +157,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ハンドルのアドレスを進める
 	cpuDescHandleSRV.ptr += constantBufferNum * dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	gpuDescHandleSRV.ptr += constantBufferNum * dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	//キー処理
+#pragma endregion
+#pragma region//キー処理
 	//入力の初期化
 	input = new Input();
 	input->Initialize(winApp);
+#pragma endregion
+#pragma region//障害物変数
+	Object* object[OBJECT_NUM];
+	for (int i = 0; i < _countof(object); i++) {
+		if (!object[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+			assert(0);
+			return 1;
+		}
+		object[i] = Object::Create();
+		object[i]->Update();
+	}
+
 	XMFLOAT3 ObjectPosition[OBJECT_NUM];
 
 	XMFLOAT3 Plus = { 0.0f,0.0f,0.0f };
@@ -213,19 +186,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	for (int i = 0; i < _countof(object); i++) {
 		object[i]->SetPosition(ObjectPosition[i]);
 	}
-
+#pragma endregion
+#pragma region//プレイヤー変数
+	Object* player;
+	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player = Object::Create();
+	player->Update();
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { 0.0f,0.0f,0.0f };
 	PlayerPosition = player->GetPosition();
-
 	player->SetPosition(PlayerPosition);
 	XMFLOAT2 SpritePosition = sprite[0]->GetPosition();
+	//当たったときの判定
 	int HitFlag = 0;
 	int RightHitFlag = 0;
 	int LeftHitFlag = 0;
 	int UpHitFlag = 0;
 	int DownHitFlag = 0;
 	float JumpG = 0.0f;
+#pragma endregion
+#pragma region//シーン変数
 	int Scene = 0;
 	enum Scene {
 		title,
@@ -233,6 +216,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		gameOver,
 		gameClear
 	};
+#pragma endregion
+#pragma region//ループ処理
 	while (true) {
 		//ウィンドウメッセージ処理
 		if (winApp->ProcessMessage()) {
@@ -243,18 +228,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		PlayerPosition = player->GetPosition();
 		SpritePosition = sprite[0]->GetPosition();
-		//毎フレーム処理
-
+#pragma region//更新処理
 		//キーの更新
 		input->Update();
-
+#pragma region//タイトル
 		if (Scene == title) {
 			if (input->TriggerKey(DIK_SPACE)) {
 				Scene = gamePlay;
 			}
-
 		}
-		
+#pragma endregion
+#pragma region//ゲームプレイ中
 		if (Scene == gamePlay) {
 			if (input->PushKey(DIK_UP)) {
 				PlayerPosition.y += 0.5f;
@@ -275,8 +259,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (input->TriggerKey(DIK_SPACE)) {
 				JumpG = -0.8f;
 			}
-
-
 			PlayerPosition.y -= JumpG;
 			JumpG += 0.025f;
 
@@ -328,12 +310,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				Scene = gameClear;
 			}
 		}
-
+#pragma endregion
+#pragma region//クリア
 		if (Scene == gameClear) {
 			if (input->TriggerKey(DIK_S)) {
 				Scene = title;
 			}
 		}
+#pragma endregion
+#pragma region//Update
 		for (int i = 0; i < _countof(object); i++) {
 			object[i]->Update();
 			//ルートシグネチャの設定コマンド
@@ -342,8 +327,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		player->Update();
 		player->SetPosition(PlayerPosition);
-
-		//びょうがこまんど
+#pragma endregion
+#pragma endregion
+#pragma region//描画
+		//描画コマンド
 		//x,y座標のデバッグログ
 		wchar_t str[256];
 
@@ -351,16 +338,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		OutputDebugString(str);
 		swprintf_s(str, L"ObjectPosition[0].x - PlayerPosition.x:%f\n", ObjectPosition[0].x - PlayerPosition.x);
 		OutputDebugString(str);
-
-		/*swprintf_s(str, L"ObjectPosition[1].y - ObjectPosition[0].y:%f\n", ObjectPosition[1].y - ObjectPosition[0].y);
-		OutputDebugString(str);*/
-		//描画コマンド
 		dxCommon->PreDraw();
 		////4.描画コマンドここから
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		//4.描画コマンドここまで
-#pragma endregion
-#pragma region//描画
+		ImGui::Begin("test");
+		if (ImGui::TreeNode("Debug"))
+		{
+			if (ImGui::TreeNode("Player"))
+			{
+				ImGui::Indent();
+				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
+				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+			ImGui::TreePop();
+		}
+		ImGui::Indent();
+		ImGui::Unindent();
+		ImGui::End();
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		if (Scene == title) {
@@ -384,10 +380,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// 3Dオブジェクト描画後処理
 		Object::PostDraw();
 	
-#pragma endregion
-#pragma region//ゲーム外処理２
+
 		dxCommon->PostDraw();
 	}
+#pragma endregion
+#pragma endregion
+#pragma region//開放処理
 	winApp->Finalize();
 	for (int i = 0; i < SpriteMax; i++) {
 		delete sprite[i];
@@ -403,4 +401,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	winApp = nullptr;
 	return 0;
+#pragma endregion
 }
+#pragma endregion
