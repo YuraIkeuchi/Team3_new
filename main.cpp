@@ -19,6 +19,8 @@
 #include "Sprite.h"
 #include "Audio.h"
 #include "Object3d.h"
+#include "Player.h"
+#include "backGround.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -181,23 +183,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ObjectPosition[i] = object[i]->GetPosition();
 	}
 
-	ObjectPosition[0] = { -20.0f,-10.0f,0.0f };
-	ObjectPosition[1] = { -5.0f,0.0f,0.0f };
+	ObjectPosition[0] = { -20.0f,-8.0f,0.0f };
+	ObjectPosition[1] = { -5.0f,5.0f,0.0f };
 	for (int i = 0; i < _countof(object); i++) {
 		object[i]->SetPosition(ObjectPosition[i]);
 	}
 #pragma endregion
 #pragma region//プレイヤー変数
-	Object* player;
+	Player* player;
 	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
-	player = Object::Create();
+	player = Player::Create();
 	player->Update();
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { 0.0f,0.0f,0.0f };
 	PlayerPosition = player->GetPosition();
+	XMFLOAT3 PlayerRotation;
+	PlayerRotation = player->GetRotaition();
 	player->SetPosition(PlayerPosition);
 	XMFLOAT2 SpritePosition = sprite[0]->GetPosition();
 	//当たったときの判定
@@ -207,6 +211,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int UpHitFlag = 0;
 	int DownHitFlag = 0;
 	float JumpG = 0.0f;
+#pragma endregion
+#pragma region//背景
+	BackGround* background;
+	if (!background->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	//XMFLOAT3 BackPosition;
+	//BackPosition = background->GetPosition();
+
+	background = BackGround::Create();
+	background->Update();
+#pragma endregion
+#pragma region//スクロール変数
+	XMFLOAT3 ScrollPosition = { 0.0f,0.0f,0.0f };
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
@@ -250,11 +269,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (input->PushKey(DIK_LEFT) && LeftHitFlag == 0) {
 				PlayerPosition.x -= 0.5f;
+				PlayerRotation.y = 270;
 			}
 			if (input->PushKey(DIK_RIGHT) && RightHitFlag == 0) {
 				PlayerPosition.x += 0.5f;
+				PlayerRotation.y = 90;
 			}
 
+			if (input->PushKey(DIK_D)) {
+				ScrollPosition.x += 0.01f;
+			}
+
+			/*PlayerPosition.x = PlayerPosition.x - ScrollPosition.x;*/
 			//ジャンプ処理
 			if (input->TriggerKey(DIK_SPACE)) {
 				JumpG = -0.8f;
@@ -270,14 +296,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//障害物との当たり判定
 			for (int i = 0; i < OBJECT_NUM; i++) {
 				//上
-				if ((ObjectPosition[i].y - PlayerPosition.y <= 5.2) && (ObjectPosition[i].y - PlayerPosition.y >= 1.0)
-					&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
+				if ((ObjectPosition[i].y - PlayerPosition.y <= 9.2) && (ObjectPosition[i].y - PlayerPosition.y >= 3.0)
+					&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)
+					&& JumpG < 0) {
+
 					JumpG = JumpG * -1;
 				}
 
 				//下
-				if ((ObjectPosition[i].y - PlayerPosition.y >= -5.2) && (ObjectPosition[i].y - PlayerPosition.y <= -1.0)
+				if ((ObjectPosition[i].y - PlayerPosition.y >= -4.0) && (ObjectPosition[i].y - PlayerPosition.y <= -1.0)
 					&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
+
 					JumpG = 0.0f;
 					DownHitFlag = 1;
 					if (PlayerPosition.y <= ObjectPosition[i].y / 2) {
@@ -289,7 +318,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 				//右
 				if ((ObjectPosition[i].x - PlayerPosition.x <= 5) && (ObjectPosition[i].x - PlayerPosition.x >= 4)
-					&& (ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
+					&& (ObjectPosition[i].y - PlayerPosition.y <= 6) && (ObjectPosition[i].y - PlayerPosition.y >= -6)) {
 					RightHitFlag = 1;
 					break;
 				} else {
@@ -298,7 +327,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 				//左
 				if ((ObjectPosition[i].x - PlayerPosition.x >= -5) && (ObjectPosition[i].x - PlayerPosition.x <= -4) &&
-					(ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
+					(ObjectPosition[i].y - PlayerPosition.y <= 6) && (ObjectPosition[i].y - PlayerPosition.y >= -6)) {
 					LeftHitFlag = 1;
 					break;
 				} else {
@@ -324,9 +353,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//ルートシグネチャの設定コマンド
 			object[i]->SetPosition(ObjectPosition[i]);
 		}
-
+		background->Update();
 		player->Update();
 		player->SetPosition(PlayerPosition);
+		player->SetRotaition(PlayerRotation);
 #pragma endregion
 #pragma endregion
 #pragma region//描画
@@ -337,6 +367,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		swprintf_s(str, L"ObjectPosition[1].x - PlayerPosition.x:%f\n", ObjectPosition[1].x - PlayerPosition.x);
 		OutputDebugString(str);
 		swprintf_s(str, L"ObjectPosition[0].x - PlayerPosition.x:%f\n", ObjectPosition[0].x - PlayerPosition.x);
+		OutputDebugString(str);
+		swprintf_s(str, L"JumpG:%f\n", JumpG);
 		OutputDebugString(str);
 		dxCommon->PreDraw();
 		////4.描画コマンドここから
@@ -349,6 +381,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Indent();
 				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
+				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -364,12 +397,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		Sprite::PostDraw();
 		Object::PreDraw(dxCommon->GetCmdList());
+		Player::PreDraw(dxCommon->GetCmdList());
+		BackGround::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
 			player->Draw();
 			for (int i = 0; i < _countof(object); i++) {
 				object[i]->Draw();
 			}
+			background->Draw();
 		}
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		if (Scene == gameClear) {
@@ -379,8 +415,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Sprite::PostDraw();
 		// 3Dオブジェクト描画後処理
 		Object::PostDraw();
-	
-
+		Player::PostDraw();
+		BackGround::PostDraw();
 		dxCommon->PostDraw();
 	}
 #pragma endregion
