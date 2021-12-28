@@ -20,6 +20,8 @@
 #include "Audio.h"
 #include "Object3d.h"
 #include "Player.h"
+#include "Player2.h"
+#include "Player3.h"
 #include "backGround.h"
 #include "DirectXTex/d3dx12.h"
 
@@ -184,7 +186,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	ObjectPosition[0] = { -20.0f,-8.0f,0.0f };
-	ObjectPosition[1] = { -5.0f,5.0f,0.0f };
+	ObjectPosition[1] = { -5.0f,2.0f,0.0f };
 	for (int i = 0; i < _countof(object); i++) {
 		object[i]->SetPosition(ObjectPosition[i]);
 	}
@@ -197,6 +199,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	player = Player::Create();
 	player->Update();
+	Player2* player2;
+	if (!player2->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player2 = Player2::Create();
+	player2->Update();
+	Player3* player3;
+	if (!player3->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player3 = Player3::Create();
+	player3->Update();
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { 0.0f,0.0f,0.0f };
 	PlayerPosition = player->GetPosition();
@@ -211,6 +227,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int UpHitFlag = 0;
 	int DownHitFlag = 0;
 	float JumpG = 0.0f;
+	//アニメーション
+	int AnimetionTimer = 0;
+	int AnimetionCount = 0;
 #pragma endregion
 #pragma region//背景
 	BackGround* background;
@@ -269,17 +288,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (input->PushKey(DIK_LEFT) && LeftHitFlag == 0) {
 				PlayerPosition.x -= 0.5f;
-				PlayerRotation.y = 270;
+				//PlayerRotation.z = 270;
+				AnimetionTimer++;
 			}
 			if (input->PushKey(DIK_RIGHT) && RightHitFlag == 0) {
 				PlayerPosition.x += 0.5f;
-				PlayerRotation.y = 90;
+				//PlayerRotation.z = 90;
+				AnimetionTimer++;
 			}
 
 			if (input->PushKey(DIK_D)) {
 				ScrollPosition.x += 0.01f;
 			}
 
+			if (AnimetionTimer == 8) {
+				AnimetionCount++;
+				AnimetionTimer = 0;
+			}
+
+			if (AnimetionCount == 3) {
+				AnimetionCount = 0;
+			}
 			/*PlayerPosition.x = PlayerPosition.x - ScrollPosition.x;*/
 			//ジャンプ処理
 			if (input->TriggerKey(DIK_SPACE)) {
@@ -355,8 +384,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		background->Update();
 		player->Update();
+		player2->Update();
+		player3->Update();
 		player->SetPosition(PlayerPosition);
+		player2->SetPosition(PlayerPosition);
+		player3->SetPosition(PlayerPosition);
 		player->SetRotaition(PlayerRotation);
+		player2->SetRotaition(PlayerRotation);
+		player3->SetRotaition(PlayerRotation);
 #pragma endregion
 #pragma endregion
 #pragma region//描画
@@ -398,10 +433,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Sprite::PostDraw();
 		Object::PreDraw(dxCommon->GetCmdList());
 		Player::PreDraw(dxCommon->GetCmdList());
+		Player2::PreDraw(dxCommon->GetCmdList());
+		Player3::PreDraw(dxCommon->GetCmdList());
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
-			player->Draw();
+			if (AnimetionCount == 0) {
+				player->Draw();
+			}
+			else if (AnimetionCount == 1) {
+				player2->Draw();
+			}
+			else if (AnimetionCount == 2) {
+				player3->Draw();
+			}
 			for (int i = 0; i < _countof(object); i++) {
 				object[i]->Draw();
 			}
@@ -416,6 +461,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// 3Dオブジェクト描画後処理
 		Object::PostDraw();
 		Player::PostDraw();
+		Player2::PostDraw();
+		Player3::PostDraw();
 		BackGround::PostDraw();
 		dxCommon->PostDraw();
 	}

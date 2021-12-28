@@ -1,4 +1,4 @@
-#include "Player.h"
+#include "Player3.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 
@@ -10,35 +10,35 @@ using namespace Microsoft::WRL;
 /// <summary>
 /// 静的メンバ変数の実体
 /// </summary>
-const float Player::radius = 5.0f;				// 底面の半径
-const float Player::prizmHeight = 8.0f;			// 柱の高さ
-ID3D12Device* Player::device = nullptr;
-UINT Player::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Player::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Player::rootsignature;
-ComPtr<ID3D12PipelineState> Player::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Player::descHeap;
-ComPtr<ID3D12Resource> Player::vertBuff;
-ComPtr<ID3D12Resource> Player::indexBuff;
-ComPtr<ID3D12Resource> Player::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Player::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Player::gpuDescHandleSRV;
-XMMATRIX Player::matView{};
-XMMATRIX Player::matProjection{};
-XMFLOAT3 Player::eye = { 0, 0, -50.0f };
-XMFLOAT3 Player::target = { 0, 0, 0 };
-XMFLOAT3 Player::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Player::vbView{};
-D3D12_INDEX_BUFFER_VIEW Player::ibView{};
-Player::VertexPosNormalUv Player::vertices[vertexCount];
-unsigned short Player::indices[planeCount * 3];
+const float Player3::radius = 5.0f;				// 底面の半径
+const float Player3::prizmHeight = 8.0f;			// 柱の高さ
+ID3D12Device* Player3::device = nullptr;
+UINT Player3::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* Player3::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> Player3::rootsignature;
+ComPtr<ID3D12PipelineState> Player3::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> Player3::descHeap;
+ComPtr<ID3D12Resource> Player3::vertBuff;
+ComPtr<ID3D12Resource> Player3::indexBuff;
+ComPtr<ID3D12Resource> Player3::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE Player3::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE Player3::gpuDescHandleSRV;
+XMMATRIX Player3::matView{};
+XMMATRIX Player3::matProjection{};
+XMFLOAT3 Player3::eye = { 0, 0, -50.0f };
+XMFLOAT3 Player3::target = { 0, 0, 0 };
+XMFLOAT3 Player3::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW Player3::vbView{};
+D3D12_INDEX_BUFFER_VIEW Player3::ibView{};
+Player3::VertexPosNormalUv Player3::vertices[vertexCount];
+unsigned short Player3::indices[planeCount * 3];
 
-bool Player::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
+bool Player3::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
 {
 	// nullptrチェック
 	assert(device);
 
-	Player::device = device;
+	Player3::device = device;
 
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
@@ -58,13 +58,13 @@ bool Player::StaticInitialize(ID3D12Device* device, int window_width, int window
 	return true;
 }
 
-void Player::PreDraw(ID3D12GraphicsCommandList* cmdList)
+void Player3::PreDraw(ID3D12GraphicsCommandList* cmdList)
 {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Player::cmdList == nullptr);
+	assert(Player3::cmdList == nullptr);
 
 	// コマンドリストをセット
-	Player::cmdList = cmdList;
+	Player3::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -74,45 +74,45 @@ void Player::PreDraw(ID3D12GraphicsCommandList* cmdList)
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Player::PostDraw()
+void Player3::PostDraw()
 {
 	// コマンドリストを解除
-	Player::cmdList = nullptr;
+	Player3::cmdList = nullptr;
 }
 
-Player* Player::Create()
+Player3* Player3::Create()
 {
 	// 3Dオブジェクトのインスタンスを生成
-	Player* player = new Player();
-	if (player == nullptr) {
+	Player3* player3 = new Player3();
+	if (player3 == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!player->Initialize()) {
-		delete player;
+	if (!player3->Initialize()) {
+		delete player3;
 		assert(0);
 		return nullptr;
 	}
 
-	return player;
+	return player3;
 }
 
-void Player::SetEye(XMFLOAT3 eye)
+void Player3::SetEye(XMFLOAT3 eye)
 {
-	Player::eye = eye;
+	Player3::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Player::SetTarget(XMFLOAT3 target)
+void Player3::SetTarget(XMFLOAT3 target)
 {
-	Player::target = target;
+	Player3::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Player::CameraMoveVector(XMFLOAT3 move)
+void Player3::CameraMoveVector(XMFLOAT3 move)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
@@ -129,7 +129,7 @@ void Player::CameraMoveVector(XMFLOAT3 move)
 	SetTarget(target_moved);
 }
 
-bool Player::InitializeDescriptorHeap()
+bool Player3::InitializeDescriptorHeap()
 {
 	HRESULT result = S_FALSE;
 
@@ -150,7 +150,7 @@ bool Player::InitializeDescriptorHeap()
 	return true;
 }
 
-void Player::InitializeCamera(int window_width, int window_height)
+void Player3::InitializeCamera(int window_width, int window_height)
 {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
@@ -171,7 +171,7 @@ void Player::InitializeCamera(int window_width, int window_height)
 	);
 }
 
-bool Player::InitializeGraphicsPipeline()
+bool Player3::InitializeGraphicsPipeline()
 {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
@@ -323,7 +323,7 @@ bool Player::InitializeGraphicsPipeline()
 	return true;
 }
 
-bool Player::LoadTexture()
+bool Player3::LoadTexture()
 {
 	HRESULT result = S_FALSE;
 
@@ -332,7 +332,7 @@ bool Player::LoadTexture()
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/ダウンロード.png", WIC_FLAGS_NONE,
+		L"Resources/unnamed.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -393,7 +393,7 @@ bool Player::LoadTexture()
 	return true;
 }
 
-void Player::CreateModel()
+void Player3::CreateModel()
 {
 	HRESULT result = S_FALSE;
 
@@ -542,13 +542,13 @@ void Player::CreateModel()
 	ibView.SizeInBytes = sizeof(indices);
 }
 
-void Player::UpdateViewMatrix()
+void Player3::UpdateViewMatrix()
 {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
-bool Player::Initialize()
+bool Player3::Initialize()
 {
 	// nullptrチェック
 	assert(device);
@@ -566,7 +566,7 @@ bool Player::Initialize()
 	return true;
 }
 
-void Player::Update()
+void Player3::Update()
 {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
@@ -599,11 +599,11 @@ void Player::Update()
 	constBuff->Unmap(0, nullptr);
 }
 
-void Player::Draw()
+void Player3::Draw()
 {
 	// nullptrチェック
 	assert(device);
-	assert(Player::cmdList);
+	assert(Player3::cmdList);
 
 	// 頂点バッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &vbView);
