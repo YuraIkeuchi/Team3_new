@@ -438,6 +438,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
+			background->Draw();
 			if (AnimetionCount == 0) {
 				player->Draw();
 			}
@@ -450,7 +451,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			for (int i = 0; i < _countof(object); i++) {
 				object[i]->Draw();
 			}
-			background->Draw();
+			
 		}
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		if (Scene == gameClear) {

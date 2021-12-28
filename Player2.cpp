@@ -10,8 +10,6 @@ using namespace Microsoft::WRL;
 /// <summary>
 /// 静的メンバ変数の実体
 /// </summary>
-const float Player2::radius = 5.0f;				// 底面の半径
-const float Player2::prizmHeight = 8.0f;			// 柱の高さ
 ID3D12Device* Player2::device = nullptr;
 UINT Player2::descriptorHandleIncrementSize = 0;
 ID3D12GraphicsCommandList* Player2::cmdList = nullptr;
@@ -30,11 +28,8 @@ XMFLOAT3 Player2::target = { 0, 0, 0 };
 XMFLOAT3 Player2::up = { 0, 1, 0 };
 D3D12_VERTEX_BUFFER_VIEW Player2::vbView{};
 D3D12_INDEX_BUFFER_VIEW Player2::ibView{};
-Player2::VertexPosNormalUv Player2::vertices[vertexCount];
-unsigned short Player2::indices[planeCount * 3];
 
-bool Player2::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
-{
+bool Player2::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
 	// nullptrチェック
 	assert(device);
 
@@ -58,8 +53,7 @@ bool Player2::StaticInitialize(ID3D12Device* device, int window_width, int windo
 	return true;
 }
 
-void Player2::PreDraw(ID3D12GraphicsCommandList* cmdList)
-{
+void Player2::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
 	assert(Player2::cmdList == nullptr);
 
@@ -74,14 +68,12 @@ void Player2::PreDraw(ID3D12GraphicsCommandList* cmdList)
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Player2::PostDraw()
-{
+void Player2::PostDraw() {
 	// コマンドリストを解除
 	Player2::cmdList = nullptr;
 }
 
-Player2* Player2::Create()
-{
+Player2* Player2::Create() {
 	// 3Dオブジェクトのインスタンスを生成
 	Player2* player2 = new Player2();
 	if (player2 == nullptr) {
@@ -98,22 +90,19 @@ Player2* Player2::Create()
 	return player2;
 }
 
-void Player2::SetEye(XMFLOAT3 eye)
-{
+void Player2::SetEye(XMFLOAT3 eye) {
 	Player2::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Player2::SetTarget(XMFLOAT3 target)
-{
+void Player2::SetTarget(XMFLOAT3 target) {
 	Player2::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Player2::CameraMoveVector(XMFLOAT3 move)
-{
+void Player2::CameraMoveVector(XMFLOAT3 move) {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
 
@@ -129,8 +118,7 @@ void Player2::CameraMoveVector(XMFLOAT3 move)
 	SetTarget(target_moved);
 }
 
-bool Player2::InitializeDescriptorHeap()
-{
+bool Player2::InitializeDescriptorHeap() {
 	HRESULT result = S_FALSE;
 
 	// デスクリプタヒープを生成	
@@ -150,8 +138,7 @@ bool Player2::InitializeDescriptorHeap()
 	return true;
 }
 
-void Player2::InitializeCamera(int window_width, int window_height)
-{
+void Player2::InitializeCamera(int window_width, int window_height) {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
 		XMLoadFloat3(&eye),
@@ -171,8 +158,7 @@ void Player2::InitializeCamera(int window_width, int window_height)
 	);
 }
 
-bool Player2::InitializeGraphicsPipeline()
-{
+bool Player2::InitializeGraphicsPipeline() {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
@@ -180,7 +166,7 @@ bool Player2::InitializeGraphicsPipeline()
 
 	// 頂点シェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
-		L"Resources/shaders/BasicVS.hlsl",	// シェーダファイル名
+		L"Resources/Shaders/BasicVS.hlsl",	// シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
 		"main", "vs_5_0",	// エントリーポイント名、シェーダーモデル指定
@@ -203,7 +189,7 @@ bool Player2::InitializeGraphicsPipeline()
 
 	// ピクセルシェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
-		L"Resources/shaders/BasicPS.hlsl",	// シェーダファイル名
+		L"Resources/Shaders/BasicPS.hlsl",	// シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
 		"main", "ps_5_0",	// エントリーポイント名、シェーダーモデル指定
@@ -252,11 +238,14 @@ bool Player2::InitializeGraphicsPipeline()
 	gpipeline.SampleMask = D3D12_DEFAULT_SAMPLE_MASK; // 標準設定
 	// ラスタライザステート
 	gpipeline.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	//gpipeline.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	gpipeline.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	//gpipeline.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	// デプスステンシルステート
+	// デプスステンシルステート
 	gpipeline.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-
+	//gpipeline.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	//時計回り(clockwise)の頂点を持つ面を表と見なす(デフォルト)
+	//gpipeline.RasterizerState.FrontCounterClockwise = FALSE;
 	// レンダーターゲットのブレンド設定
 	D3D12_RENDER_TARGET_BLEND_DESC blenddesc{};
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	// RBGA全てのチャンネルを描画
@@ -323,8 +312,7 @@ bool Player2::InitializeGraphicsPipeline()
 	return true;
 }
 
-bool Player2::LoadTexture()
-{
+bool Player2::LoadTexture() {
 	HRESULT result = S_FALSE;
 
 	// WICテクスチャのロード
@@ -332,7 +320,7 @@ bool Player2::LoadTexture()
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/texture.png", WIC_FLAGS_NONE,
+		L"Resources/title.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -393,96 +381,20 @@ bool Player2::LoadTexture()
 	return true;
 }
 
-void Player2::CreateModel()
-{
+void Player2::CreateModel() {
 	HRESULT result = S_FALSE;
 
-	const float topHeight = 10.0f;
-	const int DIV = 3;
-	const float radius = 10.0f;
-	//パーティクル用
-	VertexPosNormalUv vertices[] = {
-		//前
-	{{-5.0f,-5.0f, 5.0f},{},{0.0f,1.0f}},//左下
-	{{ 5.0f,-5.0f, 5.0f},{},{0.0f,0.0f}},//左上
-	{{-5.0f, 5.0f, 5.0f},{},{1.0f,1.0f}},//右下
-	{{ 5.0f, 5.0f, 5.0f},{},{1.0f,0.0f}},//右上
-
-	//後ろ
-	{{-5.0f, 5.0f,-5.0f},{},{0.0f,1.0f}},//左下
-	{{ 5.0f, 5.0f,-5.0f},{},{0.0f,0.0f}},//左上
-	{{-5.0f,-5.0f,-5.0f},{},{1.0f,1.0f}},//右下
-	{{ 5.0f,-5.0f,-5.0f},{},{1.0f,0.0f}},//右上
-
-	//左
-	{{-5.0f, 5.0f, 5.0f},{},{0.0f,1.0f}},//左下
-	{{-5.0f, 5.0f,-5.0f},{},{0.0f,0.0f}},//左上
-	{{-5.0f,-5.0f, 5.0f},{},{1.0f,1.0f}},//右下
-	{{-5.0f,-5.0f,-5.0f},{},{1.0f,0.0f}},//右上
-
-	//右
-	{{ 5.0f, -5.0f, 5.0f},{},{0.0f,1.0f}},//左下
-	{{ 5.0f, -5.0f,-5.0f},{},{0.0f,0.0f}},//左上
-	{{ 5.0f,  5.0f, 5.0f},{},{1.0f,1.0f}},//右下
-	{{ 5.0f,  5.0f,-5.0f},{},{1.0f,0.0f}},//右上
-
-	//下
-	{{ 5.0f,5.0f,-5.0f},{},{0.0f,1.0f}},//左下
-	{{-5.0f,5.0f,-5.0f},{},{0.0f,0.0f}},//左上
-	{{ 5.0f,5.0f, 5.0f},{},{1.0f,1.0f}},//右下
-	{{-5.0f,5.0f, 5.0f},{},{1.0f,0.0f}},//右上
-
-	//上
-	{{-5.0f,-5.0f,-5.0f},{},{0.0f,1.0f}},//左下
-	{{ 5.0f,-5.0f,-5.0f},{},{0.0f,0.0f}},//左上
-	{{-5.0f,-5.0f, 5.0f},{},{1.0f,1.0f}},//右下
-	{{ 5.0f,-5.0f, 5.0f},{},{1.0f,0.0f}},//右上
+	VertexPosNormalUv vertices[4] = {
+		{{-10.0f,-10.0f,0.0f},{0,0,0}, {0.0f,1.0f}},
+		{{-10.0f,+10.0f,0.0f },{0,0,0},{0.0f,0.0f}},
+		{{+10.0f,-10.0f,0.0f},{0,0,0},{1.0f,1.0f}},
+		{{+10.0f,+10.0f,0.0f},{0,0,0},{1.0f,0.0f}},
 	};
 
-	//パーティクル用
-	unsigned short indices[] = {
+	unsigned short indices[6] = {
 		0,1,2,
 		2,1,3,
-
-		4,5,6,
-		6,5,7,
-
-		8,9,10,
-		10,9,11,
-
-		12,13,14,
-		14,13,15,
-
-		16,17,18,
-		18,17,19,
-
-		20,21,22,
-		22,21,23,
 	};
-	// 法線方向の計算
-	for (int i = 0; i < _countof(indices) / 3; i++)
-	{// 三角形１つごとに計算していく
-		// 三角形のインデックスを取得
-		unsigned short index0 = indices[i * 3 + 0];
-		unsigned short index1 = indices[i * 3 + 1];
-		unsigned short index2 = indices[i * 3 + 2];
-		// 三角形を構成する頂点座標をベクトルに代入
-		XMVECTOR p0 = XMLoadFloat3(&vertices[index0].pos);
-		XMVECTOR p1 = XMLoadFloat3(&vertices[index1].pos);
-		XMVECTOR p2 = XMLoadFloat3(&vertices[index2].pos);
-		// p0→p1ベクトル、p0→p2ベクトルを計算
-		XMVECTOR v1 = XMVectorSubtract(p1, p0);
-		XMVECTOR v2 = XMVectorSubtract(p2, p0);
-		// 外積は両方から垂直なベクトル
-		XMVECTOR normal = XMVector3Cross(v1, v2);
-		// 正規化（長さを1にする)
-		normal = XMVector3Normalize(normal);
-		// 求めた法線を頂点データに代入
-		XMStoreFloat3(&vertices[index0].normal, normal);
-		XMStoreFloat3(&vertices[index1].normal, normal);
-		XMStoreFloat3(&vertices[index2].normal, normal);
-	}
-
 	// 頂点バッファ生成
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
@@ -523,8 +435,7 @@ void Player2::CreateModel()
 	if (SUCCEEDED(result)) {
 
 		// 全インデックスに対して
-		for (int i = 0; i < _countof(indices); i++)
-		{
+		for (int i = 0; i < _countof(indices); i++) {
 			indexMap[i] = indices[i];	// インデックスをコピー
 		}
 
@@ -542,14 +453,12 @@ void Player2::CreateModel()
 	ibView.SizeInBytes = sizeof(indices);
 }
 
-void Player2::UpdateViewMatrix()
-{
+void Player2::UpdateViewMatrix() {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
-bool Player2::Initialize()
-{
+bool Player2::Initialize() {
 	// nullptrチェック
 	assert(device);
 
@@ -566,8 +475,7 @@ bool Player2::Initialize()
 	return true;
 }
 
-void Player2::Update()
-{
+void Player2::Update() {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 
@@ -590,7 +498,6 @@ void Player2::Update()
 		// 親オブジェクトのワールド行列を掛ける
 		matWorld *= parent->matWorld;
 	}
-
 	// 定数バッファへデータ転送
 	ConstBufferData* constMap = nullptr;
 	result = constBuff->Map(0, nullptr, (void**)&constMap);
@@ -599,8 +506,7 @@ void Player2::Update()
 	constBuff->Unmap(0, nullptr);
 }
 
-void Player2::Draw()
-{
+void Player2::Draw() {
 	// nullptrチェック
 	assert(device);
 	assert(Player2::cmdList);
@@ -619,5 +525,6 @@ void Player2::Draw()
 	// シェーダリソースビューをセット
 	cmdList->SetGraphicsRootDescriptorTable(1, gpuDescHandleSRV);
 	// 描画コマンド
-	cmdList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
+	cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+
 }
