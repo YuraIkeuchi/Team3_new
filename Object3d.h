@@ -110,7 +110,7 @@ private:// 静的メンバ関数
 	/// ビュー行列を更新
 	static void UpdateViewMatrix();
 
-public: // メンバ関数
+public: // メンバ関数//
 	//初期化
 	bool Initialize();
 	/// 毎フレーム処理

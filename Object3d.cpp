@@ -621,6 +621,7 @@ void Object::Draw()
 	// 描画コマンド
 	cmdList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
 }
+//カメラの操作
 void Object::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
 {
 	XMFLOAT3 eye_moved = GetEye();

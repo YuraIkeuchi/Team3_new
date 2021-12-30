@@ -314,7 +314,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			PlayerPosition.y = -10.0f;
 		}
 
-		//カメラの試し移動
+		//カメラ
 		if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 		{
 			mode = 1;
