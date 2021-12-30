@@ -71,6 +71,12 @@ int collision2(const float& X1, const float& Y1, const float& R1, const float& X
 	}
 }
 
+//イージング
+float PI = 3.141592;
+float aseInSine(const float x) {
+	return 1 - cos((x * PI) / 2);
+}
+
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	//ポインタ置き場
@@ -245,6 +251,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int UpHitFlag = 0;
 	int DownHitFlag = 0;
 	float JumpG = 0.0f;
+
+	XMFLOAT3 camerapos = { 0.0f,0.0f, -50.0f };
+	XMFLOAT3 targetcamerapos = { 0,0,0 };
+	int mode = 0;//0:ゲームモード 1:設置モード
+	int modeflag = 0;
 	while (true) {
 		//ウィンドウメッセージ処理
 		if (winApp->ProcessMessage()) {
@@ -286,7 +297,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (input->PushKey(DIK_D) || input->PushKey(DIK_A)) {
 			if (input->PushKey(DIK_D)) {
 				angle += XMConvertToRadians(1.0f);
-			} else if (input->PushKey(DIK_A)) {
+			}
+			else if (input->PushKey(DIK_A)) {
 				angle -= XMConvertToRadians(1.0f);
 			}
 			eye.x = -100 * sinf(angle);
@@ -302,6 +314,52 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			PlayerPosition.y = -10.0f;
 		}
 
+		//カメラの試し移動
+		if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
+		{
+			mode = 1;
+		}
+		else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
+		{
+			mode = 0;
+		}
+
+		//ゲーム画面
+		if (mode == 0) {
+			camerapos.x -= 1.2f;
+			camerapos.z -= 0.5f;
+			targetcamerapos.z += 0.7f;
+			if (camerapos.x <= 0.0f) {
+				camerapos.x = 0.0f;
+			}
+			if (camerapos.z <= -50.0f) {
+				camerapos.z = -50.0f;
+			}
+			if (targetcamerapos.z >= 0.0f) {
+				targetcamerapos.z = 0.0f;
+			}
+			if (camerapos.x == 0.0f && camerapos.z == -50.0f && targetcamerapos.z == 0.0f) {
+				modeflag = 1;
+			}
+		}
+		//設置画面
+		if (mode == 1) {
+			camerapos.x += 1.2f;
+			camerapos.z += 0.5f;
+			targetcamerapos.z = -15.0f;
+			if (camerapos.x >= 70.0f) {
+				camerapos.x = 70.0f;
+			}
+			if (camerapos.z >= -10.0f) {
+				camerapos.z = -10.0f;
+			}
+			/*		if (targetcamerapos.z >= -0.01f) {
+						targetcamerapos.z = -0.01f;
+					}*/
+			if (camerapos.x == 70.0f && camerapos.z == -10.0f) {
+				modeflag = 0;
+			}
+		}
 		for (int i = 0; i < OBJECT_NUM; i++) {
 			//上
 			if ((ObjectPosition[i].y - PlayerPosition.y <= 5.2) && (ObjectPosition[i].y - PlayerPosition.y >= 1.0)
@@ -317,7 +375,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				if (PlayerPosition.y <= ObjectPosition[i].y / 2) {
 					PlayerPosition.y = ObjectPosition[i].y / 2;
 				}
-			} else {
+			}
+			else {
 				DownHitFlag = 0;
 			}
 
@@ -326,7 +385,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				&& (ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
 				RightHitFlag = 1;
 				break;
-			} else {
+			}
+			else {
 				RightHitFlag = 0;
 			}
 
@@ -335,12 +395,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				(ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
 				LeftHitFlag = 1;
 				break;
-			} else {
+			}
+			else {
 				LeftHitFlag = 0;
 			}
 		}
 
-	
+
 		for (int i = 0; i < _countof(object); i++) {
 			object[i]->Update();
 			//ルートシグネチャの設定コマンド
@@ -388,6 +449,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		for (int i = 0; i < _countof(object); i++) {
 			object[i]->Draw();
 		}
+		Object::SetCameraPosition(camerapos, targetcamerapos);
 
 		player->Draw();
 		Sprite::PreDraw(dxCommon->GetCmdList());

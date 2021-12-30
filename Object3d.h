@@ -128,7 +128,8 @@ public: // メンバ関数
 	void SetPosition(XMFLOAT3 position) { this->position = position; }
 	/// 回転の設定
 	void SetRotation(XMFLOAT3 rotation) { this->rotation = rotation; }
-
+	//カメラをその位置に移動させる処理
+	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// 色

@@ -621,3 +621,11 @@ void Object::Draw()
 	// •`‰æƒRƒ}ƒ“ƒh
 	cmdList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
 }
+void Object::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+{
+	XMFLOAT3 eye_moved = GetEye();
+	XMFLOAT3 target_moved = GetTarget();
+
+	SetEye(position);
+	SetTarget(targetposition);
+}
