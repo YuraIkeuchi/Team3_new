@@ -190,7 +190,7 @@ bool DirectXCommon::CreateSwapChain()
 	HRESULT result = S_FALSE;
 	//スワップチェーンの生成
 	DXGI_SWAP_CHAIN_DESC1 swapchainDesc{};
-	swapchainDesc.Width = 900;
+	swapchainDesc.Width = 1280;
 	swapchainDesc.Height = 720;
 	swapchainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapchainDesc.SampleDesc.Count = 1;
