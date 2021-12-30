@@ -47,6 +47,13 @@ int collision2(const float& X1, const float& Y1, const float& R1, const float& X
 		return TRUE;
 	}
 }
+
+//イージング
+float PI = 3.141592;
+float aseInSine(const float x) {
+	return 1 - cos((x * PI) / 2);
+}
+
 #pragma endregion
 #pragma region//WinMain
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -227,6 +234,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int UpHitFlag = 0;
 	int DownHitFlag = 0;
 	float JumpG = 0.0f;
+
+	XMFLOAT3 camerapos = { 0.0f,0.0f, -50.0f };
+	XMFLOAT3 targetcamerapos = { 0,0,0 };
+	int mode = 0;//0:ゲームモード 1:設置モード
+	int modeflag = 0;
+
 	//アニメーション
 	int AnimetionTimer = 0;
 	int AnimetionCount = 0;
@@ -256,6 +269,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	};
 #pragma endregion
 #pragma region//ループ処理
+
 	while (true) {
 		//ウィンドウメッセージ処理
 		if (winApp->ProcessMessage()) {
@@ -298,7 +312,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			if (input->PushKey(DIK_D)) {
+
+				angle += XMConvertToRadians(1.0f);
+			}
+			else if (input->PushKey(DIK_A)) {
+				angle -= XMConvertToRadians(1.0f);
+
 				ScrollPosition.x += 0.01f;
+
 			}
 
 			if (AnimetionTimer == 8) {
@@ -306,6 +327,57 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				AnimetionTimer = 0;
 			}
 
+		//カメラ
+		if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
+		{
+			mode = 1;
+		}
+		else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
+		{
+			mode = 0;
+		}
+
+		//ゲーム画面
+		if (mode == 0) {
+			camerapos.x -= 1.2f;
+			camerapos.z -= 0.5f;
+			targetcamerapos.z += 0.7f;
+			if (camerapos.x <= 0.0f) {
+				camerapos.x = 0.0f;
+			}
+			if (camerapos.z <= -50.0f) {
+				camerapos.z = -50.0f;
+			}
+			if (targetcamerapos.z >= 0.0f) {
+				targetcamerapos.z = 0.0f;
+			}
+			if (camerapos.x == 0.0f && camerapos.z == -50.0f && targetcamerapos.z == 0.0f) {
+				modeflag = 1;
+			}
+		}
+		//設置画面
+		if (mode == 1) {
+			camerapos.x += 1.2f;
+			camerapos.z += 0.5f;
+			targetcamerapos.z = -15.0f;
+			if (camerapos.x >= 70.0f) {
+				camerapos.x = 70.0f;
+			}
+			if (camerapos.z >= -10.0f) {
+				camerapos.z = -10.0f;
+			}
+			/*		if (targetcamerapos.z >= -0.01f) {
+						targetcamerapos.z = -0.01f;
+					}*/
+			if (camerapos.x == 70.0f && camerapos.z == -10.0f) {
+				modeflag = 0;
+			}
+		}
+		for (int i = 0; i < OBJECT_NUM; i++) {
+			//上
+			if ((ObjectPosition[i].y - PlayerPosition.y <= 5.2) && (ObjectPosition[i].y - PlayerPosition.y >= 1.0)
+				&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
+				JumpG = JumpG * -1;
 			if (AnimetionCount == 3) {
 				AnimetionCount = 0;
 			}
@@ -319,6 +391,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (PlayerPosition.y <= -10.0f) {
 				JumpG = 0.0f;
+				DownHitFlag = 1;
+				if (PlayerPosition.y <= ObjectPosition[i].y / 2) {
+					PlayerPosition.y = ObjectPosition[i].y / 2;
+				}
+			}
+			else {
+				DownHitFlag = 0;
+			}
+
+			//右
+			if ((ObjectPosition[i].x - PlayerPosition.x <= 5) && (ObjectPosition[i].x - PlayerPosition.x >= 4)
+				&& (ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
+				RightHitFlag = 1;
+				break;
+			}
+			else {
+				RightHitFlag = 0;
+			}
+
+			//左
+			if ((ObjectPosition[i].x - PlayerPosition.x >= -5) && (ObjectPosition[i].x - PlayerPosition.x <= -4) &&
+				(ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
+				LeftHitFlag = 1;
+				break;
+			}
+			else {
+				LeftHitFlag = 0;
+			}
+		}
+
+
 				PlayerPosition.y = -10.0f;
 			}
 
@@ -453,6 +556,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			
 		}
+		Object::SetCameraPosition(camerapos, targetcamerapos);
+
+		player->Draw();
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		if (Scene == gameClear) {
 			sprite[1]->Draw();
