@@ -1,4 +1,4 @@
-#include "Player2.h"
+																																																																																																																																																																																																																																																																																																																																																																								#include "Player2.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 
