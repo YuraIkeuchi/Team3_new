@@ -1,4 +1,4 @@
-																																																																																																																																																																																																																																																																																																																																																																								#include "Player2.h"
+#include "Light.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 
@@ -10,30 +10,30 @@ using namespace Microsoft::WRL;
 /// <summary>
 /// 静的メンバ変数の実体
 /// </summary>
-ID3D12Device* Player2::device = nullptr;
-UINT Player2::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Player2::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Player2::rootsignature;
-ComPtr<ID3D12PipelineState> Player2::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Player2::descHeap;
-ComPtr<ID3D12Resource> Player2::vertBuff;
-ComPtr<ID3D12Resource> Player2::indexBuff;
-ComPtr<ID3D12Resource> Player2::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Player2::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Player2::gpuDescHandleSRV;
-XMMATRIX Player2::matView{};
-XMMATRIX Player2::matProjection{};
-XMFLOAT3 Player2::eye = { 0, 0, -50.0f };
-XMFLOAT3 Player2::target = { 0, 0, 0 };
-XMFLOAT3 Player2::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Player2::vbView{};
-D3D12_INDEX_BUFFER_VIEW Player2::ibView{};
+ID3D12Device* Light::device = nullptr;
+UINT Light::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* Light::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> Light::rootsignature;
+ComPtr<ID3D12PipelineState> Light::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> Light::descHeap;
+ComPtr<ID3D12Resource> Light::vertBuff;
+ComPtr<ID3D12Resource> Light::indexBuff;
+ComPtr<ID3D12Resource> Light::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE Light::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE Light::gpuDescHandleSRV;
+XMMATRIX Light::matView{};
+XMMATRIX Light::matProjection{};
+XMFLOAT3 Light::eye = { 0, 0, -50.0f };
+XMFLOAT3 Light::target = { 0, 0, 0 };
+XMFLOAT3 Light::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW Light::vbView{};
+D3D12_INDEX_BUFFER_VIEW Light::ibView{};
 
-bool Player2::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
+bool Light::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
 	// nullptrチェック
 	assert(device);
 
-	Player2::device = device;
+	Light::device = device;
 
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
@@ -53,12 +53,12 @@ bool Player2::StaticInitialize(ID3D12Device* device, int window_width, int windo
 	return true;
 }
 
-void Player2::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void Light::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Player2::cmdList == nullptr);
+	assert(Light::cmdList == nullptr);
 
 	// コマンドリストをセット
-	Player2::cmdList = cmdList;
+	Light::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -68,41 +68,41 @@ void Player2::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Player2::PostDraw() {
+void Light::PostDraw() {
 	// コマンドリストを解除
-	Player2::cmdList = nullptr;
+	Light::cmdList = nullptr;
 }
 
-Player2* Player2::Create() {
+Light* Light::Create() {
 	// 3Dオブジェクトのインスタンスを生成
-	Player2* player2 = new Player2();
-	if (player2 == nullptr) {
+	Light* light = new Light();
+	if (light == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!player2->Initialize()) {
-		delete player2;
+	if (!light->Initialize()) {
+		delete light;
 		assert(0);
 		return nullptr;
 	}
 
-	return player2;
+	return light;
 }
 
-void Player2::SetEye(XMFLOAT3 eye) {
-	Player2::eye = eye;
+void Light::SetEye(XMFLOAT3 eye) {
+	Light::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Player2::SetTarget(XMFLOAT3 target) {
-	Player2::target = target;
+void Light::SetTarget(XMFLOAT3 target) {
+	Light::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Player2::CameraMoveVector(XMFLOAT3 move) {
+void Light::CameraMoveVector(XMFLOAT3 move) {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
 
@@ -118,7 +118,7 @@ void Player2::CameraMoveVector(XMFLOAT3 move) {
 	SetTarget(target_moved);
 }
 
-bool Player2::InitializeDescriptorHeap() {
+bool Light::InitializeDescriptorHeap() {
 	HRESULT result = S_FALSE;
 
 	// デスクリプタヒープを生成	
@@ -138,7 +138,7 @@ bool Player2::InitializeDescriptorHeap() {
 	return true;
 }
 
-void Player2::InitializeCamera(int window_width, int window_height) {
+void Light::InitializeCamera(int window_width, int window_height) {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
 		XMLoadFloat3(&eye),
@@ -158,7 +158,7 @@ void Player2::InitializeCamera(int window_width, int window_height) {
 	);
 }
 
-bool Player2::InitializeGraphicsPipeline() {
+bool Light::InitializeGraphicsPipeline() {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
@@ -312,7 +312,7 @@ bool Player2::InitializeGraphicsPipeline() {
 	return true;
 }
 
-bool Player2::LoadTexture() {
+bool Light::LoadTexture() {
 	HRESULT result = S_FALSE;
 
 	// WICテクスチャのロード
@@ -320,7 +320,7 @@ bool Player2::LoadTexture() {
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/title.png", WIC_FLAGS_NONE,
+		L"Resources/texture.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -381,7 +381,7 @@ bool Player2::LoadTexture() {
 	return true;
 }
 
-void Player2::CreateModel() {
+void Light::CreateModel() {
 	HRESULT result = S_FALSE;
 
 	VertexPosNormalUv vertices[4] = {
@@ -453,12 +453,12 @@ void Player2::CreateModel() {
 	ibView.SizeInBytes = sizeof(indices);
 }
 
-void Player2::UpdateViewMatrix() {
+void Light::UpdateViewMatrix() {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
-bool Player2::Initialize() {
+bool Light::Initialize() {
 	// nullptrチェック
 	assert(device);
 
@@ -475,7 +475,7 @@ bool Player2::Initialize() {
 	return true;
 }
 
-void Player2::Update() {
+void Light::Update() {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 
@@ -506,10 +506,10 @@ void Player2::Update() {
 	constBuff->Unmap(0, nullptr);
 }
 
-void Player2::Draw() {
+void Light::Draw() {
 	// nullptrチェック
 	assert(device);
-	assert(Player2::cmdList);
+	assert(Light::cmdList);
 
 	// 頂点バッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &vbView);
@@ -530,7 +530,7 @@ void Player2::Draw() {
 }
 
 //カメラの操作
-void Player2::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+void Light::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();

@@ -146,7 +146,8 @@ public: // メンバ関数
 	void SetRotaition(XMFLOAT3 rotaition) { this->rotation = rotaition; }
 	void SetHitFlag(int HitFlag) { this->HitFlag = HitFlag; }
 	void SetHp(int hp) { this->hp = hp; }
-
+	//カメラをその位置に移動させる処理
+	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	float speed = 0.2f;
@@ -156,7 +157,7 @@ private: // メンバ変数
 	// 色
 	XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 1.0f,1.0f,0 };
+	XMFLOAT3 scale = { 0.5f,0.5f,0 };
 	// X,Y,Z軸回りのローカル回転角
 	XMFLOAT3 rotation = { 0,0,90 };
 	// ローカル座標

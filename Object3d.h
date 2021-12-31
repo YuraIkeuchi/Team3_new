@@ -123,17 +123,21 @@ public: // メンバ関数//
 	const XMFLOAT3& GetPosition() { return position; }
 	/// 回転の取得
 	const XMFLOAT3& GetRotation() { return  rotation; }
+	/// 色の取得
+	const XMFLOAT4& GetColor() { return  color; }
 
 	/// 座標の設定
 	void SetPosition(XMFLOAT3 position) { this->position = position; }
 	/// 回転の設定
 	void SetRotation(XMFLOAT3 rotation) { this->rotation = rotation; }
+	/// 色の設定
+	void SetColor(XMFLOAT4 color) { this->color = color; }
 	//カメラをその位置に移動させる処理
 	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// 色
-	XMFLOAT4 color = { 1,1,1,0.3 };
+	XMFLOAT4 color = { 1,1,1,1.0 };
 	// ローカルスケール
 	XMFLOAT3 scale = { 0.5,0.5,0.5 };
 	// X,Y,Z軸回りのローカル回転角
