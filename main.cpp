@@ -39,6 +39,118 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 
 #pragma region//関数
+#pragma region 当たり判定用の構造体と関数
+struct BoxVertex
+{
+	float Up;
+	float Down;
+	float Left;
+	float Right;
+};
+
+bool BoxCollision_Down(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
+
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の左頂点
+	Object2.Left = object2.x - 10;
+	//object1の右頂点
+	Object2.Right = object2.x + radius2.x * 2;
+	//object1の下頂点
+	Object2.Down = object2.y - radius2.y;
+	//object1の上頂点
+	Object2.Up = Object2.Down + 1;
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+}
+
+bool BoxCollision_Up(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
+
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の左頂点
+	Object2.Left = object2.x - 10;
+	//object1の右頂点
+	Object2.Right = object2.x + radius2.x * 2;
+	//object1の上頂点
+	Object2.Up = object2.y + radius2.y;
+	//object1の下頂点
+	Object2.Down = Object2.Up - 1;
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+}
+
+
+bool BoxCollision_Left(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
+
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の左頂点
+	Object2.Left = object2.x - 10;
+	//object1の右頂点
+	Object2.Right = Object2.Left + 1;
+	//object1の下頂点
+	Object2.Down = object2.y - radius2.y + 0.5;
+	//object1の上頂点
+	Object2.Up = object2.y + radius2.y - 0.5;
+
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+}
+
+bool BoxCollision_Right(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
+
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の右頂点
+	Object2.Right = object2.x + radius2.x * 2;
+	//object1の左頂点
+	Object2.Left = Object2.Right - 11;
+	//object1の下頂点
+	Object2.Down = object2.y - radius2.y + 0.5;
+	//object1の上頂点
+	Object2.Up = object2.y + radius2.y - 0.5;
+
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+}
+#pragma endregion
 int collision2(const float& X1, const float& Y1, const float& R1, const float& X2, const float& Y2, const float& R2) {
 	int a = X1 - X2;
 	int b = Y1 - Y2;
@@ -195,7 +307,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	ObjectPosition[0] = { -20.0f,-8.0f,0.0f };
-	ObjectPosition[1] = { -5.0f,2.0f,0.0f };
+	ObjectPosition[1] = { -5.0f,-8.0f,0.0f };
 	for (int i = 0; i < _countof(object); i++) {
 		object[i]->SetPosition(ObjectPosition[i]);
 	}
@@ -225,16 +337,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { 0.0f,0.0f,0.0f };
 	PlayerPosition = player->GetPosition();
+	XMFLOAT3 OldPlayerPosition;
 	XMFLOAT3 PlayerRotation;
 	PlayerRotation = player->GetRotaition();
 	player->SetPosition(PlayerPosition);
 	XMFLOAT2 SpritePosition = sprite[0]->GetPosition();
-	//当たったときの判定
-	int HitFlag = 0;
-	int RightHitFlag = 0;
-	int LeftHitFlag = 0;
-	int UpHitFlag = 0;
-	int DownHitFlag = 0;
+	//ジャンプ変数
+	int JumpFlag = 0;
 	float JumpG = 0.0f;
 
 	XMFLOAT3 camerapos = { 0.0f,0.0f, -50.0f };
@@ -308,20 +417,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//ゲームプレイ中
 		if (Scene == gamePlay) {
+			//位置情報保存
+			OldPlayerPosition.x = PlayerPosition.x;
+			OldPlayerPosition.y = PlayerPosition.y;
+			OldPlayerPosition.z = PlayerPosition.z;
+			//移動処理
 			if (input->PushKey(DIK_UP)) {
 				PlayerPosition.y += 0.5f;
 			}
 
-			if (input->PushKey(DIK_DOWN) && DownHitFlag == 0) {
+			if (input->PushKey(DIK_DOWN)) {
 				PlayerPosition.y -= 0.5f;
 			}
 
-			if (input->PushKey(DIK_LEFT) && LeftHitFlag == 0) {
+			if (input->PushKey(DIK_LEFT)) {
 				PlayerPosition.x -= 0.5f;
 				//PlayerRotation.z = 270;
 				AnimetionTimer++;
 			}
-			if (input->PushKey(DIK_RIGHT) && RightHitFlag == 0) {
+			if (input->PushKey(DIK_RIGHT)) {
 				PlayerPosition.x += 0.5f;
 				//PlayerRotation.z = 90;
 				AnimetionTimer++;
@@ -344,8 +458,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			//ジャンプ処理
-			if (input->TriggerKey(DIK_SPACE)) {
+			if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0)) {
 				JumpG = -0.8f;
+				JumpFlag = 1;
 			}
 			PlayerPosition.y -= JumpG;
 			JumpG += 0.025f;
@@ -407,43 +522,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//障害物との当たり判定
 		for (int i = 0; i < OBJECT_NUM; i++) {
 			if (ObjectColor[i].w > 0.0f) {
-				//上
-				if ((ObjectPosition[i].y - PlayerPosition.y <= 9.2) && (ObjectPosition[i].y - PlayerPosition.y >= 3.0)
-					&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)
-					&& JumpG < 0) {
-
-					JumpG = JumpG * -1;
+				//playerとブロック左辺の当たり判定
+				if (BoxCollision_Left(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.x = OldPlayerPosition.x;
+					//JumpG = 0.0f;
 				}
-
-				//下
-				if ((ObjectPosition[i].y - PlayerPosition.y >= -4.0) && (ObjectPosition[i].y - PlayerPosition.y <= -1.0)
-					&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
-
+				//playerとブロック右辺の当たり判定
+				if (BoxCollision_Right(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.x = OldPlayerPosition.x;
+					//JumpG = 0.0f;
+				}
+				//playerとブロック下辺の当たり判定
+				if (BoxCollision_Down(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
-					DownHitFlag = 1;
-					if (PlayerPosition.y <= ObjectPosition[i].y / 2) {
-						PlayerPosition.y = ObjectPosition[i].y / 2;
-					}
-				} else {
-					DownHitFlag = 0;
 				}
-
-				//右
-				if ((ObjectPosition[i].x - PlayerPosition.x <= 5) && (ObjectPosition[i].x - PlayerPosition.x >= 4)
-					&& (ObjectPosition[i].y - PlayerPosition.y <= 6) && (ObjectPosition[i].y - PlayerPosition.y >= -6)) {
-					RightHitFlag = 1;
-					break;
-				} else {
-					RightHitFlag = 0;
-				}
-
-				//左
-				if ((ObjectPosition[i].x - PlayerPosition.x >= -5) && (ObjectPosition[i].x - PlayerPosition.x <= -4) &&
-					(ObjectPosition[i].y - PlayerPosition.y <= 6) && (ObjectPosition[i].y - PlayerPosition.y >= -6)) {
-					LeftHitFlag = 1;
-					break;
-				} else {
-					LeftHitFlag = 0;
+				//playerとブロック上辺の当たり判定
+				if (BoxCollision_Up(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.y = OldPlayerPosition.y;
+					JumpG = 0.0f;
+					JumpFlag = 0;
 				}
 			}
 		}
