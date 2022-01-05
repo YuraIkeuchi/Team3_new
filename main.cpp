@@ -24,6 +24,7 @@
 #include "Player3.h"
 #include "backGround.h"
 #include "Light.h"
+#include "Projector.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -312,6 +313,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		object[i]->SetPosition(ObjectPosition[i]);
 	}
 #pragma endregion
+#pragma region//後ろ
+	Projector* projector;
+	if (!projector->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	projector = Projector::Create();
+	projector->Update();
+
+#pragma endregion
 #pragma region//プレイヤー変数
 	Player* player;
 	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
@@ -477,6 +488,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		{
 			mode = 1;
 		}
+
 		else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
 		{
 			mode = 0;
@@ -527,6 +539,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					PlayerPosition.x = OldPlayerPosition.x;
 					//JumpG = 0.0f;
 				}
+
 				//playerとブロック右辺の当たり判定
 				if (BoxCollision_Right(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
@@ -537,6 +550,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
+
 				//playerとブロック上辺の当たり判定
 				if (BoxCollision_Up(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
@@ -577,6 +591,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		player2->Update();
 		player3->Update();
 		light->Update();
+		projector->Update();
 		player->SetPosition(PlayerPosition);
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
@@ -589,6 +604,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player2::SetCameraPosition(camerapos, targetcamerapos);
 		Player3::SetCameraPosition(camerapos, targetcamerapos);
 		Light::SetCameraPosition(camerapos, targetcamerapos);
+		Projector::SetCameraPosition(camerapos, targetcamerapos);
 #pragma endregion
 #pragma endregion
 #pragma region//描画
@@ -635,11 +651,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player3::PreDraw(dxCommon->GetCmdList());
 		Light::PreDraw(dxCommon->GetCmdList());
 		BackGround::PreDraw(dxCommon->GetCmdList());
+		Projector::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
-
-			light->Draw();
+			projector->Draw();
+			//light->Draw();
 			if (AnimetionCount == 0) {
 				player->Draw();
 			}
@@ -654,10 +671,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					object[i]->Draw();
 				}
 			}
-
+		
 		}
 	
-		player->Draw();
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		if (Scene == gameClear) {
 			sprite[1]->Draw();
@@ -671,6 +687,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player3::PostDraw();
 		Light::PostDraw();
 		BackGround::PostDraw();
+		Projector::PostDraw();
 		dxCommon->PostDraw();
 	}
 #pragma endregion
@@ -687,6 +704,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete dxCommon;
 	delete player;
 	delete light;
+	delete projector;
 	for (int i = 0; i < _countof(object); i++) {
 		delete object[i];
 	}
