@@ -196,7 +196,6 @@ XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 projector, XMFLOAT3 object) {
 	return result;
 }
 
-
 #pragma endregion
 #pragma region//WinMain
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
