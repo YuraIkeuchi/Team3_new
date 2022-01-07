@@ -317,7 +317,7 @@ bool Player2::LoadTexture() {
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/title.png", WIC_FLAGS_NONE,
+		L"Resources/Player_walk1.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;

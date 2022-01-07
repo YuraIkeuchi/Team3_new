@@ -22,6 +22,7 @@
 #include "Player.h"
 #include "Player2.h"
 #include "Player3.h"
+#include "Player4.h"
 #include "backGround.h"
 #include "Light.h"
 #include "Projector.h"
@@ -307,8 +308,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ObjectColor[i] = object[i]->GetColor();
 	}
 
-	ObjectPosition[0] = { -20.0f,-8.0f,0.0f };
-	ObjectPosition[1] = { -5.0f,-8.0f,0.0f };
+	ObjectPosition[0] = { -20.0f,-8.0f,20.0f };
+	ObjectPosition[1] = { -5.0f,-8.0f,20.0f };
 	for (int i = 0; i < _countof(object); i++) {
 		object[i]->SetPosition(ObjectPosition[i]);
 	}
@@ -324,6 +325,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 #pragma endregion
 #pragma region//プレイヤー変数
+	//各プレイヤーの初期化
 	Player* player;
 	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
@@ -345,6 +347,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	player3 = Player3::Create();
 	player3->Update();
+	Player4* player4;
+	if (!player4->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player4 = Player4::Create();
+	player4->Update();
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { 0.0f,0.0f,0.0f };
 	PlayerPosition = player->GetPosition();
@@ -448,7 +457,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			if (input->PushKey(DIK_RIGHT)) {
 				PlayerPosition.x += 0.5f;
-				//PlayerRotation.z = 90;
+				/*PlayerRotation.z = 180;*/
 				AnimetionTimer++;
 			}
 
@@ -480,7 +489,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				AnimetionCount++;
 				AnimetionTimer = 0;
 			}
-			if (AnimetionCount == 3) {
+			if (AnimetionCount == 4) {
 				AnimetionCount = 0;
 			}
 		//カメラ
@@ -590,19 +599,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		player->Update();
 		player2->Update();
 		player3->Update();
+		player4->Update();
 		light->Update();
 		projector->Update();
 		player->SetPosition(PlayerPosition);
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
+		player4->SetPosition(PlayerPosition);
 		light->SetPosition(LightPosition);
 		player->SetRotaition(PlayerRotation);
 		player2->SetRotaition(PlayerRotation);
 		player3->SetRotaition(PlayerRotation);
+		player4->SetRotaition(PlayerRotation);
 		Object::SetCameraPosition(camerapos, targetcamerapos);
 		Player::SetCameraPosition(camerapos, targetcamerapos);
 		Player2::SetCameraPosition(camerapos, targetcamerapos);
 		Player3::SetCameraPosition(camerapos, targetcamerapos);
+		Player4::SetCameraPosition(camerapos, targetcamerapos);
 		Light::SetCameraPosition(camerapos, targetcamerapos);
 		Projector::SetCameraPosition(camerapos, targetcamerapos);
 #pragma endregion
@@ -649,6 +662,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player::PreDraw(dxCommon->GetCmdList());
 		Player2::PreDraw(dxCommon->GetCmdList());
 		Player3::PreDraw(dxCommon->GetCmdList());
+		Player4::PreDraw(dxCommon->GetCmdList());
 		Light::PreDraw(dxCommon->GetCmdList());
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		Projector::PreDraw(dxCommon->GetCmdList());
@@ -665,6 +679,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			else if (AnimetionCount == 2) {
 				player3->Draw();
+			}
+			else if (AnimetionCount == 3) {
+				player4->Draw();
 			}
 			for (int i = 0; i < _countof(object); i++) {
 				if (ObjectColor[i].w > 0.0f) {
@@ -685,6 +702,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player::PostDraw();
 		Player2::PostDraw();
 		Player3::PostDraw();
+		Player4::PostDraw();
 		Light::PostDraw();
 		BackGround::PostDraw();
 		Projector::PostDraw();
