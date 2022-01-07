@@ -552,7 +552,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			//設置画面
 			if (mode == 1) {
-				for (int i = 0; i < _countof(OBJECT_NUM); i++) {
+				for (int i = 0; i < OBJECT_NUM; i++) {
 					if (SetFlag[i] == 0) {
 						//移動処理
 						if (input->PushKey(DIK_UP)) {
@@ -571,7 +571,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 							ImageObjectPosition[i].x += 0.5f;
 
 						}
-
 					}
 
 					//ジャンプ処理
@@ -582,7 +581,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
-			if (input->PushKey(DIK_S)) {
+		/*	if (input->PushKey(DIK_S)) {
 				LightPosition.y -= 0.1;
 			}
 
@@ -596,11 +595,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (input->PushKey(DIK_D)) {
 				LightPosition.x += 0.1;
-			}
+			}*/
 
+			//ジャンプ処理
 			//PlayerPosition.y -= JumpG;
 			JumpG += 0.025f;
 
+			//アニメーションタイマー
 			if (AnimetionTimer >= 8) {
 				AnimetionCount++;
 				AnimetionTimer = 0;
@@ -609,6 +610,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				AnimetionCount = 0;
 			}
 	
+		//カメラ移動
 		//ゲーム画面
 		if (mode == 0) {
 			camerapos.x -= 1.2f;
