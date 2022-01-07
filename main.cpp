@@ -169,6 +169,33 @@ float aseInSine(const float x) {
 	return 1 - cos((x * PI) / 2);
 }
 
+XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 projector, XMFLOAT3 object) {
+	XMFLOAT3 result = { screen.x,0,0 };
+	float a, b, A, B;
+	float add = 0.01f;
+
+	a = fabsf(object.z - projector.z + add);
+	b = fabsf(object.y - projector.y + add);
+	A = fabsf(screen.z - projector.z + add);
+
+	B = A * (a / b);
+	B += 1;
+	B = B * object.z;
+	result.z = B;
+
+	a = fabsf(object.z - projector.z + add);
+	b = fabsf(object.x - projector.x + add);
+	A = fabsf(screen.z - projector.z + add);
+
+	B = A * (a / b);
+	B += 1;
+	B = B * object.y;
+	result.y = B;
+
+
+	return result;
+}
+
 #pragma endregion
 #pragma region//WinMain
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
