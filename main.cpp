@@ -26,6 +26,7 @@
 #include "backGround.h"
 #include "Light.h"
 #include "Screen.h"
+#include "Projector.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -169,23 +170,24 @@ float aseInSine(const float x) {
 	return 1 - cos((x * PI) / 2);
 }
 
-XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Screen, XMFLOAT3 object) {
+//ブロック置く処理
+XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Projector, XMFLOAT3 object) {
 	XMFLOAT3 result = { screen.x,0,0 };
 	float a, b, A, B;
 	float add = 0.01f;
 
-	a = fabsf(object.z - Screen.z + add);
-	b = fabsf(object.y - Screen.y + add);
-	A = fabsf(screen.z - Screen.z + add);
+	a = fabsf(object.z - Projector.z + add);
+	b = fabsf(object.y - Projector.y + add);
+	A = fabsf(screen.z - Projector.z + add);
 
 	B = A * (a / b);
 	B += 1;
 	B = B * object.z;
 	result.z = B;
 
-	a = fabsf(object.z - Screen.z + add);
-	b = fabsf(object.x - Screen.x + add);
-	A = fabsf(screen.z - Screen.z + add);
+	a = fabsf(object.z - Projector.z + add);
+	b = fabsf(object.x - Projector.x + add);
+	A = fabsf(screen.z - Projector.z + add);
 
 	B = A * (a / b);
 	B += 1;
@@ -229,7 +231,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		XMMATRIX mat;
 	};
 	const int constantBufferNum = 128;
-	const int OBJECT_NUM = 2;
+	const int OBJECT_NUM = 4;
 #pragma endregion
 #pragma region//行列
 	//射影変換行列の作り
@@ -316,28 +318,54 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	input->Initialize(winApp);
 #pragma endregion
 #pragma region//障害物変数
-	Object* object[OBJECT_NUM];
-	for (int i = 0; i < _countof(object); i++) {
-		if (!object[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	//影を作るためのブロック
+	Object* Imageobject[OBJECT_NUM];
+	for (int i = 0; i < _countof(Imageobject); i++) {
+		if (!Imageobject[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 			assert(0);
 			return 1;
 		}
-		object[i] = Object::Create();
-		object[i]->Update();
+		Imageobject[i] = Object::Create();
+		Imageobject[i]->Update();
 	}
 
-	XMFLOAT3 ObjectPosition[OBJECT_NUM];
-	XMFLOAT4 ObjectColor[OBJECT_NUM];
+	XMFLOAT3 ImageObjectPosition[OBJECT_NUM];
+	XMFLOAT4 ImageObjectColor[OBJECT_NUM];
 	XMFLOAT3 Plus = { 0.0f,0.0f,0.0f };
-	for (int i = 0; i < _countof(object); i++) {
-		ObjectPosition[i] = object[i]->GetPosition();
-		ObjectColor[i] = object[i]->GetColor();
+	for (int i = 0; i < _countof(Imageobject); i++) {
+		ImageObjectPosition[i] = Imageobject[i]->GetPosition();
+		ImageObjectColor[i] = Imageobject[i]->GetColor();
+		ImageObjectPosition[i] = { 0.0f,0.0f,-10.0f };
 	}
 
-	ObjectPosition[0] = { -20.0f,-8.0f,20.0f };
-	ObjectPosition[1] = { -5.0f,-8.0f,20.0f };
-	for (int i = 0; i < _countof(object); i++) {
-		object[i]->SetPosition(ObjectPosition[i]);
+
+	for (int i = 0; i < _countof(Imageobject); i++) {
+		Imageobject[i]->SetPosition(ImageObjectPosition[i]);
+	}
+	//セットしたかどうかのフラグ
+	int SetFlag[OBJECT_NUM] = { 0 };
+	//ゲーム画面のブロック
+	Object* Setobject[OBJECT_NUM];
+	for (int i = 0; i < _countof(Setobject); i++) {
+		if (!Setobject[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+			assert(0);
+			return 1;
+		}
+		Setobject[i] = Object::Create();
+		Setobject[i]->Update();
+	}
+
+	XMFLOAT3 SetobjectPosition[OBJECT_NUM];
+	XMFLOAT4 SetobjectColor[OBJECT_NUM];
+
+	for (int i = 0; i < _countof(Setobject); i++) {
+		SetobjectPosition[i] = Setobject[i]->GetPosition();
+		SetobjectColor[i] = Setobject[i]->GetColor();
+	}
+	SetobjectPosition[0] = { -20.0f,-8.0f,20.0f };
+	
+	for (int i = 0; i < _countof(Setobject); i++) {
+		Setobject[i]->SetPosition(SetobjectPosition[i]);
 	}
 #pragma endregion
 #pragma region//後ろ
@@ -348,6 +376,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	screen = Screen::Create();
 	screen->Update();
+
+#pragma endregion
+#pragma region//プロジェクター
+	Projector* projector;
+	if (!projector->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	 projector = Projector::Create();
+	 projector->Update();
 
 #pragma endregion
 #pragma region//プレイヤー変数
@@ -444,9 +482,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (winApp->ProcessMessage()) {
 			break;
 		}
-		for (int i = 0; i < _countof(object); i++) {
-			ObjectPosition[i] = object[i]->GetPosition();
-			ObjectColor[i] = object[i]->GetColor();
+		for (int i = 0; i < _countof(Imageobject); i++) {
+			ImageObjectPosition[i] = Imageobject[i]->GetPosition();
+			ImageObjectColor[i] = Imageobject[i]->GetColor();
+		}
+
+		for (int i = 0; i < _countof(Setobject); i++) {
+			SetobjectPosition[i] = Setobject[i]->GetPosition();
+			SetobjectColor[i] = Setobject[i]->GetColor();
 		}
 		PlayerPosition = player->GetPosition();
 		LightPosition = light->GetPosition();
@@ -463,28 +506,80 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//ゲームプレイ中
 		if (Scene == gamePlay) {
+			//カメラ
+			if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
+			{
+				mode = 1;
+			}
+
+			else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
+			{
+				mode = 0;
+			}
+
 			//位置情報保存
 			OldPlayerPosition.x = PlayerPosition.x;
 			OldPlayerPosition.y = PlayerPosition.y;
 			OldPlayerPosition.z = PlayerPosition.z;
-			//移動処理
-			if (input->PushKey(DIK_UP)) {
-				PlayerPosition.y += 0.5f;
+			//プレイ中のプレイヤー移動
+			if (mode == 0) {
+				//移動処理
+				if (input->PushKey(DIK_UP)) {
+					PlayerPosition.y += 0.5f;
+				}
+
+				if (input->PushKey(DIK_DOWN)) {
+					PlayerPosition.y -= 0.5f;
+				}
+
+				if (input->PushKey(DIK_LEFT)) {
+					PlayerPosition.x -= 0.5f;
+					//PlayerRotation.z = 270;
+					AnimetionTimer++;
+				}
+				if (input->PushKey(DIK_RIGHT)) {
+					PlayerPosition.x += 0.5f;
+					/*PlayerRotation.z = 180;*/
+					AnimetionTimer++;
+				}
+
+				//ジャンプ処理
+				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0)) {
+					JumpG = -0.8f;
+					JumpFlag = 1;
+				}
 			}
 
-			if (input->PushKey(DIK_DOWN)) {
-				PlayerPosition.y -= 0.5f;
-			}
+			//設置画面
+			if (mode == 1) {
+				for (int i = 0; i < _countof(OBJECT_NUM); i++) {
+					if (SetFlag[i] == 0) {
+						//移動処理
+						if (input->PushKey(DIK_UP)) {
+							ImageObjectPosition[i].y += 0.5f;
+						}
 
-			if (input->PushKey(DIK_LEFT)) {
-				PlayerPosition.x -= 0.5f;
-				//PlayerRotation.z = 270;
-				AnimetionTimer++;
-			}
-			if (input->PushKey(DIK_RIGHT)) {
-				PlayerPosition.x += 0.5f;
-				/*PlayerRotation.z = 180;*/
-				AnimetionTimer++;
+						if (input->PushKey(DIK_DOWN)) {
+							ImageObjectPosition[i].y -= 0.5f;
+						}
+
+						if (input->PushKey(DIK_LEFT)) {
+							ImageObjectPosition[i].x -= 0.5f;
+							//PlayerRotation.z = 270;
+						}
+						if (input->PushKey(DIK_RIGHT)) {
+							ImageObjectPosition[i].x += 0.5f;
+
+						}
+
+					}
+
+					//ジャンプ処理
+					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0)) {
+						SetFlag[i] = 1;
+						break;
+					}
+				}
 			}
 
 			if (input->PushKey(DIK_S)) {
@@ -503,12 +598,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightPosition.x += 0.1;
 			}
 
-			//ジャンプ処理
-			if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0)) {
-				JumpG = -0.8f;
-				JumpFlag = 1;
-			}
-			PlayerPosition.y -= JumpG;
+			//PlayerPosition.y -= JumpG;
 			JumpG += 0.025f;
 
 			if (AnimetionTimer >= 8) {
@@ -518,17 +608,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (AnimetionCount == 4) {
 				AnimetionCount = 0;
 			}
-		//カメラ
-		if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
-		{
-			mode = 1;
-		}
-
-		else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
-		{
-			mode = 0;
-		}
-
+	
 		//ゲーム画面
 		if (mode == 0) {
 			camerapos.x -= 1.2f;
@@ -558,36 +638,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (camerapos.z >= -10.0f) {
 				camerapos.z = -10.0f;
 			}
-			/*		if (targetcamerapos.z >= -0.01f) {
-						targetcamerapos.z = -0.01f;
-					}*/
+			
 			if (camerapos.x == 70.0f && camerapos.z == -10.0f) {
 				modeflag = 0;
 			}
 		}
 	
-			//障害物との当たり判定
+		//障害物との当たり判定
 		for (int i = 0; i < OBJECT_NUM; i++) {
-			if (ObjectColor[i].w > 0.0f) {
+			if (SetobjectColor[i].w > 0.0f) {
 				//playerとブロック左辺の当たり判定
-				if (BoxCollision_Left(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (BoxCollision_Left(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
 					//JumpG = 0.0f;
 				}
 
 				//playerとブロック右辺の当たり判定
-				if (BoxCollision_Right(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (BoxCollision_Right(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
 					//JumpG = 0.0f;
 				}
 				//playerとブロック下辺の当たり判定
-				if (BoxCollision_Down(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (BoxCollision_Down(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
 
 				//playerとブロック上辺の当たり判定
-				if (BoxCollision_Up(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (BoxCollision_Up(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 					JumpFlag = 0;
@@ -596,9 +674,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 		//光とブロックの当たり判定
-		for (int i = 0; i < _countof(object); i++) {
-			if (collision2(ObjectPosition[i].x, ObjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
-				ObjectColor[i].w -= 0.01;
+		for (int i = 0; i < _countof(Setobject); i++) {
+			if (collision2(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
+				SetobjectColor[i].w -= 0.01;
 			}
 		}
 
@@ -615,11 +693,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 #pragma endregion
 #pragma region//Update
-		for (int i = 0; i < _countof(object); i++) {
-			object[i]->Update();
+		for (int i = 0; i < _countof(Setobject); i++) {
+			Setobject[i]->Update();
 			//ルートシグネチャの設定コマンド
-			object[i]->SetPosition(ObjectPosition[i]);
-			object[i]->SetColor(ObjectColor[i]);
+			Setobject[i]->SetPosition(SetobjectPosition[i]);
+			Setobject[i]->SetColor(SetobjectColor[i]);
+		}
+
+		for (int i = 0; i < _countof(Imageobject); i++) {
+			Imageobject[i]->Update();
+			//ルートシグネチャの設定コマンド
+			Imageobject[i]->SetPosition(ImageObjectPosition[i]);
+			Imageobject[i]->SetColor(ImageObjectColor[i]);
 		}
 		background->Update();
 		player->Update();
@@ -628,6 +713,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		player4->Update();
 		light->Update();
 		screen->Update();
+		projector->Update();
 		player->SetPosition(PlayerPosition);
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
@@ -644,39 +730,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player4::SetCameraPosition(camerapos, targetcamerapos);
 		Light::SetCameraPosition(camerapos, targetcamerapos);
 		Screen::SetCameraPosition(camerapos, targetcamerapos);
+		Projector::SetCameraPosition(camerapos, targetcamerapos);
 #pragma endregion
 #pragma endregion
 #pragma region//描画
 		//描画コマンド
-		//x,y座標のデバッグログ
-		wchar_t str[256];
-
-		swprintf_s(str, L"ObjectPosition[1].x - PlayerPosition.x:%f\n", ObjectPosition[1].x - PlayerPosition.x);
-		OutputDebugString(str);
-		swprintf_s(str, L"ObjectPosition[0].x - PlayerPosition.x:%f\n", ObjectPosition[0].x - PlayerPosition.x);
-		OutputDebugString(str);
-		swprintf_s(str, L"JumpG:%f\n", JumpG);
-		OutputDebugString(str);
 		dxCommon->PreDraw();
 		////4.描画コマンドここから
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
-			if (ImGui::TreeNode("Player"))
+			if (ImGui::TreeNode("Object0"))
 			{
-				ImGui::Indent();
-				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
-				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
-				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
-				ImGui::SliderFloat("Color", &ObjectColor[0].w, 50, -50);
+				ImGui::Text("SetFlag[0],%d", SetFlag[0]);
+				ImGui::SliderFloat("Position.x", &ImageObjectPosition[0].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &ImageObjectPosition[0].y, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Object1"))
+			{
+				ImGui::Text("SetFlag[1],%d", SetFlag[1]);
+				ImGui::SliderFloat("Position.x", &ImageObjectPosition[1].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &ImageObjectPosition[1].y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
 			ImGui::TreePop();
 		}
-		ImGui::Indent();
-		ImGui::Unindent();
 		ImGui::End();
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
@@ -692,10 +775,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Light::PreDraw(dxCommon->GetCmdList());
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		Screen::PreDraw(dxCommon->GetCmdList());
+		Projector::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
-			screen->Draw();
+			//screen->Draw();
+			projector->Draw();
 			//light->Draw();
 			if (AnimetionCount == 0) {
 				player->Draw();
@@ -709,12 +794,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			else if (AnimetionCount == 3) {
 				player4->Draw();
 			}
-			for (int i = 0; i < _countof(object); i++) {
-				if (ObjectColor[i].w > 0.0f) {
-					object[i]->Draw();
+			for (int i = 0; i < _countof(Setobject); i++) {
+				if (SetobjectColor[i].w > 0.0f) {
+					Setobject[i]->Draw();
 				}
 			}
-		
+
+			for (int i = 0; i < _countof(Imageobject); i++) {
+				Imageobject[i]->Draw();
+			}
 		}
 	
 		Sprite::PreDraw(dxCommon->GetCmdList());
@@ -732,6 +820,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Light::PostDraw();
 		BackGround::PostDraw();
 		Screen::PostDraw();
+		Projector::PostDraw();
 		dxCommon->PostDraw();
 	}
 #pragma endregion
@@ -749,8 +838,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete player;
 	delete light;
 	delete screen;
-	for (int i = 0; i < _countof(object); i++) {
-		delete object[i];
+	delete projector;
+	for (int i = 0; i < _countof(Imageobject); i++) {
+		delete Imageobject[i];
 	}
 	winApp = nullptr;
 	return 0;

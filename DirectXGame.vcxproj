@@ -161,6 +161,7 @@
     <ClCompile Include="Player2.cpp" />
     <ClCompile Include="Player3.cpp" />
     <ClCompile Include="Player4.cpp" />
+    <ClCompile Include="Projector.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="WinApp.cpp" />
@@ -235,6 +236,7 @@
     <ClInclude Include="Player2.h" />
     <ClInclude Include="Player3.h" />
     <ClInclude Include="Player4.h" />
+    <ClInclude Include="Projector.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="WinApp.h" />
