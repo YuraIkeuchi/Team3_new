@@ -19,9 +19,17 @@
 #include "Sprite.h"
 #include "Audio.h"
 #include "Object3d.h"
+#include "Player.h"
+#include "Player2.h"
+#include "Player3.h"
+#include "Player4.h"
+#include "backGround.h"
+#include "Light.h"
+#include "Projector.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
+#include <cassert>
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"d3d12.lib")
@@ -31,36 +39,120 @@
 #pragma comment(lib,"dxguid.lib")
 using namespace DirectX;
 using namespace Microsoft::WRL;
-LRESULT WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+
+#pragma region//関数
+#pragma region 当たり判定用の構造体と関数
+struct BoxVertex
 {
-	switch (msg) {
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hwnd, msg, wparam, lparam);
+	float Up;
+	float Down;
+	float Left;
+	float Right;
+};
+
+bool BoxCollision_Down(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
+
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の左頂点
+	Object2.Left = object2.x - 10;
+	//object1の右頂点
+	Object2.Right = object2.x + radius2.x * 2;
+	//object1の下頂点
+	Object2.Down = object2.y - radius2.y;
+	//object1の上頂点
+	Object2.Up = Object2.Down + 1;
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
 }
 
-bool KingBoxCollision(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
-	float disX1 = object1.x + radius1.x;
-	float disX2 = object2.x - radius2.x;
-	float disX3 = object1.x - radius1.x;
-	float disX4 = object2.x + radius2.x;
-	float disY1 = object1.y + radius1.y;
-	float disY2 = object2.y - radius2.y;
-	float disY3 = object1.y - radius1.y;
-	float disY4 = object2.y + radius2.y;
-	float disZ1 = object1.z + radius1.z;
-	float disZ2 = object2.z - radius2.z;
-	float disZ3 = object1.z - radius1.z;
-	float disZ4 = object2.z + radius2.z;
+bool BoxCollision_Up(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
 
-	//xとyはそれぞれ中心座標として計算する
-	return disX1 > disX2 && disX4 > disX3 && disY1 > disY2 && disY4 > disY3 && disZ1 > disZ2 && disZ4 > disZ3;
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の左頂点
+	Object2.Left = object2.x - 10;
+	//object1の右頂点
+	Object2.Right = object2.x + radius2.x * 2;
+	//object1の上頂点
+	Object2.Up = object2.y + radius2.y;
+	//object1の下頂点
+	Object2.Down = Object2.Up - 1;
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
 }
-//テクスチャの最大枚数
-const int SpriteSRVCount = 512;
 
+
+bool BoxCollision_Left(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
+
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の左頂点
+	Object2.Left = object2.x - 10;
+	//object1の右頂点
+	Object2.Right = Object2.Left + 1;
+	//object1の下頂点
+	Object2.Down = object2.y - radius2.y + 0.5;
+	//object1の上頂点
+	Object2.Up = object2.y + radius2.y - 0.5;
+
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+}
+
+bool BoxCollision_Right(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
+	BoxVertex Object1;
+	BoxVertex Object2;
+
+	//object1の右頂点
+	Object1.Right = object1.x + radius1.x * 2;
+	//object1の左頂点
+	Object1.Left = object1.x;
+	//object1の上頂点
+	Object1.Up = object1.y + radius1.y;
+	//object1の下頂点
+	Object1.Down = object1.y - radius1.y;
+
+	//object1の右頂点
+	Object2.Right = object2.x + radius2.x * 2;
+	//object1の左頂点
+	Object2.Left = Object2.Right - 11;
+	//object1の下頂点
+	Object2.Down = object2.y - radius2.y + 0.5;
+	//object1の上頂点
+	Object2.Up = object2.y + radius2.y - 0.5;
+
+	//→１と左２　→２と左１　上１と下２　上２と下１
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+}
+#pragma endregion
 int collision2(const float& X1, const float& Y1, const float& R1, const float& X2, const float& Y2, const float& R2) {
 	int a = X1 - X2;
 	int b = Y1 - Y2;
@@ -77,6 +169,36 @@ float aseInSine(const float x) {
 	return 1 - cos((x * PI) / 2);
 }
 
+XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 projector, XMFLOAT3 object) {
+	XMFLOAT3 result = { screen.x,0,0 };
+	float a, b, A, B;
+	float add = 0.01f;
+
+	a = fabsf(object.z - projector.z + add);
+	b = fabsf(object.y - projector.y + add);
+	A = fabsf(screen.z - projector.z + add);
+
+	B = A * (a / b);
+	B += 1;
+	B = B * object.z;
+	result.z = B;
+
+	a = fabsf(object.z - projector.z + add);
+	b = fabsf(object.x - projector.x + add);
+	A = fabsf(screen.z - projector.z + add);
+
+	B = A * (a / b);
+	B += 1;
+	B = B * object.y;
+	result.y = B;
+
+
+	return result;
+}
+
+
+#pragma endregion
+#pragma region//WinMain
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	//ポインタ置き場
@@ -92,16 +214,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	MSG msg{};
 	//でバッグレイヤーのやつ
 #ifdef _DEBUG
-
 #endif
-
 	//directx初期化
 	HRESULT result;
-
-	//描画初期化処理
-	//頂点データ3点分の座標
-//#pragma regin 描画初期化処理
-	//頂点データ構造体
+#pragma region//構造体
 	struct Vertex
 	{
 		XMFLOAT3 pos;
@@ -114,11 +230,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		XMFLOAT4 color;
 		XMMATRIX mat;
 	};
-
 	const int constantBufferNum = 128;
-
 	const int OBJECT_NUM = 2;
-
+#pragma endregion
+#pragma region//行列
 	//射影変換行列の作り
 	XMMATRIX matprojection = XMMatrixPerspectiveFovLH(XMConvertToRadians(60.0f), (float)WinApp::window_width / WinApp::window_height, 0.1f, 1000.0f);
 
@@ -132,11 +247,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ワールド変換行列
 	XMMATRIX matworld0;
 	matworld0 = XMMatrixIdentity();
-
 	XMFLOAT3 position;
-
 	position = { 0.0f,0.0f,0.0f };
-
 	//2
 	XMMATRIX matRot1;
 	XMMATRIX matTrans1;
@@ -144,32 +256,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	matRot1 = XMMatrixRotationY(XMConvertToRadians(90.0f));
 	matTrans1 = XMMatrixTranslation(-20.0f, 0, 0);
 	matworld1 = matRot1 * matTrans1;
-
 	//カメラの回転角
 	float angle = 0.0f;
-	//スプライト共通データ
+#pragma endregion
+#pragma region//スプライト共通データ
 	if (!Sprite::StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 0;
 	}
-	int map[3][3] = {
-		0,0,0,
-		1,0,1,
-		0,0,1
-	};
 
 	const int SpriteMax = 10;
 	Sprite* sprite[SpriteMax] = { nullptr };
 	// スプライト共通テクスチャ読み込み
 	/*SpriteCommonLoadTexture(spriteCommon, 0, L"Resources/texture.png", dxCommon->GetDev());
 	SpriteCommonLoadTexture(spriteCommon, 1, L"Resources/house.png", dxCommon->GetDev());*/
-	Sprite::LoadTexture(0, L"Resources/texture.png");
-	Sprite::LoadTexture(1, L"Resources/house.png");
-	sprite[0] = Sprite::Create(0, { 50.0f,50.0f });
-	sprite[1] = Sprite::Create(1, { 500.0f,500.0f });
-	sprite[0]->SetSize({ 150.5f,150.5f });
-	sprite[1]->SetSize({ 150.5f,150.5f });
-	//オーディオ
+	Sprite::LoadTexture(0, L"Resources/Title.png");
+	Sprite::LoadTexture(1, L"Resources/END.png");
+	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
+	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
+#pragma endregion
+#pragma region//オーディオ
 	const int AudioMax = 3;
 	Audio* audio = new Audio;
 	if (!audio->Initialize()) {
@@ -178,23 +284,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
 	audio->LoopWave(0, 0.5f);
-	Object* object[OBJECT_NUM];
-	for (int i = 0; i < _countof(object); i++) {
-		if (!object[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-			assert(0);
-			return 1;
-		}
-		object[i] = Object::Create();
-		object[i]->Update();
-	}
-
-	Object* player;
-	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-		assert(0);
-		return 1;
-	}
-	player = Object::Create();
-	player->Update();
+#pragma endregion
+#pragma region//デスクリプタやシェーダリソースビュー
 	//定数バッファ用でスクリプタヒープの生成
 	ComPtr<ID3D12DescriptorHeap>basicDescHeap;
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
@@ -220,42 +311,136 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//ハンドルのアドレスを進める
 	cpuDescHandleSRV.ptr += constantBufferNum * dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	gpuDescHandleSRV.ptr += constantBufferNum * dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-	//キー処理
+#pragma endregion
+#pragma region//キー処理
 	//入力の初期化
 	input = new Input();
 	input->Initialize(winApp);
-	XMFLOAT3 ObjectPosition[OBJECT_NUM];
+#pragma endregion
+#pragma region//障害物変数
+	Object* object[OBJECT_NUM];
+	for (int i = 0; i < _countof(object); i++) {
+		if (!object[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+			assert(0);
+			return 1;
+		}
+		object[i] = Object::Create();
+		object[i]->Update();
+	}
 
+	XMFLOAT3 ObjectPosition[OBJECT_NUM];
+	XMFLOAT4 ObjectColor[OBJECT_NUM];
 	XMFLOAT3 Plus = { 0.0f,0.0f,0.0f };
 	for (int i = 0; i < _countof(object); i++) {
 		ObjectPosition[i] = object[i]->GetPosition();
+		ObjectColor[i] = object[i]->GetColor();
 	}
 
-	ObjectPosition[0] = { -20.0f,-10.0f,0.0f };
-	ObjectPosition[1] = { -5.0f,0.0f,0.0f };
+	ObjectPosition[0] = { -20.0f,-8.0f,20.0f };
+	ObjectPosition[1] = { -5.0f,-8.0f,20.0f };
 	for (int i = 0; i < _countof(object); i++) {
 		object[i]->SetPosition(ObjectPosition[i]);
 	}
+#pragma endregion
+#pragma region//後ろ
+	Projector* projector;
+	if (!projector->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	projector = Projector::Create();
+	projector->Update();
 
+#pragma endregion
+#pragma region//プレイヤー変数
+	//各プレイヤーの初期化
+	Player* player;
+	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player = Player::Create();
+	player->Update();
+	Player2* player2;
+	if (!player2->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player2 = Player2::Create();
+	player2->Update();
+	Player3* player3;
+	if (!player3->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player3 = Player3::Create();
+	player3->Update();
+	Player4* player4;
+	if (!player4->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	player4 = Player4::Create();
+	player4->Update();
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { 0.0f,0.0f,0.0f };
 	PlayerPosition = player->GetPosition();
-
-	player->SetPosition(PlayerPosition);
 	XMFLOAT3 OldPlayerPosition;
+	XMFLOAT3 PlayerRotation;
+	PlayerRotation = player->GetRotaition();
+	player->SetPosition(PlayerPosition);
 	XMFLOAT2 SpritePosition = sprite[0]->GetPosition();
-	int HitFlag = 0;
-	int RightHitFlag = 0;
-	int LeftHitFlag = 0;
-	int UpHitFlag = 0;
-	int DownHitFlag = 0;
+	//ジャンプ変数
+	int JumpFlag = 0;
 	float JumpG = 0.0f;
 
 	XMFLOAT3 camerapos = { 0.0f,0.0f, -50.0f };
 	XMFLOAT3 targetcamerapos = { 0,0,0 };
 	int mode = 0;//0:ゲームモード 1:設置モード
 	int modeflag = 0;
+
+	//アニメーション
+	int AnimetionTimer = 0;
+	int AnimetionCount = 0;
+#pragma endregion
+#pragma region//ライト変数
+	Light* light;
+	if (!light->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	light = Light::Create();
+	light->Update();
+	XMFLOAT3 LightPosition;
+	LightPosition = light->GetRotaition();
+	light->SetPosition(LightPosition);
+#pragma endregion
+#pragma region//背景
+	BackGround* background;
+	if (!background->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	//XMFLOAT3 BackPosition;
+	//BackPosition = background->GetPosition();
+
+	background = BackGround::Create();
+	background->Update();
+#pragma endregion
+#pragma region//スクロール変数
+	XMFLOAT3 ScrollPosition = { 0.0f,0.0f,0.0f };
+#pragma endregion
+#pragma region//シーン変数
+	int Scene = 0;
+	enum Scene {
+		title,
+		gamePlay,
+		gameOver,
+		gameClear
+	};
+#pragma endregion
+#pragma region//ループ処理
+
 	while (true) {
 		//ウィンドウメッセージ処理
 		if (winApp->ProcessMessage()) {
@@ -263,62 +448,84 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		for (int i = 0; i < _countof(object); i++) {
 			ObjectPosition[i] = object[i]->GetPosition();
+			ObjectColor[i] = object[i]->GetColor();
 		}
 		PlayerPosition = player->GetPosition();
+		LightPosition = light->GetPosition();
 		SpritePosition = sprite[0]->GetPosition();
-
-		//障害物との当たり判定
-
-			//キーの更新
+#pragma region//更新処理
+		//キーの更新
 		input->Update();
-		//グラフィックのやつ各とこ
-		//まいフレーム処理
-		//ジャンプ処理
-		OldPlayerPosition.x = PlayerPosition.x;
-		OldPlayerPosition.y = PlayerPosition.y;
-		if (input->TriggerKey(DIK_SPACE)) {
-			JumpG = -0.8f;
+#pragma region//タイトル
+		if (Scene == title) {
+			if (input->TriggerKey(DIK_SPACE)) {
+				Scene = gamePlay;
+			}
 		}
+#pragma endregion
+#pragma region//ゲームプレイ中
+		if (Scene == gamePlay) {
+			//位置情報保存
+			OldPlayerPosition.x = PlayerPosition.x;
+			OldPlayerPosition.y = PlayerPosition.y;
+			OldPlayerPosition.z = PlayerPosition.z;
+			//移動処理
+			if (input->PushKey(DIK_UP)) {
+				PlayerPosition.y += 0.5f;
+			}
 
-		if (input->PushKey(DIK_UP)) {
-			PlayerPosition.y += 0.5f;
-		}
+			if (input->PushKey(DIK_DOWN)) {
+				PlayerPosition.y -= 0.5f;
+			}
 
-		if (input->PushKey(DIK_DOWN) && DownHitFlag == 0) {
-			PlayerPosition.y -= 0.5f;
-		}
+			if (input->PushKey(DIK_LEFT)) {
+				PlayerPosition.x -= 0.5f;
+				//PlayerRotation.z = 270;
+				AnimetionTimer++;
+			}
+			if (input->PushKey(DIK_RIGHT)) {
+				PlayerPosition.x += 0.5f;
+				/*PlayerRotation.z = 180;*/
+				AnimetionTimer++;
+			}
 
-		if (input->PushKey(DIK_LEFT) && LeftHitFlag == 0) {
-			PlayerPosition.x -= 0.5f;
-		}
-		if (input->PushKey(DIK_RIGHT) && RightHitFlag == 0) {
-			PlayerPosition.x += 0.5f;
-		}
-		if (input->PushKey(DIK_D) || input->PushKey(DIK_A)) {
+			if (input->PushKey(DIK_S)) {
+				LightPosition.y -= 0.1;
+			}
+
+			if (input->PushKey(DIK_W)) {
+				LightPosition.y += 0.1;
+			}
+
+			if (input->PushKey(DIK_A)) {
+				LightPosition.x -= 0.1;
+			}
+
 			if (input->PushKey(DIK_D)) {
-				angle += XMConvertToRadians(1.0f);
+				LightPosition.x += 0.1;
 			}
-			else if (input->PushKey(DIK_A)) {
-				angle -= XMConvertToRadians(1.0f);
+
+			//ジャンプ処理
+			if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0)) {
+				JumpG = -0.8f;
+				JumpFlag = 1;
 			}
-			eye.x = -100 * sinf(angle);
-			eye.z = -100 * cosf(angle);
-			matview = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-		}
+			PlayerPosition.y -= JumpG;
+			JumpG += 0.025f;
 
-		PlayerPosition.y -= JumpG;
-		JumpG += 0.025f;
-
-		if (PlayerPosition.y <= -10.0f) {
-			JumpG = 0.0f;
-			PlayerPosition.y = -10.0f;
-		}
-
-		//カメラの試し移動
+			if (AnimetionTimer >= 8) {
+				AnimetionCount++;
+				AnimetionTimer = 0;
+			}
+			if (AnimetionCount == 4) {
+				AnimetionCount = 0;
+			}
+		//カメラ
 		if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 		{
 			mode = 1;
 		}
+
 		else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
 		{
 			mode = 0;
@@ -360,60 +567,89 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				modeflag = 0;
 			}
 		}
+	
+			//障害物との当たり判定
 		for (int i = 0; i < OBJECT_NUM; i++) {
-			//上
-			if ((ObjectPosition[i].y - PlayerPosition.y <= 5.2) && (ObjectPosition[i].y - PlayerPosition.y >= 1.0)
-				&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
-				JumpG = JumpG * -1;
-			}
-
-			//下
-			if ((ObjectPosition[i].y - PlayerPosition.y >= -5.2) && (ObjectPosition[i].y - PlayerPosition.y <= -1.0)
-				&& (ObjectPosition[i].x - PlayerPosition.x <= 4.8) && (ObjectPosition[i].x - PlayerPosition.x >= -4.8)) {
-				JumpG = 0.0f;
-				DownHitFlag = 1;
-				if (PlayerPosition.y <= ObjectPosition[i].y / 2) {
-					PlayerPosition.y = ObjectPosition[i].y / 2;
+			if (ObjectColor[i].w > 0.0f) {
+				//playerとブロック左辺の当たり判定
+				if (BoxCollision_Left(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.x = OldPlayerPosition.x;
+					//JumpG = 0.0f;
 				}
-			}
-			else {
-				DownHitFlag = 0;
-			}
 
-			//右
-			if ((ObjectPosition[i].x - PlayerPosition.x <= 5) && (ObjectPosition[i].x - PlayerPosition.x >= 4)
-				&& (ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
-				RightHitFlag = 1;
-				break;
-			}
-			else {
-				RightHitFlag = 0;
-			}
+				//playerとブロック右辺の当たり判定
+				if (BoxCollision_Right(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.x = OldPlayerPosition.x;
+					//JumpG = 0.0f;
+				}
+				//playerとブロック下辺の当たり判定
+				if (BoxCollision_Down(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.y = OldPlayerPosition.y;
+					JumpG = 0.0f;
+				}
 
-			//左
-			if ((ObjectPosition[i].x - PlayerPosition.x >= -5) && (ObjectPosition[i].x - PlayerPosition.x <= -4) &&
-				(ObjectPosition[i].y - PlayerPosition.y <= 5) && (ObjectPosition[i].y - PlayerPosition.y >= -5)) {
-				LeftHitFlag = 1;
-				break;
-			}
-			else {
-				LeftHitFlag = 0;
+				//playerとブロック上辺の当たり判定
+				if (BoxCollision_Up(PlayerPosition, { 2,4,4 }, ObjectPosition[i], { 6,4,4 }) == TRUE) {
+					PlayerPosition.y = OldPlayerPosition.y;
+					JumpG = 0.0f;
+					JumpFlag = 0;
+				}
 			}
 		}
 
+		//光とブロックの当たり判定
+		for (int i = 0; i < _countof(object); i++) {
+			if (collision2(ObjectPosition[i].x, ObjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
+				ObjectColor[i].w -= 0.01;
+			}
+		}
 
+			if (input->TriggerKey(DIK_R)) {
+				Scene = gameClear;
+			}
+		}
+#pragma endregion
+#pragma region//クリア
+		if (Scene == gameClear) {
+			if (input->TriggerKey(DIK_S)) {
+				Scene = title;
+			}
+		}
+#pragma endregion
+#pragma region//Update
 		for (int i = 0; i < _countof(object); i++) {
 			object[i]->Update();
 			//ルートシグネチャの設定コマンド
 			object[i]->SetPosition(ObjectPosition[i]);
+			object[i]->SetColor(ObjectColor[i]);
 		}
-
+		background->Update();
 		player->Update();
+		player2->Update();
+		player3->Update();
+		player4->Update();
+		light->Update();
+		projector->Update();
 		player->SetPosition(PlayerPosition);
-
-		//びょうがこまんど
-
-
+		player2->SetPosition(PlayerPosition);
+		player3->SetPosition(PlayerPosition);
+		player4->SetPosition(PlayerPosition);
+		light->SetPosition(LightPosition);
+		player->SetRotaition(PlayerRotation);
+		player2->SetRotaition(PlayerRotation);
+		player3->SetRotaition(PlayerRotation);
+		player4->SetRotaition(PlayerRotation);
+		Object::SetCameraPosition(camerapos, targetcamerapos);
+		Player::SetCameraPosition(camerapos, targetcamerapos);
+		Player2::SetCameraPosition(camerapos, targetcamerapos);
+		Player3::SetCameraPosition(camerapos, targetcamerapos);
+		Player4::SetCameraPosition(camerapos, targetcamerapos);
+		Light::SetCameraPosition(camerapos, targetcamerapos);
+		Projector::SetCameraPosition(camerapos, targetcamerapos);
+#pragma endregion
+#pragma endregion
+#pragma region//描画
+		//描画コマンド
 		//x,y座標のデバッグログ
 		wchar_t str[256];
 
@@ -421,13 +657,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		OutputDebugString(str);
 		swprintf_s(str, L"ObjectPosition[0].x - PlayerPosition.x:%f\n", ObjectPosition[0].x - PlayerPosition.x);
 		OutputDebugString(str);
-
-		/*swprintf_s(str, L"ObjectPosition[1].y - ObjectPosition[0].y:%f\n", ObjectPosition[1].y - ObjectPosition[0].y);
-		OutputDebugString(str);*/
-		//描画コマンド
-
-		Object::PreDraw(dxCommon->GetCmdList());
+		swprintf_s(str, L"JumpG:%f\n", JumpG);
+		OutputDebugString(str);
 		dxCommon->PreDraw();
+		////4.描画コマンドここから
+		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
@@ -436,6 +670,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Indent();
 				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
+				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
+				ImGui::SliderFloat("Color", &ObjectColor[0].w, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -444,25 +680,65 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::Indent();
 		ImGui::Unindent();
 		ImGui::End();
-		//プリティ部形状の設定コマンド
-		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		for (int i = 0; i < _countof(object); i++) {
-			object[i]->Draw();
-		}
-		Object::SetCameraPosition(camerapos, targetcamerapos);
-
-		player->Draw();
+		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
-
-		sprite[0]->Draw();
-
-		//sprite[1]->Draw();
+		if (Scene == title) {
+			sprite[0]->Draw();
+		}
 		Sprite::PostDraw();
-		////描画コマンド　ここまで
-		dxCommon->PostDraw();
+		Object::PreDraw(dxCommon->GetCmdList());
+		Player::PreDraw(dxCommon->GetCmdList());
+		Player2::PreDraw(dxCommon->GetCmdList());
+		Player3::PreDraw(dxCommon->GetCmdList());
+		Player4::PreDraw(dxCommon->GetCmdList());
+		Light::PreDraw(dxCommon->GetCmdList());
+		BackGround::PreDraw(dxCommon->GetCmdList());
+		Projector::PreDraw(dxCommon->GetCmdList());
+		//背景
+		if (Scene == gamePlay) {
+			//background->Draw();
+			projector->Draw();
+			//light->Draw();
+			if (AnimetionCount == 0) {
+				player->Draw();
+			}
+			else if (AnimetionCount == 1) {
+				player2->Draw();
+			}
+			else if (AnimetionCount == 2) {
+				player3->Draw();
+			}
+			else if (AnimetionCount == 3) {
+				player4->Draw();
+			}
+			for (int i = 0; i < _countof(object); i++) {
+				if (ObjectColor[i].w > 0.0f) {
+					object[i]->Draw();
+				}
+			}
+		
+		}
+	
+		Sprite::PreDraw(dxCommon->GetCmdList());
+		if (Scene == gameClear) {
+			sprite[1]->Draw();
+		}
+	
+		Sprite::PostDraw();
+		// 3Dオブジェクト描画後処理
 		Object::PostDraw();
-
+		Player::PostDraw();
+		Player2::PostDraw();
+		Player3::PostDraw();
+		Player4::PostDraw();
+		Light::PostDraw();
+		BackGround::PostDraw();
+		Projector::PostDraw();
+		dxCommon->PostDraw();
 	}
+#pragma endregion
+#pragma endregion
+#pragma region//開放処理
 	winApp->Finalize();
 	for (int i = 0; i < SpriteMax; i++) {
 		delete sprite[i];
@@ -473,9 +749,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete winApp;
 	delete dxCommon;
 	delete player;
+	delete light;
+	delete projector;
 	for (int i = 0; i < _countof(object); i++) {
 		delete object[i];
 	}
 	winApp = nullptr;
 	return 0;
+#pragma endregion
 }
+#pragma endregion

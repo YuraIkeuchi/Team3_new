@@ -7,7 +7,7 @@
 #include <d3dx12.h>
 
 /// 3Dオブジェクト
-class Object
+class Projector
 {
 private: // エイリアス
 	// Microsoft::WRL::を省略
@@ -52,7 +52,7 @@ public: // 静的メンバ関数
 	static void PostDraw();
 
 	/// 3Dオブジェクト生成
-	static Object* Create();
+	static Projector* Create();
 
 	/// 視点座標の取得
 	static const XMFLOAT3& GetEye() { return eye; }
@@ -139,13 +139,13 @@ private: // メンバ変数
 	// 色
 	XMFLOAT4 color = { 1,1,1,1.0 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 1.0,1.0,1.0 };
+	XMFLOAT3 scale = { 50.0,50.0,50.0 };
 	// X,Y,Z軸回りのローカル回転角
 	XMFLOAT3 rotation = { 0,0,0 };
 	// ローカル座標
-	XMFLOAT3 position = { 0,0,20 };
+	XMFLOAT3 position = { 0,0,320 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	Object* parent = nullptr;
+	Projector* parent = nullptr;
 };
