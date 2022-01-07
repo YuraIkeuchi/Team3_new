@@ -25,7 +25,7 @@
 #include "Player4.h"
 #include "backGround.h"
 #include "Light.h"
-#include "Projector.h"
+#include "Screen.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -169,29 +169,28 @@ float aseInSine(const float x) {
 	return 1 - cos((x * PI) / 2);
 }
 
-XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 projector, XMFLOAT3 object) {
+XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Screen, XMFLOAT3 object) {
 	XMFLOAT3 result = { screen.x,0,0 };
 	float a, b, A, B;
 	float add = 0.01f;
 
-	a = fabsf(object.z - projector.z + add);
-	b = fabsf(object.y - projector.y + add);
-	A = fabsf(screen.z - projector.z + add);
+	a = fabsf(object.z - Screen.z + add);
+	b = fabsf(object.y - Screen.y + add);
+	A = fabsf(screen.z - Screen.z + add);
 
 	B = A * (a / b);
 	B += 1;
 	B = B * object.z;
 	result.z = B;
 
-	a = fabsf(object.z - projector.z + add);
-	b = fabsf(object.x - projector.x + add);
-	A = fabsf(screen.z - projector.z + add);
+	a = fabsf(object.z - Screen.z + add);
+	b = fabsf(object.x - Screen.x + add);
+	A = fabsf(screen.z - Screen.z + add);
 
 	B = A * (a / b);
 	B += 1;
 	B = B * object.y;
 	result.y = B;
-
 
 	return result;
 }
@@ -342,13 +341,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 #pragma endregion
 #pragma region//後ろ
-	Projector* projector;
-	if (!projector->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	Screen* screen;
+	if (!screen->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
-	projector = Projector::Create();
-	projector->Update();
+	screen = Screen::Create();
+	screen->Update();
 
 #pragma endregion
 #pragma region//プレイヤー変数
@@ -628,7 +627,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		player3->Update();
 		player4->Update();
 		light->Update();
-		projector->Update();
+		screen->Update();
 		player->SetPosition(PlayerPosition);
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
@@ -644,7 +643,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player3::SetCameraPosition(camerapos, targetcamerapos);
 		Player4::SetCameraPosition(camerapos, targetcamerapos);
 		Light::SetCameraPosition(camerapos, targetcamerapos);
-		Projector::SetCameraPosition(camerapos, targetcamerapos);
+		Screen::SetCameraPosition(camerapos, targetcamerapos);
 #pragma endregion
 #pragma endregion
 #pragma region//描画
@@ -692,11 +691,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player4::PreDraw(dxCommon->GetCmdList());
 		Light::PreDraw(dxCommon->GetCmdList());
 		BackGround::PreDraw(dxCommon->GetCmdList());
-		Projector::PreDraw(dxCommon->GetCmdList());
+		Screen::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
-			projector->Draw();
+			screen->Draw();
 			//light->Draw();
 			if (AnimetionCount == 0) {
 				player->Draw();
@@ -732,7 +731,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Player4::PostDraw();
 		Light::PostDraw();
 		BackGround::PostDraw();
-		Projector::PostDraw();
+		Screen::PostDraw();
 		dxCommon->PostDraw();
 	}
 #pragma endregion
@@ -749,7 +748,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete dxCommon;
 	delete player;
 	delete light;
-	delete projector;
+	delete screen;
 	for (int i = 0; i < _countof(object); i++) {
 		delete object[i];
 	}

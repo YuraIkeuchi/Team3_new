@@ -1,4 +1,4 @@
-#include "Projector.h"
+#include "Screen.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 
@@ -10,35 +10,35 @@ using namespace Microsoft::WRL;
 /// <summary>
 /// 静的メンバ変数の実体
 /// </summary>
-const float Projector::radius = 5.0f;				// 底面の半径
-const float Projector::prizmHeight = 8.0f;			// 柱の高さ
-ID3D12Device* Projector::device = nullptr;
-UINT Projector::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Projector::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Projector::rootsignature;
-ComPtr<ID3D12PipelineState> Projector::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Projector::descHeap;
-ComPtr<ID3D12Resource> Projector::vertBuff;
-ComPtr<ID3D12Resource> Projector::indexBuff;
-ComPtr<ID3D12Resource> Projector::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Projector::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Projector::gpuDescHandleSRV;
-XMMATRIX Projector::matView{};
-XMMATRIX Projector::matProjection{};
-XMFLOAT3 Projector::eye = { 0, 0, -50.0f };
-XMFLOAT3 Projector::target = { 0, 0, 0 };
-XMFLOAT3 Projector::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Projector::vbView{};
-D3D12_INDEX_BUFFER_VIEW Projector::ibView{};
-Projector::VertexPosNormalUv Projector::vertices[vertexCount];
-unsigned short Projector::indices[planeCount * 3];
+const float Screen::radius = 5.0f;				// 底面の半径
+const float Screen::prizmHeight = 8.0f;			// 柱の高さ
+ID3D12Device* Screen::device = nullptr;
+UINT Screen::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* Screen::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> Screen::rootsignature;
+ComPtr<ID3D12PipelineState> Screen::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> Screen::descHeap;
+ComPtr<ID3D12Resource> Screen::vertBuff;
+ComPtr<ID3D12Resource> Screen::indexBuff;
+ComPtr<ID3D12Resource> Screen::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE Screen::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE Screen::gpuDescHandleSRV;
+XMMATRIX Screen::matView{};
+XMMATRIX Screen::matProjection{};
+XMFLOAT3 Screen::eye = { 0, 0, -50.0f };
+XMFLOAT3 Screen::target = { 0, 0, 0 };
+XMFLOAT3 Screen::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW Screen::vbView{};
+D3D12_INDEX_BUFFER_VIEW Screen::ibView{};
+Screen::VertexPosNormalUv Screen::vertices[vertexCount];
+unsigned short Screen::indices[planeCount * 3];
 
-bool Projector::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
+bool Screen::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
 {
 	// nullptrチェック
 	assert(device);
 
-	Projector::device = device;
+	Screen::device = device;
 
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
@@ -58,13 +58,13 @@ bool Projector::StaticInitialize(ID3D12Device* device, int window_width, int win
 	return true;
 }
 
-void Projector::PreDraw(ID3D12GraphicsCommandList* cmdList)
+void Screen::PreDraw(ID3D12GraphicsCommandList* cmdList)
 {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Projector::cmdList == nullptr);
+	assert(Screen::cmdList == nullptr);
 
 	// コマンドリストをセット
-	Projector::cmdList = cmdList;
+	Screen::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -74,45 +74,45 @@ void Projector::PreDraw(ID3D12GraphicsCommandList* cmdList)
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Projector::PostDraw()
+void Screen::PostDraw()
 {
 	// コマンドリストを解除
-	Projector::cmdList = nullptr;
+	Screen::cmdList = nullptr;
 }
 
-Projector* Projector::Create()
+Screen* Screen::Create()
 {
 	// 3Dオブジェクトのインスタンスを生成
-	Projector* projector = new Projector();
-	if (projector == nullptr) {
+	Screen* screen = new Screen();
+	if (screen == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!projector->Initialize()) {
-		delete projector;
+	if (!screen->Initialize()) {
+		delete screen;
 		assert(0);
 		return nullptr;
 	}
 
-	return projector;
+	return screen;
 }
 
-void Projector::SetEye(XMFLOAT3 eye)
+void Screen::SetEye(XMFLOAT3 eye)
 {
-	Projector::eye = eye;
+	Screen::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Projector::SetTarget(XMFLOAT3 target)
+void Screen::SetTarget(XMFLOAT3 target)
 {
-	Projector::target = target;
+	Screen::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Projector::CameraMoveVector(XMFLOAT3 move)
+void Screen::CameraMoveVector(XMFLOAT3 move)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
@@ -129,7 +129,7 @@ void Projector::CameraMoveVector(XMFLOAT3 move)
 	SetTarget(target_moved);
 }
 
-bool Projector::InitializeDescriptorHeap()
+bool Screen::InitializeDescriptorHeap()
 {
 	HRESULT result = S_FALSE;
 
@@ -150,7 +150,7 @@ bool Projector::InitializeDescriptorHeap()
 	return true;
 }
 
-void Projector::InitializeCamera(int window_width, int window_height)
+void Screen::InitializeCamera(int window_width, int window_height)
 {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
@@ -171,7 +171,7 @@ void Projector::InitializeCamera(int window_width, int window_height)
 	);
 }
 
-bool Projector::InitializeGraphicsPipeline()
+bool Screen::InitializeGraphicsPipeline()
 {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
@@ -323,7 +323,7 @@ bool Projector::InitializeGraphicsPipeline()
 	return true;
 }
 
-bool Projector::LoadTexture()
+bool Screen::LoadTexture()
 {
 	HRESULT result = S_FALSE;
 
@@ -393,7 +393,7 @@ bool Projector::LoadTexture()
 	return true;
 }
 
-void Projector::CreateModel()
+void Screen::CreateModel()
 {
 	HRESULT result = S_FALSE;
 
@@ -542,13 +542,13 @@ void Projector::CreateModel()
 	ibView.SizeInBytes = sizeof(indices);
 }
 
-void Projector::UpdateViewMatrix()
+void Screen::UpdateViewMatrix()
 {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
-bool Projector::Initialize()
+bool Screen::Initialize()
 {
 	// nullptrチェック
 	assert(device);
@@ -566,7 +566,7 @@ bool Projector::Initialize()
 	return true;
 }
 
-void Projector::Update()
+void Screen::Update()
 {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
@@ -599,11 +599,11 @@ void Projector::Update()
 	constBuff->Unmap(0, nullptr);
 }
 
-void Projector::Draw()
+void Screen::Draw()
 {
 	// nullptrチェック
 	assert(device);
-	assert(Projector::cmdList);
+	assert(Screen::cmdList);
 
 	// 頂点バッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &vbView);
@@ -622,7 +622,7 @@ void Projector::Draw()
 	cmdList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
 }
 //カメラの操作
-void Projector::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+void Screen::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
