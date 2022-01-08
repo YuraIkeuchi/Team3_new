@@ -332,7 +332,7 @@ bool Object::LoadTexture()
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/ダウンロード.png", WIC_FLAGS_NONE,
+		L"Resources/Circle5if.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
