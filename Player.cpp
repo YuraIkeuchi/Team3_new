@@ -472,7 +472,7 @@ bool Player::Initialize() {
 	return true;
 }
 
-void Player::Update() {
+void Player::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 

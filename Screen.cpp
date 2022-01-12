@@ -566,7 +566,7 @@ bool Screen::Initialize()
 	return true;
 }
 
-void Screen::Update()
+void Screen::Update(XMMATRIX& matView)
 {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;

@@ -128,7 +128,7 @@ private:// 静的メンバ関数
 public: // メンバ関数
 	bool Initialize();
 	/// 毎フレーム処理
-	void Update();
+	void Update(XMMATRIX& matView);
 
 	/// 描画
 	void Draw();

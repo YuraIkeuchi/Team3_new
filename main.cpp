@@ -326,7 +326,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			return 1;
 		}
 		Imageobject[i] = Object::Create();
-		Imageobject[i]->Update();
+		Imageobject[i]->Update(matview);
 	}
 
 	XMFLOAT3 ImageObjectPosition[OBJECT_NUM];
@@ -352,7 +352,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			return 1;
 		}
 		Setobject[i] = Object::Create();
-		Setobject[i]->Update();
+		Setobject[i]->Update(matview);
 	}
 
 	XMFLOAT3 SetobjectPosition[OBJECT_NUM];
@@ -362,8 +362,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		SetobjectPosition[i] = Setobject[i]->GetPosition();
 		SetobjectColor[i] = Setobject[i]->GetColor();
 	}
-	SetobjectPosition[0] = { -20.0f,-8.0f,20.0f };
-	
+	SetobjectPosition[0] = { -50.0f,-8.0f,50.0f };
+	SetobjectPosition[1] = { 0.0f,-8.0f,50.0f };
+	SetobjectPosition[2] = { 20.0f,0.0f,50.0f };
+	SetobjectPosition[3] = { 15.0f,-8.0f,50.0f };
 	for (int i = 0; i < _countof(Setobject); i++) {
 		Setobject[i]->SetPosition(SetobjectPosition[i]);
 	}
@@ -375,7 +377,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return 1;
 	}
 	screen = Screen::Create();
-	screen->Update();
+	screen->Update(matview);
 
 #pragma endregion
 #pragma region//プロジェクター
@@ -385,7 +387,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return 1;
 	}
 	 projector = Projector::Create();
-	 projector->Update();
+	 projector->Update(matview);
 
 #pragma endregion
 #pragma region//プレイヤー変数
@@ -396,28 +398,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return 1;
 	}
 	player = Player::Create();
-	player->Update();
+	player->Update(matview);
 	Player2* player2;
 	if (!player2->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
 	player2 = Player2::Create();
-	player2->Update();
+	player2->Update(matview);
 	Player3* player3;
 	if (!player3->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
 	player3 = Player3::Create();
-	player3->Update();
+	player3->Update(matview);
 	Player4* player4;
 	if (!player4->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
 	player4 = Player4::Create();
-	player4->Update();
+	player4->Update(matview);
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { 0.0f,0.0f,0.0f };
 	PlayerPosition = player->GetPosition();
@@ -446,7 +448,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return 1;
 	}
 	light = Light::Create();
-	light->Update();
+	light->Update(matview);
 	XMFLOAT3 LightPosition;
 	LightPosition = light->GetRotaition();
 	light->SetPosition(LightPosition);
@@ -474,6 +476,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		gameOver,
 		gameClear
 	};
+#pragma endregion
+#pragma region//カメラ
+	XMVECTOR v0 = { 0,0,-20,0 };
+	XMMATRIX rotM;// = XMMatrixIdentity();
+	XMVECTOR eye2;
+	XMVECTOR target2 = { PlayerPosition.x, 0,0,0};
+	XMVECTOR up2 = { 0,0.0f,0,0 };
+	
 #pragma endregion
 #pragma region//ループ処理
 
@@ -598,7 +608,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}*/
 
 			//ジャンプ処理
-			//PlayerPosition.y -= JumpG;
+			PlayerPosition.y -= JumpG;
 			JumpG += 0.025f;
 
 			//アニメーションタイマー
@@ -696,26 +706,40 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//Update
 		for (int i = 0; i < _countof(Setobject); i++) {
-			Setobject[i]->Update();
+			Setobject[i]->Update(matview);
 			//ルートシグネチャの設定コマンド
 			Setobject[i]->SetPosition(SetobjectPosition[i]);
 			Setobject[i]->SetColor(SetobjectColor[i]);
 		}
 
 		for (int i = 0; i < _countof(Imageobject); i++) {
-			Imageobject[i]->Update();
+			Imageobject[i]->Update(matview);
 			//ルートシグネチャの設定コマンド
 			Imageobject[i]->SetPosition(ImageObjectPosition[i]);
 			Imageobject[i]->SetColor(ImageObjectColor[i]);
 		}
+
+		//移動のやつ
+		//カメラの注視点をプレイヤーの位置に固定
+		target2.m128_f32[2] = 0;
+		//カメラ追従用の処理
+		target2.m128_f32[0] = PlayerPosition.x;
+		target2.m128_f32[1] = 0;
+		//行列を作り直す
+		rotM = XMMatrixRotationX(XMConvertToRadians(angle));
+		XMVECTOR v;
+		v = XMVector3TransformNormal(v0, rotM);
+		eye2 = target2 + v;
+		matview = XMMatrixLookAtLH((eye2), (target2), XMLoadFloat3(&up));
+
 		background->Update();
-		player->Update();
-		player2->Update();
-		player3->Update();
-		player4->Update();
-		light->Update();
-		screen->Update();
-		projector->Update();
+		player->Update(matview);
+		player2->Update(matview);
+		player3->Update(matview);
+		player4->Update(matview);
+		light->Update(matview);
+		screen->Update(matview);
+		projector->Update(matview);
 		player->SetPosition(PlayerPosition);
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
@@ -746,8 +770,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (ImGui::TreeNode("Object0"))
 			{
 				ImGui::Text("SetFlag[0],%d", SetFlag[0]);
-				ImGui::SliderFloat("Position.x", &ImageObjectPosition[0].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &ImageObjectPosition[0].y, 50, -50);
+				ImGui::SliderFloat("Position.x", &SetobjectPosition[0].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &SetobjectPosition[0].y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -757,6 +781,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Text("SetFlag[1],%d", SetFlag[1]);
 				ImGui::SliderFloat("Position.x", &ImageObjectPosition[1].x, 50, -50);
 				ImGui::SliderFloat("Position.y", &ImageObjectPosition[1].y, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Player"))
+			{
+				ImGui::Text("SetFlag[1],%d", SetFlag[1]);
+				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
+				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -781,7 +814,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
-			//screen->Draw();
+			screen->Draw();
 			projector->Draw();
 			//light->Draw();
 			if (AnimetionCount == 0) {
@@ -803,7 +836,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			for (int i = 0; i < _countof(Imageobject); i++) {
-				Imageobject[i]->Draw();
+				//Imageobject[i]->Draw();
 			}
 		}
 	

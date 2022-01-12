@@ -114,7 +114,7 @@ public: // ƒƒ“ƒoŠÖ”//
 	//‰Šú‰»
 	bool Initialize();
 	/// –ˆƒtƒŒ[ƒ€ˆ—
-	void Update();
+	void Update(XMMATRIX& matView);
 
 	/// •`‰æ
 	void Draw();

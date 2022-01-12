@@ -114,7 +114,7 @@ public: // メンバ関数//
 	//初期化
 	bool Initialize();
 	/// 毎フレーム処理
-	void Update();
+	void Update(XMMATRIX& matView);
 
 	/// 描画
 	void Draw();
@@ -141,9 +141,9 @@ public: // メンバ関数//
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// 色
-	XMFLOAT4 color = { 1,1,1,1.0 };
+	XMFLOAT4 color = { 0,0,0,1.0 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 0.5,0.5,0.5 };
+	XMFLOAT3 scale = { 1.0,1.0,0.2 };
 	// X,Y,Z軸回りのローカル回転角
 	XMFLOAT3 rotation = { 0,0,0 };
 	// ローカル座標

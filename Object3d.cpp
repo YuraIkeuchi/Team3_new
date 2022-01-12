@@ -566,7 +566,7 @@ bool Object::Initialize()
 	return true;
 }
 
-void Object::Update()
+void Object::Update(XMMATRIX& matView)
 {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;

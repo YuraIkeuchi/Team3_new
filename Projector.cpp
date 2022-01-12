@@ -551,7 +551,7 @@ bool Projector::Initialize() {
 	return true;
 }
 
-void Projector::Update() {
+void Projector::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 
