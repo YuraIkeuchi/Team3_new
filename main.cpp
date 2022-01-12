@@ -27,6 +27,7 @@
 #include "Light.h"
 #include "Screen.h"
 #include "Projector.h"
+#include "Collision.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -42,128 +43,6 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 
 #pragma region//関数
-#pragma region 当たり判定用の構造体と関数
-struct BoxVertex
-{
-	float Up;
-	float Down;
-	float Left;
-	float Right;
-};
-
-bool BoxCollision_Down(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
-	BoxVertex Object1;
-	BoxVertex Object2;
-
-	//object1の右頂点
-	Object1.Right = object1.x + radius1.x * 2;
-	//object1の左頂点
-	Object1.Left = object1.x;
-	//object1の上頂点
-	Object1.Up = object1.y + radius1.y;
-	//object1の下頂点
-	Object1.Down = object1.y - radius1.y;
-
-	//object1の左頂点
-	Object2.Left = object2.x - 10;
-	//object1の右頂点
-	Object2.Right = object2.x + radius2.x * 2;
-	//object1の下頂点
-	Object2.Down = object2.y - radius2.y;
-	//object1の上頂点
-	Object2.Up = Object2.Down + 1;
-	//→１と左２　→２と左１　上１と下２　上２と下１
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
-}
-
-bool BoxCollision_Up(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
-	BoxVertex Object1;
-	BoxVertex Object2;
-
-	//object1の右頂点
-	Object1.Right = object1.x + radius1.x * 2;
-	//object1の左頂点
-	Object1.Left = object1.x;
-	//object1の上頂点
-	Object1.Up = object1.y + radius1.y;
-	//object1の下頂点
-	Object1.Down = object1.y - radius1.y;
-
-	//object1の左頂点
-	Object2.Left = object2.x - 10;
-	//object1の右頂点
-	Object2.Right = object2.x + radius2.x * 2;
-	//object1の上頂点
-	Object2.Up = object2.y + radius2.y;
-	//object1の下頂点
-	Object2.Down = Object2.Up - 1;
-	//→１と左２　→２と左１　上１と下２　上２と下１
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
-}
-
-
-bool BoxCollision_Left(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
-	BoxVertex Object1;
-	BoxVertex Object2;
-
-	//object1の右頂点
-	Object1.Right = object1.x + radius1.x * 2;
-	//object1の左頂点
-	Object1.Left = object1.x;
-	//object1の上頂点
-	Object1.Up = object1.y + radius1.y;
-	//object1の下頂点
-	Object1.Down = object1.y - radius1.y;
-
-	//object1の左頂点
-	Object2.Left = object2.x - 10;
-	//object1の右頂点
-	Object2.Right = Object2.Left + 1;
-	//object1の下頂点
-	Object2.Down = object2.y - radius2.y + 0.5;
-	//object1の上頂点
-	Object2.Up = object2.y + radius2.y - 0.5;
-
-	//→１と左２　→２と左１　上１と下２　上２と下１
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
-}
-
-bool BoxCollision_Right(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
-	BoxVertex Object1;
-	BoxVertex Object2;
-
-	//object1の右頂点
-	Object1.Right = object1.x + radius1.x * 2;
-	//object1の左頂点
-	Object1.Left = object1.x;
-	//object1の上頂点
-	Object1.Up = object1.y + radius1.y;
-	//object1の下頂点
-	Object1.Down = object1.y - radius1.y;
-
-	//object1の右頂点
-	Object2.Right = object2.x + radius2.x * 2;
-	//object1の左頂点
-	Object2.Left = Object2.Right - 11;
-	//object1の下頂点
-	Object2.Down = object2.y - radius2.y + 0.5;
-	//object1の上頂点
-	Object2.Up = object2.y + radius2.y - 0.5;
-
-	//→１と左２　→２と左１　上１と下２　上２と下１
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
-}
-#pragma endregion
-int collision2(const float& X1, const float& Y1, const float& R1, const float& X2, const float& Y2, const float& R2) {
-	int a = X1 - X2;
-	int b = Y1 - Y2;
-	int distance = sqrtf(a * a + b * b);
-	int radius = R1 + R2;
-	if (distance <= radius) {
-		return TRUE;
-	}
-}
-
 //イージング
 float PI = 3.141592;
 float aseInSine(const float x) {
@@ -432,7 +311,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int JumpFlag = 0;
 	float JumpG = 0.0f;
 
-	XMFLOAT3 camerapos = { 0.0f,0.0f, -50.0f };
 	XMFLOAT3 targetcamerapos = { 0,0,0 };
 	int mode = 0;//0:ゲームモード 1:設置モード
 	int modeflag = 0;
@@ -485,6 +363,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	XMVECTOR up2 = { 0,0.0f,0,0 };
 	
 #pragma endregion
+#pragma region//当たり判定
+	Collision* Boxcollision = nullptr;
+
+#pragma endregion
 #pragma region//ループ処理
 
 	while (true) {
@@ -536,6 +418,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				//移動処理
 				if (input->PushKey(DIK_UP)) {
 					PlayerPosition.y += 0.5f;
+
 				}
 
 				if (input->PushKey(DIK_DOWN)) {
@@ -591,22 +474,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
-		/*	if (input->PushKey(DIK_S)) {
-				LightPosition.y -= 0.1;
-			}
-
-			if (input->PushKey(DIK_W)) {
-				LightPosition.y += 0.1;
-			}
-
-			if (input->PushKey(DIK_A)) {
-				LightPosition.x -= 0.1;
-			}
-
-			if (input->PushKey(DIK_D)) {
-				LightPosition.x += 0.1;
-			}*/
-
 			//ジャンプ処理
 			PlayerPosition.y -= JumpG;
 			JumpG += 0.025f;
@@ -660,24 +527,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		for (int i = 0; i < OBJECT_NUM; i++) {
 			if (SetobjectColor[i].w > 0.0f) {
 				//playerとブロック左辺の当たり判定
-				if (BoxCollision_Left(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
 					//JumpG = 0.0f;
 				}
 
 				//playerとブロック右辺の当たり判定
-				if (BoxCollision_Right(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
 					//JumpG = 0.0f;
 				}
 				//playerとブロック下辺の当たり判定
-				if (BoxCollision_Down(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
 
 				//playerとブロック上辺の当たり判定
-				if (BoxCollision_Up(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 					JumpFlag = 0;
@@ -687,7 +554,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		//光とブロックの当たり判定
 		for (int i = 0; i < _countof(Setobject); i++) {
-			if (collision2(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
+			if (Boxcollision->CircleCollision(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
 				SetobjectColor[i].w -= 0.01;
 			}
 		}
@@ -744,19 +611,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
 		player4->SetPosition(PlayerPosition);
+		screen->SetPosition({PlayerPosition.x,0,320});
+		projector->SetPosition({ PlayerPosition.x,-20,-50 });
 		light->SetPosition(LightPosition);
 		player->SetRotaition(PlayerRotation);
 		player2->SetRotaition(PlayerRotation);
 		player3->SetRotaition(PlayerRotation);
 		player4->SetRotaition(PlayerRotation);
-		Object::SetCameraPosition(camerapos, targetcamerapos);
-		Player::SetCameraPosition(camerapos, targetcamerapos);
-		Player2::SetCameraPosition(camerapos, targetcamerapos);
-		Player3::SetCameraPosition(camerapos, targetcamerapos);
-		Player4::SetCameraPosition(camerapos, targetcamerapos);
-		Light::SetCameraPosition(camerapos, targetcamerapos);
-		Screen::SetCameraPosition(camerapos, targetcamerapos);
-		Projector::SetCameraPosition(camerapos, targetcamerapos);
+		
 #pragma endregion
 #pragma endregion
 #pragma region//描画
