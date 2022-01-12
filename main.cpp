@@ -184,7 +184,7 @@ XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Projector, XMFLOAT3 object) {
 	B += 1;
 	B = B * object.z;
 	result.z = B;
-
+	//oaaaaaaaaaaaaaaaaaaaaaaaa
 	a = fabsf(object.z - Projector.z + add);
 	b = fabsf(object.x - Projector.x + add);
 	A = fabsf(screen.z - Projector.z + add);
