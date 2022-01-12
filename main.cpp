@@ -478,7 +478,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	};
 #pragma endregion
 #pragma region//カメラ
-	XMVECTOR v0 = { 0,0,-20,0 };
+	XMVECTOR v0 = { 0,0,-120,0 };
 	XMMATRIX rotM;// = XMMatrixIdentity();
 	XMVECTOR eye2;
 	XMVECTOR target2 = { PlayerPosition.x, 0,0,0};
@@ -623,35 +623,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//カメラ移動
 		//ゲーム画面
 		if (mode == 0) {
-			camerapos.x -= 1.2f;
-			camerapos.z -= 0.5f;
+			v0.m128_f32[0] -= 1.2f;
+			v0.m128_f32[2] -= 0.5f;
 			targetcamerapos.z += 0.7f;
-			if (camerapos.x <= 0.0f) {
-				camerapos.x = 0.0f;
+			if (v0.m128_f32[0] <= 0.0f) {
+				v0.m128_f32[0] = 0.0f;
 			}
-			if (camerapos.z <= -50.0f) {
-				camerapos.z = -50.0f;
+			if (v0.m128_f32[2] <= -50.0f) {
+				v0.m128_f32[2] = -50.0f;
 			}
 			if (targetcamerapos.z >= 0.0f) {
 				targetcamerapos.z = 0.0f;
 			}
-			if (camerapos.x == 0.0f && camerapos.z == -50.0f && targetcamerapos.z == 0.0f) {
+			if (v0.m128_f32[0] == 0.0f && v0.m128_f32[2] == -50.0f && targetcamerapos.z == 0.0f) {
 				modeflag = 1;
 			}
 		}
 		//設置画面
 		if (mode == 1) {
-			camerapos.x += 1.2f;
-			camerapos.z += 0.5f;
+			v0.m128_f32[0] += 1.2f;
+			v0.m128_f32[2] += 0.5f;
 			targetcamerapos.z = -15.0f;
-			if (camerapos.x >= 70.0f) {
-				camerapos.x = 70.0f;
+			if (v0.m128_f32[0] >= 70.0f) {
+				v0.m128_f32[0] = 70.0f;
 			}
-			if (camerapos.z >= -10.0f) {
-				camerapos.z = -10.0f;
+			if (v0.m128_f32[2] >= -10.0f) {
+				v0.m128_f32[2] = -10.0f;
 			}
 			
-			if (camerapos.x == 70.0f && camerapos.z == -10.0f) {
+			if (v0.m128_f32[0] == 70.0f && v0.m128_f32[2] == -10.0f) {
 				modeflag = 0;
 			}
 		}
