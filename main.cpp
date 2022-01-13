@@ -110,7 +110,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		XMMATRIX mat;
 	};
 	const int constantBufferNum = 128;
-	const int OBJECT_NUM = 4;
+	const int OBJECT_NUM = 5;
 #pragma endregion
 #pragma region//行列
 	//射影変換行列の作り
@@ -236,15 +236,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	XMFLOAT3 SetobjectPosition[OBJECT_NUM];
 	XMFLOAT4 SetobjectColor[OBJECT_NUM];
-
+	int HitFlag[OBJECT_NUM] = { 0 };
 	for (int i = 0; i < _countof(Setobject); i++) {
 		SetobjectPosition[i] = Setobject[i]->GetPosition();
 		SetobjectColor[i] = Setobject[i]->GetColor();
 	}
-	SetobjectPosition[0] = { -50.0f,-8.0f,50.0f };
+	SetobjectPosition[0] = { -10.0f,-8.0f,50.0f };
 	SetobjectPosition[1] = { 0.0f,-8.0f,50.0f };
-	SetobjectPosition[2] = { 20.0f,0.0f,50.0f };
-	SetobjectPosition[3] = { 15.0f,-8.0f,50.0f };
+	SetobjectPosition[2] = { 15.0f,5.0f,50.0f };
+	SetobjectPosition[3] = { 10.0f,-8.0f,50.0f };
+	SetobjectPosition[4] = { -15.0f,5.0f,50.0f };
 	for (int i = 0; i < _countof(Setobject); i++) {
 		Setobject[i]->SetPosition(SetobjectPosition[i]);
 	}
@@ -438,7 +439,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 				//ジャンプ処理
 				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0)) {
-					JumpG = -0.8f;
+					JumpG = -1.0f;
 					JumpFlag = 1;
 				}
 			}
@@ -527,30 +528,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		for (int i = 0; i < OBJECT_NUM; i++) {
 			if (SetobjectColor[i].w > 0.0f) {
 				//playerとブロック左辺の当たり判定
-				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5,4 }, SetobjectPosition[i], { 7.5,5,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
-					//JumpG = 0.0f;
 				}
-
 				//playerとブロック右辺の当たり判定
-				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5,4 }, SetobjectPosition[i], { 7.5,5,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
 					//JumpG = 0.0f;
+					//JumpG = 0.0f;
 				}
+				
 				//playerとブロック下辺の当たり判定
-				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5,4 }, SetobjectPosition[i], { 3,5,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
 
 				//playerとブロック上辺の当たり判定
-				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 2,4,4 }, SetobjectPosition[i], { 6,4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3,5,4 }, SetobjectPosition[i], { 3,5,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 					JumpFlag = 0;
+					HitFlag[i] = 1;
+				} else {
+					HitFlag[i] = 0;
+				}
+
 				}
 			}
-		}
+		
 
 		//光とブロックの当たり判定
 		for (int i = 0; i < _countof(Setobject); i++) {
@@ -631,7 +637,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		{
 			if (ImGui::TreeNode("Object0"))
 			{
-				ImGui::Text("SetFlag[0],%d", SetFlag[0]);
+				ImGui::Text("SetFlag[0],%d", HitFlag[0]);
 				ImGui::SliderFloat("Position.x", &SetobjectPosition[0].x, 50, -50);
 				ImGui::SliderFloat("Position.y", &SetobjectPosition[0].y, 50, -50);
 				ImGui::Unindent();
@@ -640,9 +646,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (ImGui::TreeNode("Object1"))
 			{
-				ImGui::Text("SetFlag[1],%d", SetFlag[1]);
-				ImGui::SliderFloat("Position.x", &ImageObjectPosition[1].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &ImageObjectPosition[1].y, 50, -50);
+				ImGui::Text("SetFlag[1],%d", HitFlag[1]);
+				ImGui::SliderFloat("Position.x", &SetobjectPosition[1].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &SetobjectPosition[1].y, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+
+
+			if (ImGui::TreeNode("Object2"))
+			{
+				ImGui::Text("SetFlag[1],%d", HitFlag[2]);
+				ImGui::SliderFloat("Position.x", &SetobjectPosition[2].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &SetobjectPosition[2].y, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+
+
+			if (ImGui::TreeNode("Object3"))
+			{
+				ImGui::Text("SetFlag[1],%d", HitFlag[3]);
+				ImGui::SliderFloat("Position.x", &SetobjectPosition[3].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &SetobjectPosition[3].y, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Object4"))
+			{
+				ImGui::Text("SetFlag[1],%d", HitFlag[4]);
+				ImGui::SliderFloat("Position.x", &SetobjectPosition[4].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &SetobjectPosition[4].y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}

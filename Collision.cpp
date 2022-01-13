@@ -31,7 +31,7 @@ bool  Collision::BoxCollision_Down(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 
 	Object1.Down = object1.y - radius1.y;
 
 	//object1の左頂点
-	Object2.Left = object2.x - 10;
+	Object2.Left = object2.x;
 	//object1の右頂点
 	Object2.Right = object2.x + radius2.x * 2;
 	//object1の下頂点
@@ -56,7 +56,7 @@ bool Collision::BoxCollision_Up(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 obj
 	Object1.Down = object1.y - radius1.y;
 
 	//object1の左頂点
-	Object2.Left = object2.x - 10;
+	Object2.Left = object2.x;
 	//object1の右頂点
 	Object2.Right = object2.x + radius2.x * 2;
 	//object1の上頂点
@@ -72,7 +72,7 @@ bool Collision::BoxCollision_Left(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 o
 	BoxVertex Object2;
 
 	//object1の右頂点
-	Object1.Right = object1.x + radius1.x * 2;
+	Object1.Right = object1.x + radius1.x;
 	//object1の左頂点
 	Object1.Left = object1.x;
 	//object1の上頂点
@@ -81,7 +81,7 @@ bool Collision::BoxCollision_Left(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 o
 	Object1.Down = object1.y - radius1.y;
 
 	//object1の左頂点
-	Object2.Left = object2.x - 10;
+	Object2.Left = object2.x;
 	//object1の右頂点
 	Object2.Right = Object2.Left + 1;
 	//object1の下頂点
@@ -98,7 +98,7 @@ bool Collision::BoxCollision_Right(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 
 	BoxVertex Object2;
 
 	//object1の右頂点
-	Object1.Right = object1.x + radius1.x * 2;
+	Object1.Right = object1.x + radius1.x;
 	//object1の左頂点
 	Object1.Left = object1.x;
 	//object1の上頂点
@@ -107,9 +107,9 @@ bool Collision::BoxCollision_Right(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 
 	Object1.Down = object1.y - radius1.y;
 
 	//object1の右頂点
-	Object2.Right = object2.x + radius2.x * 2;
+	Object2.Right = object2.x + radius2.x;
 	//object1の左頂点
-	Object2.Left = Object2.Right - 11;
+	Object2.Left = Object2.Right - 1;
 	//object1の下頂点
 	Object2.Down = object2.y - radius2.y + 0.5;
 	//object1の上頂点
