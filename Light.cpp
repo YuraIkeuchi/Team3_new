@@ -476,7 +476,7 @@ bool Light::Initialize() {
 	return true;
 }
 
-void Light::Update() {
+void Light::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 

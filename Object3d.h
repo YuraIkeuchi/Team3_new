@@ -114,7 +114,7 @@ public: // メンバ関数//
 	//初期化
 	bool Initialize();
 	/// 毎フレーム処理
-	void Update();
+	void Update(XMMATRIX& matView);
 
 	/// 描画
 	void Draw();
@@ -123,6 +123,8 @@ public: // メンバ関数//
 	const XMFLOAT3& GetPosition() { return position; }
 	/// 回転の取得
 	const XMFLOAT3& GetRotation() { return  rotation; }
+	/// 大きさの取得
+	const XMFLOAT3& GetScale() { return  scale; }
 	/// 色の取得
 	const XMFLOAT4& GetColor() { return  color; }
 
@@ -130,6 +132,8 @@ public: // メンバ関数//
 	void SetPosition(XMFLOAT3 position) { this->position = position; }
 	/// 回転の設定
 	void SetRotation(XMFLOAT3 rotation) { this->rotation = rotation; }
+	/// 大きさの設定
+	void SetScale(XMFLOAT3 scale) { this->scale = scale; }
 	/// 色の設定
 	void SetColor(XMFLOAT4 color) { this->color = color; }
 	//カメラをその位置に移動させる処理
@@ -137,13 +141,13 @@ public: // メンバ関数//
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// 色
-	XMFLOAT4 color = { 1,1,1,1.0 };
+	XMFLOAT4 color = { 0,0,0,1.0 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 1.0,1.0,1.0 };
+	XMFLOAT3 scale = { 1.0,1.0,0.2 };
 	// X,Y,Z軸回りのローカル回転角
 	XMFLOAT3 rotation = { 0,0,0 };
 	// ローカル座標
-	XMFLOAT3 position = { 0,0,20 };
+	XMFLOAT3 position = { 0,0,120 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト

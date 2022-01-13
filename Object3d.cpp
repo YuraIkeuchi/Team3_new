@@ -332,7 +332,7 @@ bool Object::LoadTexture()
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/ダウンロード.png", WIC_FLAGS_NONE,
+		L"Resources/Circle5if.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -566,7 +566,7 @@ bool Object::Initialize()
 	return true;
 }
 
-void Object::Update()
+void Object::Update(XMMATRIX& matView)
 {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
