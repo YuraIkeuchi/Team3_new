@@ -215,7 +215,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	for (int i = 0; i < _countof(Imageobject); i++) {
 		ImageObjectPosition[i] = Imageobject[i]->GetPosition();
 		ImageObjectColor[i] = Imageobject[i]->GetColor();
-		ImageObjectPosition[i] = { 0.0f,0.0f,-10.0f };
+		ImageObjectPosition[i] = { 0.0f,0.0f,70.0f };
 	}
 
 
@@ -259,7 +259,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	screen = Screen::Create();
 	screen->Update(matview);
-
+	XMFLOAT3 screenPos = screen->GetPosition();
 #pragma endregion
 #pragma region//プロジェクター
 	Projector* projector;
@@ -270,6 +270,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	 projector = Projector::Create();
 	 projector->Update(matview);
 
+	 XMFLOAT3 projectorPos = projector->GetPosition();
 #pragma endregion
 #pragma region//プレイヤー変数
 	//各プレイヤーの初期化
@@ -344,9 +345,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	background = BackGround::Create();
 	background->Update();
-#pragma endregion
-#pragma region//スクロール変数
-	XMFLOAT3 ScrollPosition = { 0.0f,0.0f,0.0f };
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
@@ -469,6 +467,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					JumpG = -1.0f;
 					JumpFlag = 1;
 				}
+
+				//ジャンプ処理
+				PlayerPosition.y -= JumpG;
+				JumpG += 0.025f;
+
 			}
 
 			//設置画面
@@ -476,8 +479,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				
 				//projector,screen,ImageObjectPosition(box)
 
-				XMFLOAT3 screenPos = screen->GetPosition();
-				XMFLOAT3 projectorPos = projector->GetPosition();
+				
 				XMFLOAT3 temp[4];
 			
 				for (int i = 0; i < 4; i++) {
@@ -602,16 +604,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						SetFlag[i] = 1;
 						SetobjectPosition[i].x = kage[0].x;
 						SetobjectPosition[i].y = kage[0].y;
-						SetobjectPosition[i].z = 50.0f;
+						SetobjectPosition[i].z = 100.0f;
 						break;
 					}
 				}
 			}
 
-			//ジャンプ処理
-			//PlayerPosition.y -= JumpG;
-			JumpG += 0.025f;
-
+		
 			//アニメーションタイマー
 			if (AnimetionTimer >= 8) {
 				AnimetionCount++;
@@ -624,43 +623,47 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//カメラ移動
 
 		//障害物との当たり判定
-		for (int i = 0; i < OBJECT_NUM; i++) {
-			if (SetobjectColor[i].w > 0.0f) {
-				//playerとブロック左辺の当たり判定
-				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5,4 }, SetobjectPosition[i], { 7.5,5,4 }) == TRUE) {
-					PlayerPosition.x = OldPlayerPosition.x;
-				}
-				//playerとブロック右辺の当たり判定
-				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5,4 }, SetobjectPosition[i], { 7.5,5,4 }) == TRUE) {
-					PlayerPosition.x = OldPlayerPosition.x;
-					//JumpG = 0.0f;
-					//JumpG = 0.0f;
-				}
-				
-				//playerとブロック下辺の当たり判定
-				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5,4 }, SetobjectPosition[i], { 3,5,4 }) == TRUE) {
-					PlayerPosition.y = OldPlayerPosition.y;
-					JumpG = 0.0f;
-				}
+			for (int i = 0; i < OBJECT_NUM; i++) {
+				if (SetFlag[i] == 1) {
+					if (SetobjectColor[i].w > 0.0f) {
+						//playerとブロック左辺の当たり判定
+						if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5,4 }, SetobjectPosition[i], { 7.5,5,4 }) == TRUE) {
+							PlayerPosition.x = OldPlayerPosition.x;
+						}
+						//playerとブロック右辺の当たり判定
+						if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5,4 }, SetobjectPosition[i], { 7.5,5,4 }) == TRUE) {
+							PlayerPosition.x = OldPlayerPosition.x;
+							//JumpG = 0.0f;
+							//JumpG = 0.0f;
+						}
 
-				//playerとブロック上辺の当たり判定
-				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3,5,4 }, SetobjectPosition[i], { 3,5,4 }) == TRUE) {
-					PlayerPosition.y = OldPlayerPosition.y;
-					JumpG = 0.0f;
-					JumpFlag = 0;
-					HitFlag[i] = 1;
-				} else {
-					HitFlag[i] = 0;
-				}
+						//playerとブロック下辺の当たり判定
+						if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5,4 }, SetobjectPosition[i], { 3,5,4 }) == TRUE) {
+							PlayerPosition.y = OldPlayerPosition.y;
+							JumpG = 0.0f;
+						}
 
+						//playerとブロック上辺の当たり判定
+						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3,6.93,4 }, SetobjectPosition[i], { 3,6.93,4 }) == TRUE) {
+							PlayerPosition.y = OldPlayerPosition.y;
+							JumpG = 0.0f;
+							JumpFlag = 0;
+							HitFlag[i] = 1;
+						} else {
+							HitFlag[i] = 0;
+						}
+
+					}
 				}
 			}
 		
 
 		//光とブロックの当たり判定
 		for (int i = 0; i < _countof(Setobject); i++) {
-			if (Boxcollision->CircleCollision(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
-				//SetobjectColor[i].w -= 0.01;
+			if (SetFlag[i] == 1) {
+				if (Boxcollision->CircleCollision(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
+					//SetobjectColor[i].w -= 0.01;
+				}
 			}
 		}
 
@@ -696,7 +699,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		target2.m128_f32[2] = 0;
 		//カメラ追従用の処理
 		target2.m128_f32[0] = PlayerPosition.x;
-		target2.m128_f32[1] = PlayerPosition.y;
+		target2.m128_f32[1] = 0;
 		//行列を作り直す
 		rotM = XMMatrixRotationX(XMConvertToRadians(angle));
 		XMVECTOR v;
@@ -716,7 +719,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
 		player4->SetPosition(PlayerPosition);
-		screen->SetPosition({PlayerPosition.x,0,320});
+		screen->SetPosition({PlayerPosition.x,0,400});
 		projector->SetPosition({ PlayerPosition.x,-20,-50 });
 		light->SetPosition(LightPosition);
 		player->SetRotaition(PlayerRotation);
@@ -740,6 +743,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Text("SetFlag[1],%d", SetFlag[0]);
 				ImGui::SliderFloat("Position.x", &SetobjectPosition[0].x, 50, -50);
 				ImGui::SliderFloat("Position.y", &SetobjectPosition[0].y, 50, -50);
+				ImGui::SliderFloat("Position.z", &SetobjectPosition[0].z, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -753,10 +757,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("kage"))
+			if (ImGui::TreeNode("screen"))
 			{
-				ImGui::SliderFloat("kage[0]", &kage[0].x, 50, -50);
-				ImGui::SliderFloat("kage[1]", &kage[0].y, 50, -50);
+				ImGui::SliderFloat("screen", &screenPos.z, 50, -50);
+				ImGui::SliderFloat("screen", &kage[0].y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -766,6 +770,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Text("SetFlag[1],%d", SetFlag[1]);
 				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
+				ImGui::SliderFloat("Position.z", &PlayerPosition.z, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -792,7 +797,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
-			//screen->Draw();
+			screen->Draw();
 			projector->Draw();
 			//light->Draw();
 			if (AnimetionCount == 0) {
@@ -808,10 +813,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				player4->Draw();
 			}
 			for (int i = 0; i < _countof(Setobject); i++) {
-				
+				if (SetFlag[i] == 1) {
 					if (SetobjectColor[i].w > 0.0f) {
 						Setobject[i]->Draw();
 					}
+				}
 				
 			}
 

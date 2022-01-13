@@ -139,7 +139,7 @@ private: // メンバ変数
 	// 色
 	XMFLOAT4 color = { 1,1,1,1.0 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 25.0,25.0,50.0 };
+	XMFLOAT3 scale = { 50.0,25.0,50.0 };
 	// X,Y,Z軸回りのローカル回転角
 	XMFLOAT3 rotation = { 0,0,0 };
 	// ローカル座標
