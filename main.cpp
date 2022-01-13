@@ -241,11 +241,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		SetobjectPosition[i] = Setobject[i]->GetPosition();
 		SetobjectColor[i] = Setobject[i]->GetColor();
 	}
-	SetobjectPosition[0] = { -10.0f,-8.0f,50.0f };
+	/*SetobjectPosition[0] = { -10.0f,-8.0f,50.0f };
 	SetobjectPosition[1] = { 0.0f,-8.0f,50.0f };
 	SetobjectPosition[2] = { 15.0f,5.0f,50.0f };
 	SetobjectPosition[3] = { 10.0f,-8.0f,50.0f };
-	SetobjectPosition[4] = { -15.0f,5.0f,50.0f };
+	SetobjectPosition[4] = { -15.0f,5.0f,50.0f };*/
 	for (int i = 0; i < _countof(Setobject); i++) {
 		Setobject[i]->SetPosition(SetobjectPosition[i]);
 	}
@@ -369,7 +369,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 #pragma endregion
 #pragma region//ループ処理
-
+	XMFLOAT3 kage[4];
 	while (true) {
 		//ウィンドウメッセージ処理
 		if (winApp->ProcessMessage()) {
@@ -446,39 +446,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			//設置画面
 			if (mode == 1) {
-				for (int i = 0; i < OBJECT_NUM; i++) {
-					if (SetFlag[i] == 0) {
-						//移動処理
-						if (input->PushKey(DIK_UP)) {
-							ImageObjectPosition[i].y += 0.5f;
-						}
-
-						if (input->PushKey(DIK_DOWN)) {
-							ImageObjectPosition[i].y -= 0.5f;
-						}
-
-						if (input->PushKey(DIK_LEFT)) {
-							ImageObjectPosition[i].x -= 0.5f;
-							//PlayerRotation.z = 270;
-						}
-						if (input->PushKey(DIK_RIGHT)) {
-							ImageObjectPosition[i].x += 0.5f;
-
-						}
-					}
-
-					//ジャンプ処理
-					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0)) {
-						SetFlag[i] = 1;
-						break;
-					}
-				}
+				
 				//projector,screen,ImageObjectPosition(box)
 
 				XMFLOAT3 screenPos = screen->GetPosition();
 				XMFLOAT3 projectorPos = projector->GetPosition();
 				XMFLOAT3 temp[4];
-				XMFLOAT3 kage[4];
+			
 				for (int i = 0; i < 4; i++) {
 					temp[i] = { 0.0f,0.0f,screenPos.z };
 					kage[i] = { 0.0f,0.0f,screenPos.z };
@@ -494,7 +468,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					float B;
 					float C;
 
-					float boxRadius = 5.0f;
+					float boxRadius = 1.0f;
 
 
 					a1 = (ImageObjectPosition[i].z - boxRadius) - projectorPos.z;
@@ -541,7 +515,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 					A = screenPos.z - projectorPos.z;
 
-
 					if (abs(ImageObjectPosition[i].x - projectorPos.x) <= boxRadius) {
 						B = (b * A) / a1;
 						C = (c * A) / a1;
@@ -572,10 +545,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				kage[2] = { temp[3].x,temp[1].y,screenPos.z - 10.0f };
 				kage[3] = { temp[2].x,temp[1].y,screenPos.z - 10.0f };
 
+				float kageXR = (kage[1].x - kage[0].x) / 2;
+				float kageYR = (kage[3].y - kage[0].y) / 2;
+				kage[0].x = kage[0].x + kageXR;
+				kage[0].y = kage[0].y + kageYR;
+				for (int i = 0; i < OBJECT_NUM; i++) {
+					if (SetFlag[i] == 0) {
+						//移動処理
+						if (input->PushKey(DIK_UP)) {
+							ImageObjectPosition[i].y += 0.5f;
+						}
+
+						if (input->PushKey(DIK_DOWN)) {
+							ImageObjectPosition[i].y -= 0.5f;
+						}
+
+						if (input->PushKey(DIK_LEFT)) {
+							ImageObjectPosition[i].x -= 0.5f;
+							//PlayerRotation.z = 270;
+						}
+						if (input->PushKey(DIK_RIGHT)) {
+							ImageObjectPosition[i].x += 0.5f;
+
+						}
+					}
+
+					//ジャンプ処理
+					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0)) {
+						SetFlag[i] = 1;
+						SetobjectPosition[i].x = kage[0].x;
+						SetobjectPosition[i].y = kage[0].y;
+						SetobjectPosition[i].z = 50.0f;
+						break;
+					}
+				}
 			}
 
 			//ジャンプ処理
-			PlayerPosition.y -= JumpG;
+			//PlayerPosition.y -= JumpG;
 			JumpG += 0.025f;
 
 			//アニメーションタイマー
@@ -660,7 +667,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//光とブロックの当たり判定
 		for (int i = 0; i < _countof(Setobject); i++) {
 			if (Boxcollision->CircleCollision(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
-				SetobjectColor[i].w -= 0.01;
+				//SetobjectColor[i].w -= 0.01;
 			}
 		}
 
@@ -696,7 +703,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		target2.m128_f32[2] = 0;
 		//カメラ追従用の処理
 		target2.m128_f32[0] = PlayerPosition.x;
-		target2.m128_f32[1] = 0;
+		target2.m128_f32[1] = PlayerPosition.y;
 		//行列を作り直す
 		rotM = XMMatrixRotationX(XMConvertToRadians(angle));
 		XMVECTOR v;
@@ -734,49 +741,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
-			if (ImGui::TreeNode("Object0"))
+			
+			if (ImGui::TreeNode("Set"))
 			{
-				ImGui::Text("SetFlag[0],%d", HitFlag[0]);
+				ImGui::Text("SetFlag[1],%d", SetFlag[0]);
 				ImGui::SliderFloat("Position.x", &SetobjectPosition[0].x, 50, -50);
 				ImGui::SliderFloat("Position.y", &SetobjectPosition[0].y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("Object1"))
+
+			if (ImGui::TreeNode("Image"))
 			{
-				ImGui::Text("SetFlag[1],%d", HitFlag[1]);
-				ImGui::SliderFloat("Position.x", &SetobjectPosition[1].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &SetobjectPosition[1].y, 50, -50);
+				ImGui::SliderFloat("Position.x", &ImageObjectPosition[0].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &ImageObjectPosition[0].y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
 
-
-			if (ImGui::TreeNode("Object2"))
+			if (ImGui::TreeNode("kage"))
 			{
-				ImGui::Text("SetFlag[1],%d", HitFlag[2]);
-				ImGui::SliderFloat("Position.x", &SetobjectPosition[2].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &SetobjectPosition[2].y, 50, -50);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}
-
-
-			if (ImGui::TreeNode("Object3"))
-			{
-				ImGui::Text("SetFlag[1],%d", HitFlag[3]);
-				ImGui::SliderFloat("Position.x", &SetobjectPosition[3].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &SetobjectPosition[3].y, 50, -50);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Object4"))
-			{
-				ImGui::Text("SetFlag[1],%d", HitFlag[4]);
-				ImGui::SliderFloat("Position.x", &SetobjectPosition[4].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &SetobjectPosition[4].y, 50, -50);
+				ImGui::SliderFloat("kage[0]", &kage[0].x, 50, -50);
+				ImGui::SliderFloat("kage[1]", &kage[0].y, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -789,6 +776,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
+
+		
 			ImGui::TreePop();
 		}
 		ImGui::End();
@@ -810,7 +799,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
-			screen->Draw();
+			//screen->Draw();
 			projector->Draw();
 			//light->Draw();
 			if (AnimetionCount == 0) {
@@ -826,13 +815,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				player4->Draw();
 			}
 			for (int i = 0; i < _countof(Setobject); i++) {
-				if (SetobjectColor[i].w > 0.0f) {
-					Setobject[i]->Draw();
-				}
+				
+					if (SetobjectColor[i].w > 0.0f) {
+						Setobject[i]->Draw();
+					}
+				
 			}
 
-			for (int i = 0; i < _countof(Imageobject); i++) {
-				//Imageobject[i]->Draw();
+			if (mode == 1) {
+				for (int i = 0; i < _countof(Imageobject); i++) {
+					Imageobject[i]->Draw();
+				}
 			}
 		}
 	
