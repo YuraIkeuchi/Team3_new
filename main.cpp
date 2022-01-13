@@ -218,6 +218,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 
+
 	for (int i = 0; i < _countof(Imageobject); i++) {
 		Imageobject[i]->SetPosition(ImageObjectPosition[i]);
 	}
