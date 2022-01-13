@@ -473,6 +473,105 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						break;
 					}
 				}
+				//projector,screen,ImageObjectPosition(box)
+
+				XMFLOAT3 screenPos = screen->GetPosition();
+				XMFLOAT3 projectorPos = projector->GetPosition();
+				XMFLOAT3 temp[4];
+				XMFLOAT3 kage[4];
+				for (int i = 0; i < 4; i++) {
+					temp[i] = { 0.0f,0.0f,screenPos.z };
+					kage[i] = { 0.0f,0.0f,screenPos.z };
+				}
+
+				for (int i = 0; i < OBJECT_NUM; i++) {
+					float a1;
+					float a2;
+					float b;
+					float c;
+
+					float A;
+					float B;
+					float C;
+
+					float boxRadius = 5.0f;
+
+
+					a1 = (ImageObjectPosition[i].z - boxRadius) - projectorPos.z;
+					a2 = (ImageObjectPosition[i].z + boxRadius) - projectorPos.z;
+
+					b = boxRadius + (projectorPos.y - ImageObjectPosition[i].y);
+
+					c = (ImageObjectPosition[i].y + boxRadius) - projectorPos.y;
+
+					A = screenPos.z - projectorPos.z;
+
+
+					if (abs(ImageObjectPosition[i].y - projectorPos.y) <= boxRadius) {
+						B = (b * A) / a1;
+						C = (c * A) / a1;
+						float lineY = projectorPos.y - B;
+						float lineLength = B + C;
+						temp[0].y = lineY;
+						temp[1].y = lineLength;
+					}
+					else if (ImageObjectPosition[i].y < projectorPos.y) {
+						B = (b * A) / a1;
+						C = (c * A) / a2;
+						float lineY = projectorPos.y - B;
+						float lineLength = B + C;
+						temp[0].y = lineY;
+						temp[1].y = lineLength;
+					}
+					else if (ImageObjectPosition[i].y > projectorPos.y) {
+						B = (b * A) / a2;
+						C = (c * A) / a1;
+						float lineY = projectorPos.y - B;
+						float lineLength = B + C;
+						temp[0].y = lineY;
+						temp[1].y = lineLength;
+					}
+
+					a1 = (ImageObjectPosition[i].z - boxRadius) - projectorPos.z;
+					a2 = (ImageObjectPosition[i].z + boxRadius) - projectorPos.z;
+
+					b = boxRadius + (projectorPos.x - ImageObjectPosition[i].x);
+
+					c = (ImageObjectPosition[i].x + boxRadius) - projectorPos.x;
+
+					A = screenPos.z - projectorPos.z;
+
+
+					if (abs(ImageObjectPosition[i].x - projectorPos.x) <= boxRadius) {
+						B = (b * A) / a1;
+						C = (c * A) / a1;
+						float lineY = projectorPos.x - B;
+						float lineLength = B + C;
+						temp[2].x = lineY;
+						temp[3].x = lineLength;
+					}
+					else if (ImageObjectPosition[i].x < projectorPos.x) {
+						B = (b * A) / a1;
+						C = (c * A) / a2;
+						float lineY = projectorPos.x - B;
+						float lineLength = B + C;
+						temp[2].x = lineY;
+						temp[3].x = lineLength;
+					}
+					else if (ImageObjectPosition[i].x > projectorPos.x) {
+						B = (b * A) / a2;
+						C = (c * A) / a1;
+						float lineY = projectorPos.x - B;
+						float lineLength = B + C;
+						temp[2].x = lineY;
+						temp[3].x = lineLength;
+					}
+				}
+				kage[0] = { temp[2].x,temp[0].y,screenPos.z - 10.0f };
+				kage[1] = { temp[3].x,temp[0].y,screenPos.z - 10.0f };
+				kage[2] = { temp[3].x,temp[1].y,screenPos.z - 10.0f };
+				kage[3] = { temp[2].x,temp[1].y,screenPos.z - 10.0f };
+
 			}
 
 			//ジャンプ処理
