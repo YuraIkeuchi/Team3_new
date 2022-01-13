@@ -49,6 +49,7 @@ float aseInSine(const float x) {
 	return 1 - cos((x * PI) / 2);
 }
 
+
 //ブロック置く処理
 XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Projector, XMFLOAT3 object) {
 	XMFLOAT3 result = { screen.x,0,0 };
@@ -218,7 +219,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 
-
 	for (int i = 0; i < _countof(Imageobject); i++) {
 		Imageobject[i]->SetPosition(ImageObjectPosition[i]);
 	}
@@ -358,7 +358,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	};
 #pragma endregion
 #pragma region//カメラ
-	XMVECTOR v0 = { 0,0,-120,0 };
+	XMVECTOR v0 = { 0,0,-50,0 };
 	XMMATRIX rotM;// = XMMatrixIdentity();
 	XMVECTOR eye2;
 	XMVECTOR target2 = { PlayerPosition.x, 0,0,0};
@@ -411,6 +411,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				mode = 0;
 			}
 
+			if (mode == 0) {
+				v0.m128_f32[2] += 1.5f;
+				v0.m128_f32[1] -= 1.0f;
+				if (v0.m128_f32[2] >= -50.0f) {
+					v0.m128_f32[2] = -50.0f;
+				}
+				if (v0.m128_f32[1] <= 0.0f) {
+					v0.m128_f32[1] = 0.0f;
+				}
+				if (v0.m128_f32[2] == -50.0f && v0.m128_f32[1] == 0.0f) {
+					modeflag = 1;
+				}
+			}
+			if (mode == 1) {
+				v0.m128_f32[2] -= 1.5f;
+				v0.m128_f32[1] += 1.0f;
+				if (v0.m128_f32[2] <= -140.0f) {
+					v0.m128_f32[2] = -140.0f;
+				}
+				if (v0.m128_f32[1] >= 60.0f) {
+					v0.m128_f32[1] = 60.0f;
+				}
+				if (v0.m128_f32[2] == -140.0f && v0.m128_f32[1] == 60.0f) {
+					modeflag = 0;
+				}
+			}
 			//位置情報保存
 			OldPlayerPosition.x = PlayerPosition.x;
 			OldPlayerPosition.y = PlayerPosition.y;
@@ -596,41 +622,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 	
 		//カメラ移動
-		//ゲーム画面
-		if (mode == 0) {
-			v0.m128_f32[0] -= 1.2f;
-			v0.m128_f32[2] -= 0.5f;
-			targetcamerapos.z += 0.7f;
-			if (v0.m128_f32[0] <= 0.0f) {
-				v0.m128_f32[0] = 0.0f;
-			}
-			if (v0.m128_f32[2] <= -50.0f) {
-				v0.m128_f32[2] = -50.0f;
-			}
-			if (targetcamerapos.z >= 0.0f) {
-				targetcamerapos.z = 0.0f;
-			}
-			if (v0.m128_f32[0] == 0.0f && v0.m128_f32[2] == -50.0f && targetcamerapos.z == 0.0f) {
-				modeflag = 1;
-			}
-		}
-		//設置画面
-		if (mode == 1) {
-			v0.m128_f32[0] += 1.2f;
-			v0.m128_f32[2] += 0.5f;
-			targetcamerapos.z = -15.0f;
-			if (v0.m128_f32[0] >= 70.0f) {
-				v0.m128_f32[0] = 70.0f;
-			}
-			if (v0.m128_f32[2] >= -10.0f) {
-				v0.m128_f32[2] = -10.0f;
-			}
-			
-			if (v0.m128_f32[0] == 70.0f && v0.m128_f32[2] == -10.0f) {
-				modeflag = 0;
-			}
-		}
-	
+
 		//障害物との当たり判定
 		for (int i = 0; i < OBJECT_NUM; i++) {
 			if (SetobjectColor[i].w > 0.0f) {
