@@ -28,6 +28,7 @@
 #include "Screen.h"
 #include "Projector.h"
 #include "Collision.h"
+#include "LightSource.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -272,6 +273,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	 XMFLOAT3 projectorPos = projector->GetPosition();
 #pragma endregion
+#pragma region//光源
+	 LightSource* lightSource;
+	 if (!lightSource->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		 assert(0);
+		 return 1;
+	 }
+	 lightSource = LightSource::Create();
+	 lightSource->Update(matview);
+
+	 XMFLOAT3 lightSourcePos = lightSource->GetPosition();
+#pragma endregion
 #pragma region//プレイヤー変数
 	//各プレイヤーの初期化
 	Player* player;
@@ -476,9 +488,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			//設置画面
 			if (mode == 1) {
-				
-				//projector,screen,ImageObjectPosition(box)
-
 				
 				XMFLOAT3 temp[4];
 			
@@ -715,12 +724,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		light->Update(matview);
 		screen->Update(matview);
 		projector->Update(matview);
+		lightSource->Update(matview);
 		player->SetPosition(PlayerPosition);
 		player2->SetPosition(PlayerPosition);
 		player3->SetPosition(PlayerPosition);
 		player4->SetPosition(PlayerPosition);
+
 		screen->SetPosition({PlayerPosition.x,0,400});
 		projector->SetPosition({ PlayerPosition.x,-20,-50 });
+		lightSource->SetPosition({ PlayerPosition.x,0,180 });
 		light->SetPosition(LightPosition);
 		player->SetRotaition(PlayerRotation);
 		player2->SetRotaition(PlayerRotation);
@@ -794,11 +806,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		Screen::PreDraw(dxCommon->GetCmdList());
 		Projector::PreDraw(dxCommon->GetCmdList());
+		LightSource::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
 			screen->Draw();
 			projector->Draw();
+			
 			//light->Draw();
 			if (AnimetionCount == 0) {
 				player->Draw();
@@ -825,6 +839,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				for (int i = 0; i < _countof(Imageobject); i++) {
 					Imageobject[i]->Draw();
 				}
+				lightSource->Draw();
 			}
 		}
 	
@@ -844,6 +859,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PostDraw();
 		Screen::PostDraw();
 		Projector::PostDraw();
+		LightSource::PostDraw();
 		dxCommon->PostDraw();
 	}
 #pragma endregion
@@ -862,6 +878,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete light;
 	delete screen;
 	delete projector;
+	delete lightSource;
 	for (int i = 0; i < _countof(Imageobject); i++) {
 		delete Imageobject[i];
 	}

@@ -7,7 +7,7 @@
 #include <d3dx12.h>
 
 /// 3Dオブジェクト
-class Screen
+class LightSource
 {
 private: // エイリアス
 	// Microsoft::WRL::を省略
@@ -52,7 +52,7 @@ public: // 静的メンバ関数
 	static void PostDraw();
 
 	/// 3Dオブジェクト生成
-	static Screen* Create();
+	static LightSource* Create();
 
 	/// 視点座標の取得
 	static const XMFLOAT3& GetEye() { return eye; }
@@ -137,15 +137,15 @@ public: // メンバ関数//
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// 色
-	XMFLOAT4 color = { 1,1,1,1.0 };
+	XMFLOAT4 color = { 0.5,0.5,0,0.5 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 30.0,15.0,50.0 };
+	XMFLOAT3 scale = { 16.0,16.0,25.0 };
 	// X,Y,Z軸回りのローカル回転角
-	XMFLOAT3 rotation = { 0,0,0 };
+	XMFLOAT3 rotation = { 0,0,45 };
 	// ローカル座標
-	XMFLOAT3 position = { 0,0,320 };
+	XMFLOAT3 position = { 0,0,0 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	Screen* parent = nullptr;
+	LightSource* parent = nullptr;
 };
