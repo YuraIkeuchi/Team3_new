@@ -19,10 +19,14 @@
 #include "Sprite.h"
 #include "Audio.h"
 #include "Object3d.h"
-#include "Player.h"
-#include "Player2.h"
-#include "Player3.h"
-#include "Player4.h"
+#include "PlayerLeftWalk.h"
+#include "PlayerLeftWalk2.h"
+#include "PlayerLeftWalk3.h"
+#include "PlayerLeftWalk4.h"
+#include "PlayerRightWalk.h"
+#include "PlayerRightWalk2.h"
+#include "PlayerRightWalk3.h"
+#include "PlayerRightWalk4.h"
 #include "backGround.h"
 #include "Light.h"
 #include "Screen.h"
@@ -269,8 +273,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	
 	}
 
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < 10; i++) {
 		FieldobjectPosition[i] = { -150 + ((float)i * 10),-20,134 };
+		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+	}
+
+	for (int i = 10; i < 20; i++) {
+		FieldobjectPosition[i] = { -200 + ((float)i * 10),10,134 };
 		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
 	}
 
@@ -308,42 +317,75 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	 XMFLOAT3 lightSourcePos = lightSource->GetPosition();
 #pragma endregion
 #pragma region//プレイヤー変数
+#pragma region//左向きのプレイヤー変数
 	//各プレイヤーの初期化
-	Player* player;
-	if (!player->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	PlayerLeftWalk* playerleftwalk;
+	if (!playerleftwalk->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
-	player = Player::Create();
-	player->Update(matview);
-	Player2* player2;
-	if (!player2->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	playerleftwalk = PlayerLeftWalk::Create();
+	playerleftwalk->Update(matview);
+	PlayerLeftWalk2* playerleftwalk2;
+	if (!playerleftwalk2->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
-	player2 = Player2::Create();
-	player2->Update(matview);
-	Player3* player3;
-	if (!player3->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	playerleftwalk2 = PlayerLeftWalk2::Create();
+	playerleftwalk2->Update(matview);
+	PlayerLeftWalk3* playerleftwalk3;
+	if (!playerleftwalk3->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
-	player3 = Player3::Create();
-	player3->Update(matview);
-	Player4* player4;
-	if (!player4->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	playerleftwalk3 = PlayerLeftWalk3::Create();
+	playerleftwalk3->Update(matview);
+	PlayerLeftWalk4* playerleftwalk4;
+	if (!playerleftwalk4->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
-	player4 = Player4::Create();
-	player4->Update(matview);
+	playerleftwalk4 = PlayerLeftWalk4::Create();
+	playerleftwalk4->Update(matview);
+#pragma endregion
+#pragma region//右向きのプレイヤー変数
+	//各プレイヤーの初期化
+	PlayerRightWalk* playerrightwalk;
+	if (!playerrightwalk->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	playerrightwalk = PlayerRightWalk::Create();
+	playerrightwalk->Update(matview);
+	PlayerRightWalk2* playerrightwalk2;
+	if (!playerrightwalk2->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	playerrightwalk2 = PlayerRightWalk2::Create();
+	playerrightwalk2->Update(matview);
+	PlayerRightWalk3* playerrightwalk3;
+	if (!playerrightwalk3->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	playerrightwalk3 = PlayerRightWalk3::Create();
+	playerrightwalk3->Update(matview);
+	PlayerRightWalk4* playerrightwalk4;
+	if (!playerrightwalk4->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	playerrightwalk4 = PlayerRightWalk4::Create();
+	playerrightwalk4->Update(matview);
+#pragma endregion
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { -120.0f,0.0f,135.0f };
 	
 	XMFLOAT3 OldPlayerPosition;
 	XMFLOAT3 PlayerRotation;
-	PlayerRotation = player->GetRotaition();
-	player->SetPosition(PlayerPosition);
+	PlayerRotation = playerleftwalk->GetRotaition();
+	playerleftwalk->SetPosition(PlayerPosition);
 	XMFLOAT2 SpritePosition = sprite[0]->GetPosition();
 	//ジャンプ変数
 	int JumpFlag = 0;
@@ -357,6 +399,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int AnimetionTimer = 0;
 	int AnimetionCount = 0;
 	int PlayerAlive = 1;
+	int PlayerDirectionNumber = 0;
 #pragma endregion
 #pragma region//ライト変数
 	Light* light;
@@ -514,10 +557,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				if (input->PushKey(DIK_LEFT)) {
 					PlayerPosition.x -= 0.5f;
 					AnimetionTimer++;
+					PlayerDirectionNumber = 1;
 				}
 				if (input->PushKey(DIK_RIGHT)) {
 					PlayerPosition.x += 0.5f;
 					AnimetionTimer++;
+					PlayerDirectionNumber = 0;
 				}
 
 				//ジャンプ処理
@@ -804,29 +849,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		matview = XMMatrixLookAtLH((eye2), (target2), XMLoadFloat3(&up));
 
 		background->Update();
-		player->Update(matview);
-		player2->Update(matview);
-		player3->Update(matview);
-		player4->Update(matview);
+		playerleftwalk->Update(matview);
+		playerleftwalk2->Update(matview);
+		playerleftwalk3->Update(matview);
+		playerleftwalk4->Update(matview);
+		playerrightwalk->Update(matview);
+		playerrightwalk2->Update(matview);
+		playerrightwalk3->Update(matview);
+		playerrightwalk4->Update(matview);
 		light->Update(matview);
 		item->Update(matview);
 		screen->Update(matview);
 		projector->Update(matview);
 		lightSource->Update(matview);
-		player->SetPosition(PlayerPosition);
-		player2->SetPosition(PlayerPosition);
-		player3->SetPosition(PlayerPosition);
-		player4->SetPosition(PlayerPosition);
+		playerleftwalk->SetPosition(PlayerPosition);
+		playerleftwalk2->SetPosition(PlayerPosition);
+		playerleftwalk3->SetPosition(PlayerPosition);
+		playerleftwalk4->SetPosition(PlayerPosition);
+		playerrightwalk->SetPosition(PlayerPosition);
+		playerrightwalk2->SetPosition(PlayerPosition);
+		playerrightwalk3->SetPosition(PlayerPosition);
+		playerrightwalk4->SetPosition(PlayerPosition);
 		screen->SetPosition({0,50,400});
 		projector->SetPosition({ 0,-20,-50 });
 		lightSource->SetPosition({ 0,0,180 });
 		light->SetPosition(LightPosition);
 		item->SetPosition(ItemPosition);
-		player->SetRotaition(PlayerRotation);
-		player2->SetRotaition(PlayerRotation);
-		player3->SetRotaition(PlayerRotation);
-		player4->SetRotaition(PlayerRotation);
-		
+	
 #pragma endregion
 #pragma endregion
 #pragma region//描画
@@ -877,10 +926,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		Sprite::PostDraw();
 		Object::PreDraw(dxCommon->GetCmdList());
-		Player::PreDraw(dxCommon->GetCmdList());
-		Player2::PreDraw(dxCommon->GetCmdList());
-		Player3::PreDraw(dxCommon->GetCmdList());
-		Player4::PreDraw(dxCommon->GetCmdList());
+		PlayerLeftWalk::PreDraw(dxCommon->GetCmdList());
+		PlayerLeftWalk2::PreDraw(dxCommon->GetCmdList());
+		PlayerLeftWalk3::PreDraw(dxCommon->GetCmdList());
+		PlayerLeftWalk4::PreDraw(dxCommon->GetCmdList());
+		PlayerRightWalk::PreDraw(dxCommon->GetCmdList());
+		PlayerRightWalk2::PreDraw(dxCommon->GetCmdList());
+		PlayerRightWalk3::PreDraw(dxCommon->GetCmdList());
+		PlayerRightWalk4::PreDraw(dxCommon->GetCmdList());
 		Light::PreDraw(dxCommon->GetCmdList());
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		Screen::PreDraw(dxCommon->GetCmdList());
@@ -895,16 +948,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			
 			//light->Draw();
 			if (AnimetionCount == 0) {
-				player->Draw();
+				if (PlayerDirectionNumber == 0) {
+					playerrightwalk->Draw();
+				}
+				else if (PlayerDirectionNumber == 1) {
+					playerleftwalk->Draw();
+				}
 			}
 			else if (AnimetionCount == 1) {
-				player2->Draw();
+				if (PlayerDirectionNumber == 0) {
+					playerrightwalk2->Draw();
+				} else if (PlayerDirectionNumber == 1) {
+					playerleftwalk2->Draw();
+				}
 			}
 			else if (AnimetionCount == 2) {
-				player3->Draw();
+				if (PlayerDirectionNumber == 0) {
+					playerrightwalk3->Draw();
+				} else if (PlayerDirectionNumber == 1) {
+					playerleftwalk3->Draw();
+				}
 			}
 			else if (AnimetionCount == 3) {
-				player4->Draw();
+				if (PlayerDirectionNumber == 0) {
+					playerrightwalk4->Draw();
+				} else if (PlayerDirectionNumber == 1) {
+					playerleftwalk4->Draw();
+				}
 			}
 
 			if (ItemAlive == 1) {
@@ -941,10 +1011,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Sprite::PostDraw();
 		// 3Dオブジェクト描画後処理
 		Object::PostDraw();
-		Player::PostDraw();
-		Player2::PostDraw();
-		Player3::PostDraw();
-		Player4::PostDraw();
+		PlayerLeftWalk::PostDraw();
+		PlayerLeftWalk2::PostDraw();
+		PlayerLeftWalk3::PostDraw();
+		PlayerLeftWalk4::PostDraw();
+		PlayerRightWalk::PostDraw();
+		PlayerRightWalk2::PostDraw();
+		PlayerRightWalk3::PostDraw();
+		PlayerRightWalk4::PostDraw();
 		Light::PostDraw();
 		BackGround::PostDraw();
 		Screen::PostDraw();
@@ -965,7 +1039,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete audio;
 	delete winApp;
 	delete dxCommon;
-	delete player;
+	delete playerleftwalk;
+	delete playerleftwalk2;
+	delete playerleftwalk3;
+	delete playerleftwalk4;
+	delete playerrightwalk;
+	delete playerrightwalk2;
+	delete playerrightwalk3;
+	delete playerrightwalk4;
 	delete light;
 	delete item;
 	delete screen;
