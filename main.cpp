@@ -134,12 +134,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(13, L"Resources/STAGECLEAR.png");
 	Sprite::LoadTexture(14, L"Resources/GAMECLEAR.png");
 	Sprite::LoadTexture(15, L"Resources/GAMEOVER.png");
+	Sprite::LoadTexture(16, L"Resources/EXPLATION.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
 	sprite[3] = Sprite::Create(13, { 0.0f,0.0f });
 	sprite[4] = Sprite::Create(14, { 0.0f,0.0f });
 	sprite[5] = Sprite::Create(15, { 0.0f,0.0f });
+	sprite[6] = Sprite::Create(16, { 0.0f,0.0f });
 	Sprite* spriteNumber[SpriteNumberMax] = { nullptr };
 	spriteNumber[0] = Sprite::Create(3, { 0.0f,0.0f });
 	spriteNumber[1] = Sprite::Create(4, { 0.0f,0.0f });
@@ -477,8 +479,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int Scene = 0;
 	int StageNumber = 1;
 	int ResetFlag = 0;
+	int SpaceCount = 0;
 	enum Scene {
 		title,
+		explation,
 		gamePlay,
 		gameOver,
 		stageClear,
@@ -491,7 +495,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	XMVECTOR eye2;
 	XMVECTOR target2 = { PlayerPosition.x, 0,0,0};
 	XMVECTOR up2 = { 0,0.0f,0,0 };
-	
 #pragma endregion
 #pragma region//当たり判定
 	Collision* Boxcollision = nullptr;
@@ -529,19 +532,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		LightPosition = light->GetPosition();
 		SpritePosition = sprite[0]->GetPosition();
 		
-
 #pragma region//更新処理
 		//キーの更新
 		input->Update();
 #pragma region//タイトル
 		if (Scene == title) {
 			if (input->TriggerKey(DIK_SPACE)) {
+				Scene = explation;
+				SpaceCount++;
+			}
+		}
+#pragma endregion
+#pragma region//説明
+		if (Scene == explation) {
+			if (input->TriggerKey(DIK_SPACE)) {
+				SpaceCount++;
+			}
+
+			if (SpaceCount == 3) {
 				Scene = gamePlay;
+				SpaceCount = 0;
 			}
 		}
 #pragma endregion
 #pragma region//ゲームプレイ中
 		if (Scene == gamePlay) {
+
 			//カメラ
 			if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 			{
@@ -847,6 +863,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					Scene = gameClear;
 				}
 			}
+
 			//画面外で死
 			if (PlayerPosition.y <= -130) {
 				PlayerAlive = 0;
@@ -879,48 +896,59 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//クリア
 		if (Scene == gameClear) {
+			StageNumber = 1;
 			ResetFlag = 1;
-			if (input->TriggerKey(DIK_S)) {
+			if (input->TriggerKey(DIK_SPACE)) {
 				Scene = title;
+				
 				ResetFlag = 0;
+				SpaceCount = 0;
 			}
 		}
 
 		if (ResetFlag == 1) {
 			//各変数初期化
-				JumpG = 0.0f;
-				PlayerAlive = 1;
-				PlayerDirectionNumber = 0;
-				ItemCount = 0;
-				for (int i = 0; i < _countof(Setobject); i++) {
-					SetobjectPosition[i] = { 0.0f,400.0f,0.0f };
-				}
+			JumpG = 0.0f;
+			PlayerAlive = 1;
+			PlayerDirectionNumber = 0;
+			ItemCount = 0;
+			for (int i = 0; i < _countof(Setobject); i++) {
+				SetobjectPosition[i] = { 0.0f,400.0f,0.0f };
+				SetFlag[i] = 0;
+			}
 
-				for (int i = 0; i < _countof(Markobject); i++) {
-					MarkobjectPosition[i] = { 0.0f,0.0f,134.0f };
-				}
+			for (int i = 0; i < _countof(Markobject); i++) {
+				MarkobjectPosition[i] = { 0.0f,0.0f,134.0f };
+			}
 
-				for (int i = 0; i < Item_NUM; i++) {
-					ItemPosition[i] = { 0,300,134 };
-					ItemAlive[i] = 1;
-					item[i]->SetPosition(ItemPosition[i]);
-				}
-				for (int i = 0; i < _countof(Imageobject); i++) {
-					ImageObjectPosition[i] = { 0.0f,0.0f,70.0f };
-				}
+			for (int i = 0; i < Item_NUM; i++) {
+				ItemPosition[i] = { 0,300,134 };
+				ItemAlive[i] = 1;
+				item[i]->SetPosition(ItemPosition[i]);
+			}
+			for (int i = 0; i < _countof(Imageobject); i++) {
+				ImageObjectPosition[i] = { 0.0f,0.0f,70.0f };
+			}
+
+			for (int i = 0; i < _countof(Fieldobject); i++) {
+				FieldobjectPosition[i] = { 0.0f,400.0f,0.0f };
+			}
 
 			if (StageNumber == 1) {
 				PlayerPosition = { -140.0f,20.0f,135.0f };
 				for (int i = 0; i < 4; i++) {
 					FieldobjectPosition[i] = { -150 + ((float)i * 10),0,134 };
+					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
 				}
 
 				for (int i = 4; i < 10; i++) {
 					FieldobjectPosition[i] = { -100 + ((float)i * 10),0,134 };
+					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
 				}
 
 				for (int i = 10; i < 20; i++) {
 					FieldobjectPosition[i] = { -80 + ((float)i * 10),-70,134 };
+					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
 				}
 
 				ItemPosition[0] = { -120,10,134 };
@@ -928,7 +956,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			else if (StageNumber == 2) {
-				PlayerPosition = { 40.0f,20.0f,135.0f };
+				PlayerPosition = { -140.0f,20.0f,135.0f };
+				for (int i = 0; i < 5; i++) {
+					FieldobjectPosition[i] = { -150 + ((float)i * 10),0,134 };
+					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+				}
+
+				for (int i = 5; i < 10; i++) {
+					FieldobjectPosition[i] = { -70 + ((float)i * 10),40,134 };
+					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+				}
+
+				for (int i = 10; i < 15; i++) {
+					FieldobjectPosition[i] = { -20 + ((float)i * 10),-70,134 };
+					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+				}
+
+				ItemPosition[0] = { -120,10,134 };
+				ItemPosition[1] = { -70,25,134 };
+				ItemPosition[2] = { 30,50,134 };
 			}
 		}
 #pragma endregion
@@ -1016,6 +1062,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (ImGui::TreeNode("Player"))
 			{
 				ImGui::Text("stageNumber,%d", StageNumber);
+				ImGui::Text("ResetFlag,%d",ResetFlag);
+				ImGui::Text("SpaceCOunt,%d", SpaceCount);
 				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 				ImGui::SliderFloat("Position.z", &PlayerPosition.z, 50, -50);
@@ -1117,6 +1165,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		if (Scene == title) {
 			sprite[0]->Draw();
+		}
+
+		else if (Scene == explation) {
+			sprite[6]->Draw();
 		}
 
 		else if (Scene == gamePlay) {
