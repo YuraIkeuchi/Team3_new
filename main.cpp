@@ -55,33 +55,6 @@ float aseInSine(const float x) {
 	return 1 - cos((x * PI) / 2);
 }
 
-//ブロック置く処理
-XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Projector, XMFLOAT3 object) {
-	XMFLOAT3 result = { screen.x,0,0 };
-	float a, b, A, B;
-	float add = 0.01f;
-
-	a = fabsf(object.z - Projector.z + add);
-	b = fabsf(object.y - Projector.y + add);
-	A = fabsf(screen.z - Projector.z + add);
-
-	B = A * (a / b);
-	B += 1;
-	B = B * object.z;
-	result.z = B;
-
-	a = fabsf(object.z - Projector.z + add);
-	b = fabsf(object.x - Projector.x + add);
-	A = fabsf(screen.z - Projector.z + add);
-
-	B = A * (a / b);
-	B += 1;
-	B = B * object.y;
-	result.y = B;
-
-	return result;
-}
-
 #pragma endregion
 #pragma region//WinMain
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -139,7 +112,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return 0;
 	}
 
-	const int SpriteMax = 10;
+	const int SpriteMax = 20;
+	const int SpriteNumberMax = 10;
 	Sprite* sprite[SpriteMax] = { nullptr };
 	// スプライト共通テクスチャ読み込み
 	/*SpriteCommonLoadTexture(spriteCommon, 0, L"Resources/texture.png", dxCommon->GetDev());
@@ -147,9 +121,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(0, L"Resources/Title.png");
 	Sprite::LoadTexture(1, L"Resources/END.png");
 	Sprite::LoadTexture(2, L"Resources/ItemUI.png");
+	Sprite::LoadTexture(3, L"Resources/0.png");
+	Sprite::LoadTexture(4, L"Resources/1.png");
+	Sprite::LoadTexture(5, L"Resources/2.png");
+	Sprite::LoadTexture(6, L"Resources/3.png");
+	Sprite::LoadTexture(7, L"Resources/4.png");
+	Sprite::LoadTexture(8, L"Resources/5.png");
+	Sprite::LoadTexture(9, L"Resources/6.png");
+	Sprite::LoadTexture(10, L"Resources/7.png");
+	Sprite::LoadTexture(11, L"Resources/8.png");
+	Sprite::LoadTexture(12, L"Resources/9.png");
+	Sprite::LoadTexture(13, L"Resources/STAGECLEAR.png");
+	Sprite::LoadTexture(14, L"Resources/GAMECLEAR.png");
+	Sprite::LoadTexture(15, L"Resources/GAMEOVER.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
+	sprite[3] = Sprite::Create(13, { 0.0f,0.0f });
+	sprite[4] = Sprite::Create(14, { 0.0f,0.0f });
+	sprite[5] = Sprite::Create(15, { 0.0f,0.0f });
+	Sprite* spriteNumber[SpriteNumberMax] = { nullptr };
+	spriteNumber[0] = Sprite::Create(3, { 0.0f,0.0f });
+	spriteNumber[1] = Sprite::Create(4, { 0.0f,0.0f });
+	spriteNumber[2] = Sprite::Create(5, { 0.0f,0.0f });
+	spriteNumber[3] = Sprite::Create(6, { 0.0f,0.0f });
+	spriteNumber[4] = Sprite::Create(7, { 0.0f,0.0f });
+	spriteNumber[5] = Sprite::Create(8, { 0.0f,0.0f });
+	spriteNumber[6] = Sprite::Create(9, { 0.0f,0.0f });
+	spriteNumber[7] = Sprite::Create(10, { 0.0f,0.0f });
+	spriteNumber[8] = Sprite::Create(11, { 0.0f,0.0f });
+	spriteNumber[9] = Sprite::Create(12, { 0.0f,0.0f });
+	for (int i = 0; i < SpriteNumberMax; i++) {
+		spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
+		spriteNumber[i]->SetSize({ 120.0f,120.0f });
+		spriteNumber[i]->SetPosition({ 210,0 });
+	}
+	//sprite[2]->SetPosition({ 200,20 });
 #pragma endregion
 #pragma region//オーディオ
 	const int AudioMax = 3;
@@ -468,10 +475,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
+	int StageNumber = 1;
+	int ResetFlag = 0;
 	enum Scene {
 		title,
 		gamePlay,
 		gameOver,
+		stageClear,
 		gameClear
 	};
 #pragma endregion
@@ -518,6 +528,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		LightPosition = light->GetPosition();
 		SpritePosition = sprite[0]->GetPosition();
+		
+
 #pragma region//更新処理
 		//キーの更新
 		input->Update();
@@ -639,6 +651,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						temp[0].y = lineY;
 						temp[1].y = lineLength;
 					}
+
 					else if (ImageObjectPosition[i].y < projectorPos.y) {
 						B = (b * A) / a1;
 						C = (c * A) / a2;
@@ -646,8 +659,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						float lineLength = B + C;
 						temp[0].y = lineY;
 						temp[1].y = lineLength;
-					}
-					else if (ImageObjectPosition[i].y > projectorPos.y) {
+					} else if (ImageObjectPosition[i].y > projectorPos.y) {
 						B = (b * A) / a2;
 						C = (c * A) / a1;
 						float lineY = projectorPos.y - B;
@@ -672,16 +684,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						float lineLength = B + C;
 						temp[2].x = lineY;
 						temp[3].x = lineLength;
-					}
-					else if (ImageObjectPosition[i].x < projectorPos.x) {
+					} else if (ImageObjectPosition[i].x < projectorPos.x) {
 						B = (b * A) / a1;
 						C = (c * A) / a2;
 						float lineY = projectorPos.x - B;
 						float lineLength = B + C;
 						temp[2].x = lineY;
 						temp[3].x = lineLength;
-					}
-					else if (ImageObjectPosition[i].x > projectorPos.x) {
+					} else if (ImageObjectPosition[i].x > projectorPos.x) {
 						B = (b * A) / a2;
 						C = (c * A) / a1;
 						float lineY = projectorPos.x - B;
@@ -723,7 +733,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					}
 
 					//ブロックを置く処理
-					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0) &&(ItemCount != 0)) {
+					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0) && (ItemCount != 0)) {
 						ItemCount--;
 						SetFlag[i] = 1;
 						SetobjectPosition[i].x = kage[0].x;
@@ -742,9 +752,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (AnimetionCount == 4) {
 				AnimetionCount = 0;
 			}
-	
-		//カメラ移動
-		//障害物との当たり判定
+
+			//カメラ移動
+			//障害物との当たり判定
 			for (int i = 0; i < OBJECT_NUM; i++) {
 				if (SetFlag[i] == 1) {
 					if (SetobjectColor[i].w > 0.0f) {
@@ -768,12 +778,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 							PlayerPosition.y = OldPlayerPosition.y;
 							if (JumpG >= 1.85f) {
 								PlayerAlive = 0;
-							}
-							else {
+							} else {
 								JumpG = 0.0f;
 							}
 							JumpFlag = 0;
-						} 
+						}
 					}
 				}
 			}
@@ -810,41 +819,116 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
-		//光とブロックの当たり判定
-		for (int i = 0; i < _countof(Setobject); i++) {
-			if (SetFlag[i] == 1) {
-				if (Boxcollision->CircleCollision(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
-					//SetobjectColor[i].w -= 0.01;
+			//光とブロックの当たり判定
+			for (int i = 0; i < _countof(Setobject); i++) {
+				if (SetFlag[i] == 1) {
+					if (Boxcollision->CircleCollision(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
+						//SetobjectColor[i].w -= 0.01;
+					}
 				}
+			}
+
+			//アイテム取得判定
+			for (int i = 0; i < Item_NUM; i++) {
+				if (ItemAlive[i] == 1) {
+					if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, ItemPosition[i].x, ItemPosition[i].y, 3) == 1) {
+						ItemCount++;
+						ItemAlive[i] = 0;
+					}
+				}
+			}
+
+			//ゴール判定
+			if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, GoalPosition.x, GoalPosition.y, 3) == 1) {
+				StageNumber++;
+				if (StageNumber != 3) {
+					Scene = stageClear;
+				} else {
+					Scene = gameClear;
+				}
+			}
+			//画面外で死
+			if (PlayerPosition.y <= -130) {
+				PlayerAlive = 0;
+			}
+
+			if (PlayerAlive == 0) {
+				Scene = gameOver;
 			}
 		}
 
-		//アイテム取得判定
-		for (int i = 0; i < Item_NUM; i++) {
-			if (ItemAlive[i] == 1) {
-				if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, ItemPosition[i].x, ItemPosition[i].y, 3) == 1) {
-					ItemCount++;
-					ItemAlive[i] = 0;
-				}
-			}
-		}
-		//画面外で死
-		if (PlayerPosition.y <= -130) {
-			PlayerAlive = 0;
-		}
-
-		if (PlayerAlive == 0) {
-			Scene = gameClear;
-		}
-			if (input->TriggerKey(DIK_R)) {
-				Scene = gameClear;
+#pragma region//ステージクリア
+		if (Scene == stageClear) {
+			ResetFlag = 1;
+			if (input->TriggerKey(DIK_SPACE)) {
+				Scene = gamePlay;
+				ResetFlag = 0;
+			
 			}
 		}
 #pragma endregion
+#pragma region//ゲームオーバー
+		if (Scene == gameOver) {
+			ResetFlag = 1;
+			if (input->TriggerKey(DIK_SPACE)) {
+				Scene = gamePlay;
+				ResetFlag = 0;
+			}
+		}
+#pragma endregion
+#pragma endregion
 #pragma region//クリア
 		if (Scene == gameClear) {
+			ResetFlag = 1;
 			if (input->TriggerKey(DIK_S)) {
 				Scene = title;
+				ResetFlag = 0;
+			}
+		}
+
+		if (ResetFlag == 1) {
+			//各変数初期化
+				JumpG = 0.0f;
+				PlayerAlive = 1;
+				PlayerDirectionNumber = 0;
+				ItemCount = 0;
+				for (int i = 0; i < _countof(Setobject); i++) {
+					SetobjectPosition[i] = { 0.0f,400.0f,0.0f };
+				}
+
+				for (int i = 0; i < _countof(Markobject); i++) {
+					MarkobjectPosition[i] = { 0.0f,0.0f,134.0f };
+				}
+
+				for (int i = 0; i < Item_NUM; i++) {
+					ItemPosition[i] = { 0,300,134 };
+					ItemAlive[i] = 1;
+					item[i]->SetPosition(ItemPosition[i]);
+				}
+				for (int i = 0; i < _countof(Imageobject); i++) {
+					ImageObjectPosition[i] = { 0.0f,0.0f,70.0f };
+				}
+
+			if (StageNumber == 1) {
+				PlayerPosition = { -140.0f,20.0f,135.0f };
+				for (int i = 0; i < 4; i++) {
+					FieldobjectPosition[i] = { -150 + ((float)i * 10),0,134 };
+				}
+
+				for (int i = 4; i < 10; i++) {
+					FieldobjectPosition[i] = { -100 + ((float)i * 10),0,134 };
+				}
+
+				for (int i = 10; i < 20; i++) {
+					FieldobjectPosition[i] = { -80 + ((float)i * 10),-70,134 };
+				}
+
+				ItemPosition[0] = { -120,10,134 };
+				ItemPosition[1] = { -40,10,134 };
+			}
+
+			else if (StageNumber == 2) {
+				PlayerPosition = { 40.0f,20.0f,135.0f };
 			}
 		}
 #pragma endregion
@@ -929,30 +1013,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
-			if (ImGui::TreeNode("Set"))
-			{
-				ImGui::Text("SetFlag[1],%d", SetFlag[0]);
-				ImGui::SliderFloat("Position.x", &SetobjectPosition[0].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &SetobjectPosition[0].y, 50, -50);
-				ImGui::SliderFloat("Position.z", &SetobjectPosition[0].z, 50, -50);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Set"))
-			{
-				ImGui::Text("SetFlag[1],%d", SetFlag[1]);
-				ImGui::SliderFloat("Position.x", &SetobjectPosition[1].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &SetobjectPosition[1].y, 50, -50);
-				ImGui::SliderFloat("Position.z", &SetobjectPosition[1].z, 50, -50);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}
-
 			if (ImGui::TreeNode("Player"))
 			{
-				ImGui::Text("ItemCount,%d", ItemCount);
-				ImGui::Text("HitNumber,%d", PlayerHitNumber);
+				ImGui::Text("stageNumber,%d", StageNumber);
 				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 				ImGui::SliderFloat("Position.z", &PlayerPosition.z, 50, -50);
@@ -1056,13 +1119,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			sprite[0]->Draw();
 		}
 
-		if (Scene == gamePlay) {
+		else if (Scene == gamePlay) {
 			sprite[2]->Draw();
+			spriteNumber[ItemCount]->Draw();
 		}
-		if (Scene == gameClear) {
-			sprite[1]->Draw();
+
+		else if (Scene == stageClear) {
+			sprite[3]->Draw();
+		}
+
+		else if (Scene == gameClear) {
+			sprite[4]->Draw();
 		}
 	
+		else if (Scene == gameOver) {
+			sprite[5]->Draw();
+		}
 		Sprite::PostDraw();
 		// 3Dオブジェクト描画後処理
 		Object::PostDraw();
