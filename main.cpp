@@ -135,6 +135,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(14, L"Resources/GAMECLEAR.png");
 	Sprite::LoadTexture(15, L"Resources/GAMEOVER.png");
 	Sprite::LoadTexture(16, L"Resources/EXPLATION.png");
+	Sprite::LoadTexture(17, L"Resources/EXPLATION2.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -142,6 +143,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	sprite[4] = Sprite::Create(14, { 0.0f,0.0f });
 	sprite[5] = Sprite::Create(15, { 0.0f,0.0f });
 	sprite[6] = Sprite::Create(16, { 0.0f,0.0f });
+	sprite[7] = Sprite::Create(17, { 0.0f,0.0f });
 	Sprite* spriteNumber[SpriteNumberMax] = { nullptr };
 	spriteNumber[0] = Sprite::Create(3, { 0.0f,0.0f });
 	spriteNumber[1] = Sprite::Create(4, { 0.0f,0.0f });
@@ -158,7 +160,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		spriteNumber[i]->SetSize({ 120.0f,120.0f });
 		spriteNumber[i]->SetPosition({ 210,0 });
 	}
-	//sprite[2]->SetPosition({ 200,20 });
+	int ExplanationNumber = 0;
 #pragma endregion
 #pragma region//オーディオ
 	const int AudioMax = 3;
@@ -545,11 +547,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//説明
 		if (Scene == explation) {
-			if (input->TriggerKey(DIK_SPACE)) {
+			if (input->TriggerKey(DIK_RIGHT)) {
+				ExplanationNumber = 1;
+			}
+			if ((input->TriggerKey(DIK_SPACE)) && (ExplanationNumber == 1)) {
 				SpaceCount++;
 			}
 
-			if (SpaceCount == 3) {
+			if (SpaceCount == 2) {
 				Scene = gamePlay;
 				SpaceCount = 0;
 			}
@@ -908,6 +913,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		if (ResetFlag == 1) {
 			//各変数初期化
+			ExplanationNumber = 0;
 			JumpG = 0.0f;
 			PlayerAlive = 1;
 			PlayerDirectionNumber = 0;
@@ -1168,7 +1174,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 		else if (Scene == explation) {
-			sprite[6]->Draw();
+			if (ExplanationNumber == 0) {
+				sprite[6]->Draw();
+			} else {
+				sprite[7]->Draw();
+			}
 		}
 
 		else if (Scene == gamePlay) {
