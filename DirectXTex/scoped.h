@@ -1,75 +1,24 @@
 //-------------------------------------------------------------------------------------
 // scoped.h
-//
+//  
 // Utility header with helper classes for exception-safe handling of resources
 //
-// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 //-------------------------------------------------------------------------------------
 
 #pragma once
 
-#include <cassert>
-#include <cstddef>
-#include <cstdint>
+#include <assert.h>
 #include <memory>
-
-#ifndef WIN32
-#include <cstdlib>
-
-struct aligned_deleter { void operator()(void* p) noexcept { free(p); } };
-
-using ScopedAlignedArrayFloat = std::unique_ptr<float[], aligned_deleter>;
-
-inline ScopedAlignedArrayFloat make_AlignedArrayFloat(uint64_t count)
-{
-    uint64_t size = sizeof(float) * count;
-    size = (size + 15u) & ~0xF;
-    if (size > static_cast<uint64_t>(UINT32_MAX))
-        return nullptr;
-
-    auto ptr = aligned_alloc(16, static_cast<size_t>(size)      );
-    return ScopedAlignedArrayFloat(static_cast<float*>(ptr));
-}
-
-using ScopedAlignedArrayXMVECTOR = std::unique_ptr<DirectX::XMVECTOR[], aligned_deleter>;
-
-inline ScopedAlignedArrayXMVECTOR make_AlignedArrayXMVECTOR(uint64_t count)
-{
-    uint64_t size = sizeof(DirectX::XMVECTOR) * count;
-    if (size > static_cast<uint64_t>(UINT32_MAX))
-        return nullptr;
-    auto ptr = aligned_alloc(16, static_cast<size_t>(size));
-    return ScopedAlignedArrayXMVECTOR(static_cast<DirectX::XMVECTOR*>(ptr));
-}
-
-#else // WIN32
-//---------------------------------------------------------------------------------
 #include <malloc.h>
 
+//---------------------------------------------------------------------------------
 struct aligned_deleter { void operator()(void* p) noexcept { _aligned_free(p); } };
 
 using ScopedAlignedArrayFloat = std::unique_ptr<float[], aligned_deleter>;
 
-inline ScopedAlignedArrayFloat make_AlignedArrayFloat(uint64_t count)
-{
-    uint64_t size = sizeof(float) * count;
-    if (size > static_cast<uint64_t>(UINT32_MAX))
-        return nullptr;
-    auto ptr = _aligned_malloc(static_cast<size_t>(size), 16);
-    return ScopedAlignedArrayFloat(static_cast<float*>(ptr));
-}
-
 using ScopedAlignedArrayXMVECTOR = std::unique_ptr<DirectX::XMVECTOR[], aligned_deleter>;
-
-inline ScopedAlignedArrayXMVECTOR make_AlignedArrayXMVECTOR(uint64_t count)
-{
-    uint64_t size = sizeof(DirectX::XMVECTOR) * count;
-    if (size > static_cast<uint64_t>(UINT32_MAX))
-        return nullptr;
-    auto ptr = _aligned_malloc(static_cast<size_t>(size), 16);
-    return ScopedAlignedArrayXMVECTOR(static_cast<DirectX::XMVECTOR*>(ptr));
-}
 
 //---------------------------------------------------------------------------------
 struct handle_closer { void operator()(HANDLE h) noexcept { assert(h != INVALID_HANDLE_VALUE); if (h) CloseHandle(h); } };
@@ -107,5 +56,3 @@ public:
 private:
     HANDLE m_handle;
 };
-
-#endif // WIN32

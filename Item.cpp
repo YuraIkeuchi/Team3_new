@@ -321,7 +321,7 @@ bool Item::LoadTexture() {
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/file.jpg", WIC_FLAGS_NONE,
+		L"Resources/Item.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
