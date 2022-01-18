@@ -12,7 +12,6 @@
 #include<wrl.h>
 #include <stdio.h>
 
-//#include"Header1.hlsli"
 #include "Input.h"
 #include "WinApp.h"
 #include "DirectXCommon.h"
@@ -34,6 +33,7 @@
 #include "Collision.h"
 #include "LightSource.h"
 #include "Item.h"
+#include "Goal.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -146,8 +146,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SpriteCommonLoadTexture(spriteCommon, 1, L"Resources/house.png", dxCommon->GetDev());*/
 	Sprite::LoadTexture(0, L"Resources/Title.png");
 	Sprite::LoadTexture(1, L"Resources/END.png");
+	Sprite::LoadTexture(2, L"Resources/ItemUI.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
+	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
 #pragma endregion
 #pragma region//オーディオ
 	const int AudioMax = 3;
@@ -230,7 +232,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	XMFLOAT3 SetobjectPosition[OBJECT_NUM];
 	XMFLOAT4 SetobjectColor[OBJECT_NUM];
 	for (int i = 0; i < _countof(Setobject); i++) {
-		SetobjectPosition[i] = Setobject[i]->GetPosition();
+		SetobjectPosition[i] = { 0.0f,400.0f,0.0f };
 		SetobjectColor[i] = Setobject[i]->GetColor();
 
 	}
@@ -273,13 +275,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	
 	}
 
-	for (int i = 0; i < 10; i++) {
-		FieldobjectPosition[i] = { -150 + ((float)i * 10),-20,134 };
+	for (int i = 0; i < 4; i++) {
+		FieldobjectPosition[i] = { -150 + ((float)i * 10),0,134 };
+		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+	}
+
+	for (int i = 4; i < 10; i++) {
+		FieldobjectPosition[i] = { -100 + ((float)i * 10),0,134 };
 		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
 	}
 
 	for (int i = 10; i < 20; i++) {
-		FieldobjectPosition[i] = { -200 + ((float)i * 10),10,134 };
+		FieldobjectPosition[i] = { -80 + ((float)i * 10),-70,134 };
 		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
 	}
 
@@ -380,7 +387,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	playerrightwalk4->Update(matview);
 #pragma endregion
 	XMFLOAT3 PlayerPosition;
-	PlayerPosition = { -120.0f,0.0f,135.0f };
+	PlayerPosition = { -140.0f,10.0f,135.0f };
 	
 	XMFLOAT3 OldPlayerPosition;
 	XMFLOAT3 PlayerRotation;
@@ -400,6 +407,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int AnimetionCount = 0;
 	int PlayerAlive = 1;
 	int PlayerDirectionNumber = 0;
+	int PlayerHitNumber = 0;
 #pragma endregion
 #pragma region//ライト変数
 	Light* light;
@@ -414,17 +422,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	light->SetPosition(LightPosition);
 #pragma endregion
 #pragma region//アイテム変数
-	Item* item;
-	if (!item->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	const int Item_NUM = 10;
+	Item* item[Item_NUM];
+	XMFLOAT3 ItemPosition[Item_NUM];
+	int ItemAlive[Item_NUM];
+	int ItemCount = 0;
+
+	for (int i = 0; i < Item_NUM; i++) {
+		if (!item[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+			assert(0);
+			return 1;
+		}
+		item[i] = Item::Create();
+		item[i]->Update(matview);
+		ItemPosition[i] = { 0,300,134 };
+		ItemAlive[i] = 1;
+		item[i]->SetPosition(ItemPosition[i]);
+	}
+
+	ItemPosition[0] = { -120,10,134 };
+	ItemPosition[1] = { -40,10,134 };
+#pragma endregion
+#pragma region//ゴール
+	Goal* goal;
+	if (!goal->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 		assert(0);
 		return 1;
 	}
-	item = Item::Create();
-	item->Update(matview);
-	XMFLOAT3 ItemPosition = { -130,-10,134 };
-	item->SetPosition(ItemPosition);
-	int ItemCount = 0;
-	int ItemAlive = 1;
+	goal = Goal::Create();
+	goal->Update(matview);
+	XMFLOAT3 GoalPosition = { 110.0f,-60.0f,134.0f };
+	goal->SetPosition(GoalPosition);
 #pragma endregion
 #pragma region//背景
 	BackGround* background;
@@ -738,7 +766,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						//playerとブロック上辺の当たり判定(高いところからだと死)
 						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, SetobjectPosition[i], { 3.2,5.2,4 }) == TRUE) {
 							PlayerPosition.y = OldPlayerPosition.y;
-							if (JumpG >= 1.5f) {
+							if (JumpG >= 1.85f) {
 								PlayerAlive = 0;
 							}
 							else {
@@ -753,24 +781,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			for (int i = 0; i < FIELD_NUM; i++) {
 				//playerとブロック左辺の当たり判定
 				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5.4,4 }, FieldobjectPosition[i], { 7.5,5.4,4 }) == TRUE) {
+					PlayerHitNumber = 1;
 					PlayerPosition.x = OldPlayerPosition.x;
 				}
 				//playerとブロック右辺の当たり判定
 				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5.4,4 }, FieldobjectPosition[i], { 7.5,5.4,4 }) == TRUE) {
+					PlayerHitNumber = 2;
 					PlayerPosition.x = OldPlayerPosition.x;
 				}
 
 				//playerとブロック下辺の当たり判定
 				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5.3,4 }, FieldobjectPosition[i], { 3,5.3,4 }) == TRUE) {
+					PlayerHitNumber = 3;
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
 
 				//playerとブロック上辺の当たり判定(高いところからだと死)
 				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, FieldobjectPosition[i], { 3.2,5.2,4 }) == TRUE) {
+					PlayerHitNumber = 4;
 					PlayerPosition.y = OldPlayerPosition.y;
-					JumpG = 0.0f;
 					JumpFlag = 0;
+					if (JumpG >= 1.85f) {
+						PlayerAlive = 0;
+					} else {
+						JumpG = 0.0f;
+					}
 				}
 			}
 
@@ -784,10 +820,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 		//アイテム取得判定
-		if (ItemAlive == 1) {
-			if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, ItemPosition.x, ItemPosition.y, 3) == 1) {
-				ItemCount += 2;
-				ItemAlive = 0;
+		for (int i = 0; i < Item_NUM; i++) {
+			if (ItemAlive[i] == 1) {
+				if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, ItemPosition[i].x, ItemPosition[i].y, 3) == 1) {
+					ItemCount++;
+					ItemAlive[i] = 0;
+				}
 			}
 		}
 		//画面外で死
@@ -835,6 +873,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		for (int i = 0; i < _countof(Fieldobject); i++) {
 			Fieldobject[i]->Update(matview);
 		}
+
+		for (int i = 0; i < Item_NUM; i++) {
+			item[i]->Update(matview);
+			item[i]->SetPosition(ItemPosition[i]);
+		}
 		//移動のやつ
 		//カメラの注視点をプレイヤーの位置に固定
 		target2.m128_f32[2] = 0;
@@ -858,9 +901,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk3->Update(matview);
 		playerrightwalk4->Update(matview);
 		light->Update(matview);
-		item->Update(matview);
 		screen->Update(matview);
 		projector->Update(matview);
+		goal->Update(matview);
 		lightSource->Update(matview);
 		playerleftwalk->SetPosition(PlayerPosition);
 		playerleftwalk2->SetPosition(PlayerPosition);
@@ -872,9 +915,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk4->SetPosition(PlayerPosition);
 		screen->SetPosition({0,50,400});
 		projector->SetPosition({ 0,-20,-50 });
+		goal->SetPosition(GoalPosition);
 		lightSource->SetPosition({ 0,0,180 });
 		light->SetPosition(LightPosition);
-		item->SetPosition(ItemPosition);
 	
 #pragma endregion
 #pragma endregion
@@ -909,6 +952,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (ImGui::TreeNode("Player"))
 			{
 				ImGui::Text("ItemCount,%d", ItemCount);
+				ImGui::Text("HitNumber,%d", PlayerHitNumber);
 				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 				ImGui::SliderFloat("Position.z", &PlayerPosition.z, 50, -50);
@@ -921,9 +965,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::End();
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
-		if (Scene == title) {
-			sprite[0]->Draw();
-		}
+	
 		Sprite::PostDraw();
 		Object::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk::PreDraw(dxCommon->GetCmdList());
@@ -938,15 +980,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		Screen::PreDraw(dxCommon->GetCmdList());
 		Projector::PreDraw(dxCommon->GetCmdList());
+		Goal::PreDraw(dxCommon->GetCmdList());
 		LightSource::PreDraw(dxCommon->GetCmdList());
 		Item::PreDraw(dxCommon->GetCmdList());
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
+			//スクリーン
 			screen->Draw();
+			//プロジェクター
 			projector->Draw();
-			
-			//light->Draw();
+			//プレイヤー
 			if (AnimetionCount == 0) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk->Draw();
@@ -976,11 +1020,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					playerleftwalk4->Draw();
 				}
 			}
-
-			if (ItemAlive == 1) {
-				item->Draw();
+			//アイテム
+			for (int i = 0; i < Item_NUM; i++) {
+				if (ItemAlive[i] == 1) {
+					item[i]->Draw();
+				}
 			}
-
+			//ゴール
+			goal->Draw();
+			//ブロック
 			for (int i = 0; i < _countof(Fieldobject); i++) {
 				Fieldobject[i]->Draw();
 			}
@@ -1004,6 +1052,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 	
 		Sprite::PreDraw(dxCommon->GetCmdList());
+		if (Scene == title) {
+			sprite[0]->Draw();
+		}
+
+		if (Scene == gamePlay) {
+			sprite[2]->Draw();
+		}
 		if (Scene == gameClear) {
 			sprite[1]->Draw();
 		}
@@ -1023,6 +1078,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PostDraw();
 		Screen::PostDraw();
 		Projector::PostDraw();
+		Goal::PostDraw();
 		LightSource::PostDraw();
 		Item::PostDraw();
 		dxCommon->PostDraw();
@@ -1048,10 +1104,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete playerrightwalk3;
 	delete playerrightwalk4;
 	delete light;
-	delete item;
+	for (int i = 0; i < Item_NUM; i++) {
+		delete item[i];
+	}
 	delete screen;
 	delete projector;
 	delete lightSource;
+	delete goal;
 	for (int i = 0; i < _countof(Imageobject); i++) {
 		delete Imageobject[i];
 	}

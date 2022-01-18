@@ -148,6 +148,7 @@
     <ClCompile Include="background.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DirectXCommon.cpp" />
+    <ClCompile Include="Goal.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -229,6 +230,7 @@
     <ClInclude Include="background.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="DirectXCommon.h" />
+    <ClInclude Include="Goal.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx12.h" />

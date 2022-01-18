@@ -7,7 +7,7 @@
 #include <d3dx12.h>
 
 /// 3Dオブジェクト
-class Item {
+class Goal {
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -49,7 +49,7 @@ public: // 静的メンバ関数
 	static void PostDraw();
 
 	/// 3Dオブジェクト生成
-	static Item* Create();
+	static Goal* Create();
 
 	/// 視点座標の取得
 	static const XMFLOAT3& GetEye() { return eye; }
@@ -165,5 +165,5 @@ private: // メンバ変数
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	Item* parent = nullptr;
+	Goal* parent = nullptr;
 };
