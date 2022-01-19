@@ -169,8 +169,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		assert(0);
 		return 1;
 	}
-	audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
-	audio->LoopWave(0, 0.5f);
+	//audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
+	//audio->LoopWave(0, 0.5f);
 #pragma endregion
 #pragma region//デスクリプタやシェーダリソースビュー
 	//定数バッファ用でスクリプタヒープの生成
@@ -607,14 +607,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//プレイ中のプレイヤー移動
 			if (mode == 0) {
 				//移動処理
-				if (input->PushKey(DIK_UP)) {
-					PlayerPosition.y += 0.5f;
-				}
-
-				if (input->PushKey(DIK_DOWN)) {
-					PlayerPosition.y -= 0.5f;
-				}
-
 				if (input->PushKey(DIK_LEFT)) {
 					PlayerPosition.x -= 0.5f;
 					AnimetionTimer++;
@@ -627,7 +619,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 
 				//ジャンプ処理
-				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0)) {
+				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && ( JumpG >= 0.0f) && (JumpG <= 0.1f)) {
 					JumpG = -1.0f;
 					JumpFlag = 1;
 				}
@@ -837,6 +829,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					} else {
 						JumpG = 0.0f;
 					}
+				} else {
+					PlayerHitNumber = 0;
 				}
 			}
 
@@ -1067,9 +1061,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		{
 			if (ImGui::TreeNode("Player"))
 			{
-				ImGui::Text("stageNumber,%d", StageNumber);
-				ImGui::Text("ResetFlag,%d",ResetFlag);
-				ImGui::Text("SpaceCOunt,%d", SpaceCount);
+				ImGui::Text("playerHitNumber,%d", PlayerHitNumber);
 				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 				ImGui::SliderFloat("Position.z", &PlayerPosition.z, 50, -50);
