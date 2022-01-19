@@ -7,7 +7,7 @@
 #include <d3dx12.h>
 
 /// 3Dオブジェクト
-class Projector {
+class Gear {
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -49,7 +49,7 @@ public: // 静的メンバ関数
 	static void PostDraw();
 
 	/// 3Dオブジェクト生成
-	static Projector* Create();
+	static Gear* Create();
 
 	/// 視点座標の取得
 	static const XMFLOAT3& GetEye() { return eye; }
@@ -149,7 +149,7 @@ public: // メンバ関数
 	void SetRotaition(XMFLOAT3 rotaition) { this->rotation = rotaition; }
 	void SetHitFlag(int HitFlag) { this->HitFlag = HitFlag; }
 	void SetHp(int hp) { this->hp = hp; }
-	
+
 	//カメラをその位置に移動させる処理
 	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 private: // メンバ変数
@@ -162,13 +162,13 @@ private: // メンバ変数
 	// 色
 	XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 8.0f,8.0f,8.0f };
+	XMFLOAT3 scale = { 5.0f,5.0f,5.0f };
 	// X,Y,Z軸回りのローカル回転角
-	XMFLOAT3 rotation = { 0,-90,0 };
+	XMFLOAT3 rotation = { 0,0,90 };
 	// ローカル座標
 	XMFLOAT3 position = { 0,-20,-60 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	Projector* parent = nullptr;
+	Gear* parent = nullptr;
 };

@@ -1,48 +1,45 @@
-#include "Object3d.h"
+#include "Block.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
-#include<fstream>
-#include<sstream>
-#include<string>
-#include<vector>
-using namespace std;
 
 #pragma comment(lib, "d3dcompiler.lib")
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
+/// <summary>
 /// 静的メンバ変数の実体
-ID3D12Device* Object3d::device = nullptr;
-UINT Object3d::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Object3d::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Object3d::rootsignature;
-ComPtr<ID3D12PipelineState> Object3d::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Object3d::descHeap;
-ComPtr<ID3D12Resource> Object3d::vertBuff;
-ComPtr<ID3D12Resource> Object3d::indexBuff;
-ComPtr<ID3D12Resource> Object3d::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Object3d::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Object3d::gpuDescHandleSRV;
-XMMATRIX Object3d::matView{};
-XMMATRIX Object3d::matProjection{};
-XMFLOAT3 Object3d::eye = { 0, 0, -5.0f };
-XMFLOAT3 Object3d::target = { 0, 0, 0 };
-XMFLOAT3 Object3d::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Object3d::vbView{};
-D3D12_INDEX_BUFFER_VIEW Object3d::ibView{};
-std::vector<Object3d::VertexPosNormalUv>Object3d::vertices;
-std::vector<unsigned short>Object3d::indices;
-//Object3d::Material Object3d::material;
+/// </summary>
+const float Block::radius = 5.0f;				// 底面の半径
+const float Block::prizmHeight = 8.0f;			// 柱の高さ
+ID3D12Device* Block::device = nullptr;
+UINT Block::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* Block::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> Block::rootsignature;
+ComPtr<ID3D12PipelineState> Block::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> Block::descHeap;
+ComPtr<ID3D12Resource> Block::vertBuff;
+ComPtr<ID3D12Resource> Block::indexBuff;
+ComPtr<ID3D12Resource> Block::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE Block::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE Block::gpuDescHandleSRV;
+XMMATRIX Block::matView{};
+XMMATRIX Block::matProjection{};
+XMFLOAT3 Block::eye = { 0, 0, -50.0f };
+XMFLOAT3 Block::target = { 0, 0, 0 };
+XMFLOAT3 Block::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW Block::vbView{};
+D3D12_INDEX_BUFFER_VIEW Block::ibView{};
+Block::VertexPosNormalUv Block::vertices[vertexCount];
+unsigned short Block::indices[planeCount * 3];
 
-bool Object3d::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
+bool Block::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
 {
 	// nullptrチェック
 	assert(device);
 
-	Object3d::device = device;
-	//モデルにデバイスをセット
-	Model::SetDevice(device);
+	Block::device = device;
+
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
 
@@ -53,18 +50,21 @@ bool Object3d::StaticInitialize(ID3D12Device* device, int window_width, int wind
 	InitializeGraphicsPipeline();
 
 	// テクスチャ読み込み
-	//LoadTexture();
+	LoadTexture();
+
+	// モデル生成
+	CreateModel();
 
 	return true;
 }
 
-void Object3d::PreDraw(ID3D12GraphicsCommandList* cmdList)
+void Block::PreDraw(ID3D12GraphicsCommandList* cmdList)
 {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Object3d::cmdList == nullptr);
+	assert(Block::cmdList == nullptr);
 
 	// コマンドリストをセット
-	Object3d::cmdList = cmdList;
+	Block::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -74,48 +74,45 @@ void Object3d::PreDraw(ID3D12GraphicsCommandList* cmdList)
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Object3d::PostDraw()
+void Block::PostDraw()
 {
 	// コマンドリストを解除
-	Object3d::cmdList = nullptr;
+	Block::cmdList = nullptr;
 }
 
-Object3d* Object3d::Create()
+Block* Block::Create()
 {
 	// 3Dオブジェクトのインスタンスを生成
-	Object3d* object3d = new Object3d();
-	if (object3d == nullptr) {
+	Block* block = new Block();
+	if (block == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!object3d->Initialize()) {
-		delete object3d;
+	if (!block->Initialize()) {
+		delete block;
 		assert(0);
 		return nullptr;
 	}
 
-	float scale_val = 1;
-	object3d->scale = { scale_val,scale_val,scale_val };
-
-	return object3d;
+	return block;
 }
 
-void Object3d::SetEye(XMFLOAT3 eye)
+void Block::SetEye(XMFLOAT3 eye)
 {
-	Object3d::eye = eye;
+	Block::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Object3d::SetTarget(XMFLOAT3 target)
+void Block::SetTarget(XMFLOAT3 target)
 {
-	Object3d::target = target;
+	Block::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Object3d::CameraMoveVector(XMFLOAT3 move)
+void Block::CameraMoveVector(XMFLOAT3 move)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
@@ -132,7 +129,7 @@ void Object3d::CameraMoveVector(XMFLOAT3 move)
 	SetTarget(target_moved);
 }
 
-bool Object3d::InitializeDescriptorHeap()
+bool Block::InitializeDescriptorHeap()
 {
 	HRESULT result = S_FALSE;
 
@@ -153,7 +150,7 @@ bool Object3d::InitializeDescriptorHeap()
 	return true;
 }
 
-void Object3d::InitializeCamera(int window_width, int window_height)
+void Block::InitializeCamera(int window_width, int window_height)
 {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
@@ -170,11 +167,11 @@ void Object3d::InitializeCamera(int window_width, int window_height)
 	matProjection = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(60.0f),
 		(float)window_width / window_height,
-		0.1f, 200.0f
+		0.1f, 1000.0f
 	);
 }
 
-bool Object3d::InitializeGraphicsPipeline()
+bool Block::InitializeGraphicsPipeline()
 {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
@@ -294,14 +291,9 @@ bool Object3d::InitializeGraphicsPipeline()
 	descRangeSRV.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
 
 	// ルートパラメータ
-	/*CD3DX12_ROOT_PARAMETER rootparams[2];
+	CD3DX12_ROOT_PARAMETER rootparams[2];
 	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);*/
-
-	CD3DX12_ROOT_PARAMETER rootparams[3];
-	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[2].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
 
 	// スタティックサンプラー
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc = CD3DX12_STATIC_SAMPLER_DESC(0);
@@ -331,7 +323,7 @@ bool Object3d::InitializeGraphicsPipeline()
 	return true;
 }
 
-bool Object3d::LoadTexture(const std::string& directoryPath, const std::string& filename)
+bool Block::LoadTexture()
 {
 	HRESULT result = S_FALSE;
 
@@ -339,22 +331,9 @@ bool Object3d::LoadTexture(const std::string& directoryPath, const std::string& 
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
-	string filepath = directoryPath + filename;
-
-	wchar_t wfilepath[128];
-	int iBufferSize = MultiByteToWideChar(CP_ACP, 0,
-		filepath.c_str(), -1, wfilepath, _countof(wfilepath));
-
-
-	//result = LoadFromWICFile(
-	//	L"Resources/texture.png", WIC_FLAGS_NONE,
-	//	&metadata, scratchImg);
-
 	result = LoadFromWICFile(
-		wfilepath, WIC_FLAGS_NONE,
-		&metadata, scratchImg
-	);
-
+		L"Resources/Circle5if.png", WIC_FLAGS_NONE,
+		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
 	}
@@ -414,32 +393,180 @@ bool Object3d::LoadTexture(const std::string& directoryPath, const std::string& 
 	return true;
 }
 
+void Block::CreateModel()
+{
+	HRESULT result = S_FALSE;
 
-void Object3d::UpdateViewMatrix()
+	const float topHeight = 10.0f;
+	const int DIV = 3;
+	const float radius = 10.0f;
+	//パーティクル用
+	VertexPosNormalUv vertices[] = {
+		//前
+	{{-5.0f,-5.0f, 5.0f},{},{0.0f,1.0f}},//左下
+	{{ 5.0f,-5.0f, 5.0f},{},{0.0f,0.0f}},//左上
+	{{-5.0f, 5.0f, 5.0f},{},{1.0f,1.0f}},//右下
+	{{ 5.0f, 5.0f, 5.0f},{},{1.0f,0.0f}},//右上
+
+	//後ろ
+	{{-5.0f, 5.0f,-5.0f},{},{0.0f,1.0f}},//左下
+	{{ 5.0f, 5.0f,-5.0f},{},{0.0f,0.0f}},//左上
+	{{-5.0f,-5.0f,-5.0f},{},{1.0f,1.0f}},//右下
+	{{ 5.0f,-5.0f,-5.0f},{},{1.0f,0.0f}},//右上
+
+	//左
+	{{-5.0f, 5.0f, 5.0f},{},{0.0f,1.0f}},//左下
+	{{-5.0f, 5.0f,-5.0f},{},{0.0f,0.0f}},//左上
+	{{-5.0f,-5.0f, 5.0f},{},{1.0f,1.0f}},//右下
+	{{-5.0f,-5.0f,-5.0f},{},{1.0f,0.0f}},//右上
+
+	//右
+	{{ 5.0f, -5.0f, 5.0f},{},{0.0f,1.0f}},//左下
+	{{ 5.0f, -5.0f,-5.0f},{},{0.0f,0.0f}},//左上
+	{{ 5.0f,  5.0f, 5.0f},{},{1.0f,1.0f}},//右下
+	{{ 5.0f,  5.0f,-5.0f},{},{1.0f,0.0f}},//右上
+
+	//下
+	{{ 5.0f,5.0f,-5.0f},{},{0.0f,1.0f}},//左下
+	{{-5.0f,5.0f,-5.0f},{},{0.0f,0.0f}},//左上
+	{{ 5.0f,5.0f, 5.0f},{},{1.0f,1.0f}},//右下
+	{{-5.0f,5.0f, 5.0f},{},{1.0f,0.0f}},//右上
+
+	//上
+	{{-5.0f,-5.0f,-5.0f},{},{0.0f,1.0f}},//左下
+	{{ 5.0f,-5.0f,-5.0f},{},{0.0f,0.0f}},//左上
+	{{-5.0f,-5.0f, 5.0f},{},{1.0f,1.0f}},//右下
+	{{ 5.0f,-5.0f, 5.0f},{},{1.0f,0.0f}},//右上
+	};
+
+	//パーティクル用
+	unsigned short indices[] = {
+		0,1,2,
+		2,1,3,
+
+		4,5,6,
+		6,5,7,
+
+		8,9,10,
+		10,9,11,
+
+		12,13,14,
+		14,13,15,
+
+		16,17,18,
+		18,17,19,
+
+		20,21,22,
+		22,21,23,
+	};
+	// 法線方向の計算
+	for (int i = 0; i < _countof(indices) / 3; i++)
+	{// 三角形１つごとに計算していく
+		// 三角形のインデックスを取得
+		unsigned short index0 = indices[i * 3 + 0];
+		unsigned short index1 = indices[i * 3 + 1];
+		unsigned short index2 = indices[i * 3 + 2];
+		// 三角形を構成する頂点座標をベクトルに代入
+		XMVECTOR p0 = XMLoadFloat3(&vertices[index0].pos);
+		XMVECTOR p1 = XMLoadFloat3(&vertices[index1].pos);
+		XMVECTOR p2 = XMLoadFloat3(&vertices[index2].pos);
+		// p0→p1ベクトル、p0→p2ベクトルを計算
+		XMVECTOR v1 = XMVectorSubtract(p1, p0);
+		XMVECTOR v2 = XMVectorSubtract(p2, p0);
+		// 外積は両方から垂直なベクトル
+		XMVECTOR normal = XMVector3Cross(v1, v2);
+		// 正規化（長さを1にする)
+		normal = XMVector3Normalize(normal);
+		// 求めた法線を頂点データに代入
+		XMStoreFloat3(&vertices[index0].normal, normal);
+		XMStoreFloat3(&vertices[index1].normal, normal);
+		XMStoreFloat3(&vertices[index2].normal, normal);
+	}
+
+	// 頂点バッファ生成
+	result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices)),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&vertBuff));
+	if (FAILED(result)) {
+		assert(0);
+		return;
+	}
+
+	// インデックスバッファ生成
+	result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices)),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&indexBuff));
+	if (FAILED(result)) {
+		assert(0);
+		return;
+	}
+
+	// 頂点バッファへのデータ転送
+	VertexPosNormalUv* vertMap = nullptr;
+	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
+	if (SUCCEEDED(result)) {
+		memcpy(vertMap, vertices, sizeof(vertices));
+		vertBuff->Unmap(0, nullptr);
+	}
+
+	// インデックスバッファへのデータ転送
+	unsigned short* indexMap = nullptr;
+	result = indexBuff->Map(0, nullptr, (void**)&indexMap);
+	if (SUCCEEDED(result)) {
+
+		// 全インデックスに対して
+		for (int i = 0; i < _countof(indices); i++)
+		{
+			indexMap[i] = indices[i];	// インデックスをコピー
+		}
+
+		indexBuff->Unmap(0, nullptr);
+	}
+
+	// 頂点バッファビューの作成
+	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
+	vbView.SizeInBytes = sizeof(vertices);
+	vbView.StrideInBytes = sizeof(vertices[0]);
+
+	// インデックスバッファビューの作成
+	ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
+	ibView.Format = DXGI_FORMAT_R16_UINT;
+	ibView.SizeInBytes = sizeof(indices);
+}
+
+void Block::UpdateViewMatrix()
 {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
-bool Object3d::Initialize()
+bool Block::Initialize()
 {
 	// nullptrチェック
 	assert(device);
 
 	HRESULT result;
-	//// 定数バッファの生成
+	// 定数バッファの生成
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
+		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferData) + 0xff) & ~0xff),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&constBuffB0));
+		IID_PPV_ARGS(&constBuff));
 
 	return true;
 }
 
-void Object3d::Update(XMMATRIX matview)
+void Block::Update(XMMATRIX& matView)
 {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
@@ -465,99 +592,41 @@ void Object3d::Update(XMMATRIX matview)
 	}
 
 	// 定数バッファへデータ転送
-	ConstBufferDataB0* constMap = nullptr;
-	result = constBuffB0->Map(0, nullptr, (void**)&constMap);
-	//constMap->color = color;
-	constMap->mat = matWorld * matview * matProjection;	// 行列の合成
-	constBuffB0->Unmap(0, nullptr);
-
+	ConstBufferData* constMap = nullptr;
+	result = constBuff->Map(0, nullptr, (void**)&constMap);
+	constMap->color = color;
+	constMap->mat = matWorld * matView * matProjection;	// 行列の合成
+	constBuff->Unmap(0, nullptr);
 }
 
-void Object3d::Draw()
+void Block::Draw()
 {
-	//// nullptrチェック
+	// nullptrチェック
 	assert(device);
-	assert(Object3d::cmdList);
+	assert(Block::cmdList);
 
-	if (model == nullptr)return;
-	//// 頂点バッファの設定
-	//cmdList->IASetVertexBuffers(0, 1, &vbView);
-	//// インデックスバッファの設定
-	//cmdList->IASetIndexBuffer(&ibView);
+	// 頂点バッファの設定
+	cmdList->IASetVertexBuffers(0, 1, &vbView);
+	// インデックスバッファの設定
+	cmdList->IASetIndexBuffer(&ibView);
 
-	//// デスクリプタヒープの配列
-	//ID3D12DescriptorHeap* ppHeaps[] = { descHeap.Get() };
-	//cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+	// デスクリプタヒープの配列
+	ID3D12DescriptorHeap* ppHeaps[] = { descHeap.Get() };
+	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
-	//// 定数バッファビューをセット
-	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
-	//cmdList->SetGraphicsRootConstantBufferView(1, constBuffB1->GetGPUVirtualAddress());
-	//// シェーダリソースビューをセット
-	//cmdList->SetGraphicsRootDescriptorTable(2, gpuDescHandleSRV);
-	//// 描画コマンド
-	//cmdList->DrawIndexedInstanced((UINT)indices.size(), 1, 0, 0, 0);
-
-	model->Draw(cmdList, 1);
-
+	// 定数バッファビューをセット
+	cmdList->SetGraphicsRootConstantBufferView(0, constBuff->GetGPUVirtualAddress());
+	// シェーダリソースビューをセット
+	cmdList->SetGraphicsRootDescriptorTable(1, gpuDescHandleSRV);
+	// 描画コマンド
+	cmdList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
 }
+//カメラの操作
+void Block::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+{
+	XMFLOAT3 eye_moved = GetEye();
+	XMFLOAT3 target_moved = GetTarget();
 
-void Object3d::Shot(int isAlive, XMFLOAT3 position1, XMFLOAT3 position2, int RandLane, int RandHigh, int RandZ) {
-
-	if (isAlive == 0) {
-		isAlive = 1;
-	}
-
-	RandLane = rand() % 4;
-	RandHigh = rand() % 2;
-	RandZ = rand() % 500 + 500;
-	position1.z = position2.z + RandZ;
-	//出現場所を決める
-	if (RandHigh == 0) {
-		position1.y = 5.0f;
-	} else if (RandHigh == 1) {
-		position1.y = -15.0f;
-	}
-
-	if (RandLane == 0) {
-		position1.x = -65.0f;
-	}
-
-	else if (RandLane == 1) {
-		position1.x = -50.0f;
-	}
-
-	else if (RandLane == 2) {
-		position1.x = -35.0f;
-	}
-
-	else {
-		position1.x = -20.0f;
-	}
-}
-
-bool Object3d::Collide(XMFLOAT3 position1, XMFLOAT3 position2, XMFLOAT3 scale, int isAlive, int breakCount, int HP) {
-
-	if ((position1.x == position2.x) && (position1.y == position2.y)
-		&& (position1.z >= position2.z) && (position1.z <= position2.z + 15)
-		&& (isAlive == 1)) {
-		breakCount++;
-		position1.z = position2.z + 4.25;
-	}
-
-	if (breakCount == 15) {
-		scale.x -= 0.75;
-		scale.y -= 0.75;
-		scale.z -= 0.75;
-		breakCount = 0;
-		HP--;
-	}
-
-	if (scale.z <= 0.0) {
-
-		return true;
-	} else {
-		return false;
-	}
-
-	return true;
+	SetEye(position);
+	SetTarget(targetposition);
 }

@@ -148,6 +148,7 @@
     <ClCompile Include="background.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DirectXCommon.cpp" />
+    <ClCompile Include="Gear.cpp" />
     <ClCompile Include="Goal.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -157,9 +158,12 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Lever.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object3d.cpp" />
     <ClCompile Include="PlayerLeftWalk.cpp" />
     <ClCompile Include="PlayerLeftWalk2.cpp" />
@@ -230,6 +234,7 @@
     <ClInclude Include="background.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="DirectXCommon.h" />
+    <ClInclude Include="Gear.h" />
     <ClInclude Include="Goal.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -241,8 +246,11 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="Lever.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightSource.h" />
+    <ClInclude Include="Block.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Object3d.h" />
     <ClInclude Include="PlayerLeftWalk.h" />
     <ClInclude Include="PlayerLeftWalk2.h" />

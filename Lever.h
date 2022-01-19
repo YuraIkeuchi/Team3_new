@@ -7,7 +7,7 @@
 #include <d3dx12.h>
 
 /// 3Dオブジェクト
-class Projector {
+class Lever {
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -49,7 +49,7 @@ public: // 静的メンバ関数
 	static void PostDraw();
 
 	/// 3Dオブジェクト生成
-	static Projector* Create();
+	static Lever* Create();
 
 	/// 視点座標の取得
 	static const XMFLOAT3& GetEye() { return eye; }
@@ -149,7 +149,7 @@ public: // メンバ関数
 	void SetRotaition(XMFLOAT3 rotaition) { this->rotation = rotaition; }
 	void SetHitFlag(int HitFlag) { this->HitFlag = HitFlag; }
 	void SetHp(int hp) { this->hp = hp; }
-	
+
 	//カメラをその位置に移動させる処理
 	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 private: // メンバ変数
@@ -170,5 +170,5 @@ private: // メンバ変数
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	Projector* parent = nullptr;
+	Lever* parent = nullptr;
 };

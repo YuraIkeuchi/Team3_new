@@ -1,48 +1,53 @@
-#include "Object3d.h"
+#include "Lever.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 #include<fstream>
 #include<sstream>
 #include<string>
+
 #include<vector>
 using namespace std;
+
 
 #pragma comment(lib, "d3dcompiler.lib")
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
+/// <summary>
 /// 静的メンバ変数の実体
-ID3D12Device* Object3d::device = nullptr;
-UINT Object3d::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Object3d::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Object3d::rootsignature;
-ComPtr<ID3D12PipelineState> Object3d::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Object3d::descHeap;
-ComPtr<ID3D12Resource> Object3d::vertBuff;
-ComPtr<ID3D12Resource> Object3d::indexBuff;
-ComPtr<ID3D12Resource> Object3d::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Object3d::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Object3d::gpuDescHandleSRV;
-XMMATRIX Object3d::matView{};
-XMMATRIX Object3d::matProjection{};
-XMFLOAT3 Object3d::eye = { 0, 0, -5.0f };
-XMFLOAT3 Object3d::target = { 0, 0, 0 };
-XMFLOAT3 Object3d::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Object3d::vbView{};
-D3D12_INDEX_BUFFER_VIEW Object3d::ibView{};
-std::vector<Object3d::VertexPosNormalUv>Object3d::vertices;
-std::vector<unsigned short>Object3d::indices;
-//Object3d::Material Object3d::material;
+/// </summary>
+const float Lever::radius = 5.0f;				// 底面の半径
+const float Lever::prizmHeight = 8.0f;			// 柱の高さ
+ID3D12Device* Lever::device = nullptr;
+UINT Lever::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* Lever::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> Lever::rootsignature;
+ComPtr<ID3D12PipelineState> Lever::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> Lever::descHeap;
+ComPtr<ID3D12Resource> Lever::vertBuff;
+ComPtr<ID3D12Resource> Lever::indexBuff;
+ComPtr<ID3D12Resource> Lever::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE Lever::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE Lever::gpuDescHandleSRV;
+XMMATRIX Lever::matView{};
+XMMATRIX Lever::matProjection{};
+XMFLOAT3 Lever::eye = { 0, 0, -50.0f };
+XMFLOAT3 Lever::target = { 0, 0, 0 };
+XMFLOAT3 Lever::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW Lever::vbView{};
+D3D12_INDEX_BUFFER_VIEW Lever::ibView{};
+//Lever::VertexPosNormalUv Lever::vertices[vertexCount];
+//unsigned short Lever::indices[planeCount * 3];
+std::vector<Lever::VertexPosNormalUv>Lever::vertices;
+std::vector<unsigned short> Lever::indices;
 
-bool Object3d::StaticInitialize(ID3D12Device* device, int window_width, int window_height)
-{
+bool Lever::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
 	// nullptrチェック
 	assert(device);
 
-	Object3d::device = device;
-	//モデルにデバイスをセット
-	Model::SetDevice(device);
+	Lever::device = device;
+
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
 
@@ -53,18 +58,21 @@ bool Object3d::StaticInitialize(ID3D12Device* device, int window_width, int wind
 	InitializeGraphicsPipeline();
 
 	// テクスチャ読み込み
-	//LoadTexture();
+	LoadTexture();
+
+	// モデル生成
+	CreateModel();
 
 	return true;
 }
 
-void Object3d::PreDraw(ID3D12GraphicsCommandList* cmdList)
-{
+void Lever::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Object3d::cmdList == nullptr);
+	assert(Lever::cmdList == nullptr);
+	// 3Dオブジェクト描画前処理
 
 	// コマンドリストをセット
-	Object3d::cmdList = cmdList;
+	Lever::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -72,51 +80,44 @@ void Object3d::PreDraw(ID3D12GraphicsCommandList* cmdList)
 	cmdList->SetGraphicsRootSignature(rootsignature.Get());
 	// プリミティブ形状を設定
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 }
 
-void Object3d::PostDraw()
-{
+void Lever::PostDraw() {
 	// コマンドリストを解除
-	Object3d::cmdList = nullptr;
+	Lever::cmdList = nullptr;
 }
 
-Object3d* Object3d::Create()
-{
+Lever* Lever::Create() {
 	// 3Dオブジェクトのインスタンスを生成
-	Object3d* object3d = new Object3d();
-	if (object3d == nullptr) {
+	Lever* lever = new Lever();
+	if (lever == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!object3d->Initialize()) {
-		delete object3d;
+	if (!lever->Initialize()) {
+		delete lever;
 		assert(0);
 		return nullptr;
 	}
 
-	float scale_val = 1;
-	object3d->scale = { scale_val,scale_val,scale_val };
-
-	return object3d;
+	return lever;
 }
 
-void Object3d::SetEye(XMFLOAT3 eye)
-{
-	Object3d::eye = eye;
+void Lever::SetEye(XMFLOAT3 eye) {
+	Lever::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Object3d::SetTarget(XMFLOAT3 target)
-{
-	Object3d::target = target;
+void Lever::SetTarget(XMFLOAT3 target) {
+	Lever::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Object3d::CameraMoveVector(XMFLOAT3 move)
-{
+void Lever::CameraMoveVector(XMFLOAT3 move) {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
 
@@ -132,8 +133,7 @@ void Object3d::CameraMoveVector(XMFLOAT3 move)
 	SetTarget(target_moved);
 }
 
-bool Object3d::InitializeDescriptorHeap()
-{
+bool Lever::InitializeDescriptorHeap() {
 	HRESULT result = S_FALSE;
 
 	// デスクリプタヒープを生成	
@@ -153,8 +153,7 @@ bool Object3d::InitializeDescriptorHeap()
 	return true;
 }
 
-void Object3d::InitializeCamera(int window_width, int window_height)
-{
+void Lever::InitializeCamera(int window_width, int window_height) {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
 		XMLoadFloat3(&eye),
@@ -170,12 +169,11 @@ void Object3d::InitializeCamera(int window_width, int window_height)
 	matProjection = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(60.0f),
 		(float)window_width / window_height,
-		0.1f, 200.0f
+		0.1f, 1000.0f
 	);
 }
 
-bool Object3d::InitializeGraphicsPipeline()
-{
+bool Lever::InitializeGraphicsPipeline() {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
@@ -183,7 +181,7 @@ bool Object3d::InitializeGraphicsPipeline()
 
 	// 頂点シェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
-		L"Resources/shaders/BasicVS.hlsl",	// シェーダファイル名
+		L"Resources/Shaders/BasicVS.hlsl",	// シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
 		"main", "vs_5_0",	// エントリーポイント名、シェーダーモデル指定
@@ -206,7 +204,7 @@ bool Object3d::InitializeGraphicsPipeline()
 
 	// ピクセルシェーダの読み込みとコンパイル
 	result = D3DCompileFromFile(
-		L"Resources/shaders/BasicPS.hlsl",	// シェーダファイル名
+		L"Resources/Shaders/BasicPS.hlsl",	// シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE, // インクルード可能にする
 		"main", "ps_5_0",	// エントリーポイント名、シェーダーモデル指定
@@ -294,14 +292,9 @@ bool Object3d::InitializeGraphicsPipeline()
 	descRangeSRV.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0); // t0 レジスタ
 
 	// ルートパラメータ
-	/*CD3DX12_ROOT_PARAMETER rootparams[2];
+	CD3DX12_ROOT_PARAMETER rootparams[2];
 	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);*/
-
-	CD3DX12_ROOT_PARAMETER rootparams[3];
-	rootparams[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
-	rootparams[2].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
+	rootparams[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
 
 	// スタティックサンプラー
 	CD3DX12_STATIC_SAMPLER_DESC samplerDesc = CD3DX12_STATIC_SAMPLER_DESC(0);
@@ -331,30 +324,17 @@ bool Object3d::InitializeGraphicsPipeline()
 	return true;
 }
 
-bool Object3d::LoadTexture(const std::string& directoryPath, const std::string& filename)
-{
+bool Lever::LoadTexture() {
 	HRESULT result = S_FALSE;
 
 	// WICテクスチャのロード
 	TexMetadata metadata{};
 	ScratchImage scratchImg{};
 
-	string filepath = directoryPath + filename;
-
-	wchar_t wfilepath[128];
-	int iBufferSize = MultiByteToWideChar(CP_ACP, 0,
-		filepath.c_str(), -1, wfilepath, _countof(wfilepath));
-
-
-	//result = LoadFromWICFile(
-	//	L"Resources/texture.png", WIC_FLAGS_NONE,
-	//	&metadata, scratchImg);
-
 	result = LoadFromWICFile(
-		wfilepath, WIC_FLAGS_NONE,
-		&metadata, scratchImg
-	);
-
+		//L"Resources/mameneko.jpg", WIC_FLAGS_NONE,
+		L"Resources/lever/lever.png", WIC_FLAGS_NONE,
+		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
 	}
@@ -414,33 +394,164 @@ bool Object3d::LoadTexture(const std::string& directoryPath, const std::string& 
 	return true;
 }
 
+void Lever::CreateModel() {
+	HRESULT result = S_FALSE;
 
-void Object3d::UpdateViewMatrix()
-{
+	std::vector<VertexPosNormalUv> realVertices;
+	//ファイルストリーム
+	std::ifstream file;
+	//.objファイルを開く
+	file.open("Resources/lever/lever.obj");
+	//ファイルオープン失敗をチャック
+	if (file.fail()) {
+		assert(0);
+	}
+	vector<XMFLOAT3>positions;
+	vector<XMFLOAT3>normals;
+	vector<XMFLOAT2>texcoords;
+	//一行ずつ読み込む
+	string line;
+	while (getline(file, line)) {
+		//
+		std::istringstream line_stream(line);
+
+		//半角スペース区切りで業おお先端文字列を取得
+		string key;
+		getline(line_stream, key, ' ');
+		if (key == "v") {
+			XMFLOAT3 position{};
+			line_stream >> position.x;
+			line_stream >> position.y;
+			line_stream >> position.z;
+
+			positions.emplace_back(position);
+			//VertexPosNormalUv vertex{};
+			//vertex.pos = position;
+			//vertices.emplace_back(vertex);
+		}
+		if (key == "vt") {
+			XMFLOAT2 texcoord{};
+			line_stream >> texcoord.x;
+			line_stream >> texcoord.y;
+
+			texcoord.y = 1.0f - texcoord.y;
+			texcoords.emplace_back(texcoord);
+		}
+		if (key == "vn") {
+			XMFLOAT3 normal{};
+			line_stream >> normal.x;
+			line_stream >> normal.y;
+			line_stream >> normal.z;
+			normals.emplace_back(normal);
+		}
+		if (key == "f") {
+			string index_string;
+			while (getline(line_stream, index_string, ' ')) {
+				std::istringstream index_stream(index_string);
+				unsigned short indexPosition, indexNormal, indexTexcoord;
+				index_stream >> indexPosition;
+				index_stream.seekg(1, ios_base::cur);
+				index_stream >> indexTexcoord;
+				index_stream.seekg(1, ios_base::cur);
+				index_stream >> indexNormal;
+				VertexPosNormalUv vertex{};
+				vertex.pos = positions[indexPosition - 1];
+				vertex.normal = normals[indexNormal - 1];
+				vertex.uv = texcoords[indexTexcoord - 1];
+				vertices.emplace_back(vertex);
+				indices.emplace_back((unsigned short)indices.size());
+			}
+		}
+	}
+	//
+	file.close();
+	UINT sizeVB = static_cast<UINT>(sizeof(VertexPosNormalUv) * vertices.size());
+	UINT sizeIB = static_cast<UINT>(sizeof(unsigned short) * indices.size());
+
+	// 頂点バッファ生成
+	result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		//&CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices)),
+		&CD3DX12_RESOURCE_DESC::Buffer(sizeVB),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&vertBuff));
+	if (FAILED(result)) {
+		assert(0);
+		return;
+	}
+
+	// インデックスバッファ生成
+	result = device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		//&CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices)),
+		&CD3DX12_RESOURCE_DESC::Buffer(sizeIB),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&indexBuff));
+	if (FAILED(result)) {
+		assert(0);
+		return;
+	}
+
+	// 頂点バッファへのデータ転送
+	VertexPosNormalUv* vertMap = nullptr;
+	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
+	if (SUCCEEDED(result)) {
+		//memcpy(vertMap, vertices, sizeof(vertices));
+		std::copy(vertices.begin(), vertices.end(), vertMap);
+		vertBuff->Unmap(0, nullptr);
+	}
+
+	// インデックスバッファへのデータ転送
+	unsigned short* indexMap = nullptr;
+	result = indexBuff->Map(0, nullptr, (void**)&indexMap);
+	if (SUCCEEDED(result)) {
+		//// 全インデックスに対して
+		//for (int i = 0; i < _countof(indices); i++)
+		//{
+		//	indexMap[i] = indices[i];	// インデックスをコピー
+		//}
+		std::copy(indices.begin(), indices.end(), indexMap);
+		indexBuff->Unmap(0, nullptr);
+	}
+
+	// 頂点バッファビューの作成
+	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
+	//vbView.SizeInBytes = sizeof(vertices);
+	vbView.SizeInBytes = sizeVB;
+	vbView.StrideInBytes = sizeof(vertices[0]);
+
+	// インデックスバッファビューの作成
+	ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
+	ibView.Format = DXGI_FORMAT_R16_UINT;
+	//ibView.SizeInBytes = sizeof(indices);
+	ibView.SizeInBytes = sizeIB;
+}
+
+void Lever::UpdateViewMatrix() {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
-
-bool Object3d::Initialize()
-{
+bool Lever::Initialize() {
 	// nullptrチェック
 	assert(device);
 
 	HRESULT result;
-	//// 定数バッファの生成
+	// 定数バッファの生成
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), 	// アップロード可能
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
+		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferData) + 0xff) & ~0xff),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&constBuffB0));
-
+		IID_PPV_ARGS(&constBuff));
 	return true;
 }
 
-void Object3d::Update(XMMATRIX matview)
-{
+void Lever::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 
@@ -463,101 +574,43 @@ void Object3d::Update(XMMATRIX matview)
 		// 親オブジェクトのワールド行列を掛ける
 		matWorld *= parent->matWorld;
 	}
-
 	// 定数バッファへデータ転送
-	ConstBufferDataB0* constMap = nullptr;
-	result = constBuffB0->Map(0, nullptr, (void**)&constMap);
-	//constMap->color = color;
-	constMap->mat = matWorld * matview * matProjection;	// 行列の合成
-	constBuffB0->Unmap(0, nullptr);
+	ConstBufferData* constMap = nullptr;
+	result = constBuff->Map(0, nullptr, (void**)&constMap);
+	constMap->color = color;
+	constMap->mat = matWorld * matView * matProjection;	// 行列の合成
+	constBuff->Unmap(0, nullptr);
 
 }
 
-void Object3d::Draw()
-{
-	//// nullptrチェック
+void Lever::Draw() {
+	// nullptrチェック
 	assert(device);
-	assert(Object3d::cmdList);
+	assert(Lever::cmdList);
+	//assert(constBuff);
+	// 頂点バッファの設定
+	cmdList->IASetVertexBuffers(0, 1, &vbView);
+	// インデックスバッファの設定
+	cmdList->IASetIndexBuffer(&ibView);
 
-	if (model == nullptr)return;
-	//// 頂点バッファの設定
-	//cmdList->IASetVertexBuffers(0, 1, &vbView);
-	//// インデックスバッファの設定
-	//cmdList->IASetIndexBuffer(&ibView);
+	// デスクリプタヒープの配列
+	ID3D12DescriptorHeap* ppHeaps[] = { descHeap.Get() };
+	cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
-	//// デスクリプタヒープの配列
-	//ID3D12DescriptorHeap* ppHeaps[] = { descHeap.Get() };
-	//cmdList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-
-	//// 定数バッファビューをセット
-	cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
-	//cmdList->SetGraphicsRootConstantBufferView(1, constBuffB1->GetGPUVirtualAddress());
-	//// シェーダリソースビューをセット
-	//cmdList->SetGraphicsRootDescriptorTable(2, gpuDescHandleSRV);
-	//// 描画コマンド
-	//cmdList->DrawIndexedInstanced((UINT)indices.size(), 1, 0, 0, 0);
-
-	model->Draw(cmdList, 1);
-
+	// 定数バッファビューをセット
+	cmdList->SetGraphicsRootConstantBufferView(0, constBuff->GetGPUVirtualAddress());
+	// シェーダリソースビューをセット
+	cmdList->SetGraphicsRootDescriptorTable(1, gpuDescHandleSRV);
+	// 描画コマンド
+	cmdList->DrawIndexedInstanced((UINT)indices.size(), 1, 0, 0, 0);
 }
 
-void Object3d::Shot(int isAlive, XMFLOAT3 position1, XMFLOAT3 position2, int RandLane, int RandHigh, int RandZ) {
+//カメラの操作
+void Lever::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+{
+	XMFLOAT3 eye_moved = GetEye();
+	XMFLOAT3 target_moved = GetTarget();
 
-	if (isAlive == 0) {
-		isAlive = 1;
-	}
-
-	RandLane = rand() % 4;
-	RandHigh = rand() % 2;
-	RandZ = rand() % 500 + 500;
-	position1.z = position2.z + RandZ;
-	//出現場所を決める
-	if (RandHigh == 0) {
-		position1.y = 5.0f;
-	} else if (RandHigh == 1) {
-		position1.y = -15.0f;
-	}
-
-	if (RandLane == 0) {
-		position1.x = -65.0f;
-	}
-
-	else if (RandLane == 1) {
-		position1.x = -50.0f;
-	}
-
-	else if (RandLane == 2) {
-		position1.x = -35.0f;
-	}
-
-	else {
-		position1.x = -20.0f;
-	}
-}
-
-bool Object3d::Collide(XMFLOAT3 position1, XMFLOAT3 position2, XMFLOAT3 scale, int isAlive, int breakCount, int HP) {
-
-	if ((position1.x == position2.x) && (position1.y == position2.y)
-		&& (position1.z >= position2.z) && (position1.z <= position2.z + 15)
-		&& (isAlive == 1)) {
-		breakCount++;
-		position1.z = position2.z + 4.25;
-	}
-
-	if (breakCount == 15) {
-		scale.x -= 0.75;
-		scale.y -= 0.75;
-		scale.z -= 0.75;
-		breakCount = 0;
-		HP--;
-	}
-
-	if (scale.z <= 0.0) {
-
-		return true;
-	} else {
-		return false;
-	}
-
-	return true;
+	SetEye(position);
+	SetTarget(targetposition);
 }

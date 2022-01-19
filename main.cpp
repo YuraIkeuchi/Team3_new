@@ -17,7 +17,7 @@
 #include "DirectXCommon.h"
 #include "Sprite.h"
 #include "Audio.h"
-#include "Object3d.h"
+#include "Block.h"
 #include "PlayerLeftWalk.h"
 #include "PlayerLeftWalk2.h"
 #include "PlayerLeftWalk3.h"
@@ -34,6 +34,8 @@
 #include "LightSource.h"
 #include "Item.h"
 #include "Goal.h"
+#include "Lever.h"
+#include "Gear.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -78,7 +80,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region//構造体
 	
 	const int constantBufferNum = 128;
-	const int OBJECT_NUM = 5;
+	const int Block_NUM = 5;
 #pragma endregion
 #pragma region//行列
 	//射影変換行列の作り
@@ -206,99 +208,99 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//障害物変数
 	//影を作るためのブロック
-	Object* Imageobject[OBJECT_NUM];
-	for (int i = 0; i < _countof(Imageobject); i++) {
-		if (!Imageobject[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	Block* ImageBlock[Block_NUM];
+	for (int i = 0; i < _countof(ImageBlock); i++) {
+		if (!ImageBlock[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 			assert(0);
 			return 1;
 		}
-		Imageobject[i] = Object::Create();
-		Imageobject[i]->Update(matview);
+		ImageBlock[i] = Block::Create();
+		ImageBlock[i]->Update(matview);
 	}
 
-	XMFLOAT3 ImageObjectPosition[OBJECT_NUM];
-	XMFLOAT4 ImageObjectColor[OBJECT_NUM];
-	for (int i = 0; i < _countof(Imageobject); i++) {
-		ImageObjectPosition[i] = Imageobject[i]->GetPosition();
-		ImageObjectColor[i] = Imageobject[i]->GetColor();
-		ImageObjectPosition[i] = { 0.0f,0.0f,70.0f };
+	XMFLOAT3 ImageBlockPosition[Block_NUM];
+	XMFLOAT4 ImageBlockColor[Block_NUM];
+	for (int i = 0; i < _countof(ImageBlock); i++) {
+		ImageBlockPosition[i] = ImageBlock[i]->GetPosition();
+		ImageBlockColor[i] = ImageBlock[i]->GetColor();
+		ImageBlockPosition[i] = { 0.0f,0.0f,70.0f };
 	}
 
-	for (int i = 0; i < _countof(Imageobject); i++) {
-		Imageobject[i]->SetPosition(ImageObjectPosition[i]);
+	for (int i = 0; i < _countof(ImageBlock); i++) {
+		ImageBlock[i]->SetPosition(ImageBlockPosition[i]);
 	}
 	//セットしたかどうかのフラグ
-	int SetFlag[OBJECT_NUM] = { 0 };
+	int SetFlag[Block_NUM] = { 0 };
 	//ゲーム画面のブロック
-	Object* Setobject[OBJECT_NUM];
-	for (int i = 0; i < _countof(Setobject); i++) {
-		if (!Setobject[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	Block* SetBlock[Block_NUM];
+	for (int i = 0; i < _countof(SetBlock); i++) {
+		if (!SetBlock[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 			assert(0);
 			return 1;
 		}
-		Setobject[i] = Object::Create();
-		Setobject[i]->Update(matview);
+		SetBlock[i] = Block::Create();
+		SetBlock[i]->Update(matview);
 	}
 
-	XMFLOAT3 SetobjectPosition[OBJECT_NUM];
-	XMFLOAT4 SetobjectColor[OBJECT_NUM];
-	for (int i = 0; i < _countof(Setobject); i++) {
-		SetobjectPosition[i] = { 0.0f,400.0f,0.0f };
-		SetobjectColor[i] = Setobject[i]->GetColor();
+	XMFLOAT3 SetBlockPosition[Block_NUM];
+	XMFLOAT4 SetBlockColor[Block_NUM];
+	for (int i = 0; i < _countof(SetBlock); i++) {
+		SetBlockPosition[i] = { 0.0f,400.0f,0.0f };
+		SetBlockColor[i] = SetBlock[i]->GetColor();
 
 	}
-	for (int i = 0; i < _countof(Setobject); i++) {
-		Setobject[i]->SetPosition(SetobjectPosition[i]);
+	for (int i = 0; i < _countof(SetBlock); i++) {
+		SetBlock[i]->SetPosition(SetBlockPosition[i]);
 	}
 	//目印のマーク
-	Object* Markobject[OBJECT_NUM];
-	for (int i = 0; i < _countof(Markobject); i++) {
-		if (!Markobject[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	Block* MarkBlock[Block_NUM];
+	for (int i = 0; i < _countof(MarkBlock); i++) {
+		if (!MarkBlock[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 			assert(0);
 			return 1;
 		}
-		Markobject[i] = Object::Create();
-		Markobject[i]->Update(matview);
+		MarkBlock[i] = Block::Create();
+		MarkBlock[i]->Update(matview);
 	}
 
-	XMFLOAT3 MarkobjectPosition[OBJECT_NUM];
-	XMFLOAT4 MarkobjectColor[OBJECT_NUM];
-	for (int i = 0; i < _countof(Markobject); i++) {
-		MarkobjectColor[i] = Imageobject[i]->GetColor();
-		MarkobjectPosition[i] = { 0.0f,0.0f,134.0f };
+	XMFLOAT3 MarkBlockPosition[Block_NUM];
+	XMFLOAT4 MarkBlockColor[Block_NUM];
+	for (int i = 0; i < _countof(MarkBlock); i++) {
+		MarkBlockColor[i] = ImageBlock[i]->GetColor();
+		MarkBlockPosition[i] = { 0.0f,0.0f,134.0f };
 	}
-	for (int i = 0; i < _countof(Markobject); i++) {
-		Markobject[i]->SetPosition(MarkobjectPosition[i]);
+	for (int i = 0; i < _countof(MarkBlock); i++) {
+		MarkBlock[i]->SetPosition(MarkBlockPosition[i]);
 	}
 
 	//普通のブロック
 	const int FIELD_NUM = 20;
-	Object* Fieldobject[FIELD_NUM];
-	XMFLOAT3 FieldobjectPosition[FIELD_NUM];
-	XMFLOAT4 FieldobjectColor[FIELD_NUM];
-	for (int i = 0; i < _countof(Fieldobject); i++) {
-		if (!Fieldobject[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+	Block* FieldBlock[FIELD_NUM];
+	XMFLOAT3 FieldBlockPosition[FIELD_NUM];
+	XMFLOAT4 FieldBlockColor[FIELD_NUM];
+	for (int i = 0; i < _countof(FieldBlock); i++) {
+		if (!FieldBlock[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
 			assert(0);
 			return 1;
 		}
-		Fieldobject[i] = Object::Create();
-		Fieldobject[i]->Update(matview);
+		FieldBlock[i] = Block::Create();
+		FieldBlock[i]->Update(matview);
 	
 	}
 
 	for (int i = 0; i < 4; i++) {
-		FieldobjectPosition[i] = { -150 + ((float)i * 10),0,134 };
-		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+		FieldBlockPosition[i] = { -150 + ((float)i * 10),0,134 };
+		FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 	}
 
 	for (int i = 4; i < 10; i++) {
-		FieldobjectPosition[i] = { -100 + ((float)i * 10),0,134 };
-		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+		FieldBlockPosition[i] = { -100 + ((float)i * 10),0,134 };
+		FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 	}
 
 	for (int i = 10; i < 20; i++) {
-		FieldobjectPosition[i] = { -80 + ((float)i * 10),-70,134 };
-		Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+		FieldBlockPosition[i] = { -80 + ((float)i * 10),-70,134 };
+		FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 	}
 
 #pragma endregion
@@ -321,7 +323,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	 projector = Projector::Create();
 	 projector->Update(matview);
 
-	 XMFLOAT3 projectorPos = projector->GetPosition();
+	 XMFLOAT3 projectorPos;
+	 projectorPos = { 0,-20.0f,-70.0f };
+	 projector->SetPosition(projectorPos);
+
+	 Lever* lever;
+	 if (!lever->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		 assert(0);
+		 return 1;
+	 }
+	 lever = Lever::Create();
+	 lever->Update(matview);
+
+	 XMFLOAT3 leverPos;
+	 leverPos = { -4.0,-5.0f,-70.0f };
+	 lever->SetPosition(leverPos);
+	 XMFLOAT3 leverRota = lever->GetRotaition();
+	 Gear* gear[2];
+	 XMFLOAT3 gearPos[2];
+	 gearPos[0] = { 0.7f,0.0f,-72.0f };
+	 gearPos[1] = { 0.7f,-6.0f,-76.0f };
+	 XMFLOAT3 gearRota[2];
+	 for (int i = 0; i < 2; i++) {
+		 if (!gear[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+			 assert(0);
+			 return 1;
+		 }
+		 gear[i] = Gear::Create();
+		 gear[i]->Update(matview);
+		 gearRota[i] = gear[i]->GetRotaition();
+		 gear[i]->SetPosition(gearPos[i]);
+	 }
+
 #pragma endregion
 #pragma region//光源
 	 LightSource* lightSource;
@@ -421,16 +454,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int PlayerHitNumber = 0;
 #pragma endregion
 #pragma region//ライト変数
-	Light* light;
-	if (!light->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-		assert(0);
-		return 1;
+	const int Light_NUM = 20;
+
+	Light* light[Light_NUM];
+	XMFLOAT3 LightPosition[Light_NUM];
+	for (int i = 0; i < Light_NUM; i++) {
+		if (!light[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+			assert(0);
+			return 1;
+		}
+		light[i] = Light::Create();
+		light[i]->Update(matview);
+		LightPosition[i] = { 0,300.0f,0.0f };
+		light[i]->SetPosition(LightPosition[i]);
 	}
-	light = Light::Create();
-	light->Update(matview);
-	XMFLOAT3 LightPosition;
-	LightPosition = light->GetRotaition();
-	light->SetPosition(LightPosition);
 #pragma endregion
 #pragma region//アイテム変数
 	const int Item_NUM = 10;
@@ -509,29 +546,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (winApp->ProcessMessage()) {
 			break;
 		}
-		for (int i = 0; i < _countof(Imageobject); i++) {
-			ImageObjectPosition[i] = Imageobject[i]->GetPosition();
+		for (int i = 0; i < _countof(ImageBlock); i++) {
+			ImageBlockPosition[i] = ImageBlock[i]->GetPosition();
 			if (ItemCount != 0) {
-				Imageobject[i]->SetColor({ 0.0f,1.0f,0.0f,1.0 });
+				ImageBlock[i]->SetColor({ 0.0f,1.0f,0.0f,1.0 });
 			} else {
-				Imageobject[i]->SetColor({ 1.0f,0.0f,0.0f,1.0 });
+				ImageBlock[i]->SetColor({ 1.0f,0.0f,0.0f,1.0 });
 			}
-			Imageobject[i]->SetScale({ 1.0f,1.0f,1.0f});
+			ImageBlock[i]->SetScale({ 1.0f,1.0f,1.0f});
 		}
 
-		for (int i = 0; i < _countof(Setobject); i++) {
-			SetobjectPosition[i] = Setobject[i]->GetPosition();
-			SetobjectColor[i] = Setobject[i]->GetColor();
+		for (int i = 0; i < _countof(SetBlock); i++) {
+			SetBlockPosition[i] = SetBlock[i]->GetPosition();
+			SetBlockColor[i] = SetBlock[i]->GetColor();
 		}
 
-		for (int i = 0; i < _countof(Markobject); i++) {
-			Markobject[i]->SetColor({ 1.0f,0.0f,0.0f,1.0 });
+		for (int i = 0; i < _countof(MarkBlock); i++) {
+			MarkBlock[i]->SetColor({ 1.0f,0.0f,0.0f,1.0 });
 		}
 
-		for (int i = 0; i < _countof(Fieldobject); i++) {
-			Fieldobject[i]->SetColor({ 0.3f,0.3f,0.3f,1.0f });
+		for (int i = 0; i < _countof(FieldBlock); i++) {
+			FieldBlock[i]->SetColor({ 0.3f,0.3f,0.3f,1.0f });
 		}
-		LightPosition = light->GetPosition();
 		SpritePosition = sprite[0]->GetPosition();
 		
 #pragma region//更新処理
@@ -637,7 +673,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					kage[i] = { 0.0f,0.0f,screenPos.z };
 				}
 
-				for (int i = 0; i < OBJECT_NUM; i++) {
+				for (int i = 0; i < Block_NUM; i++) {
 					float a1;
 					float a2;
 					float b;
@@ -647,16 +683,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					float B;
 					float C;
 					float boxRadius = 1.0f;
-					a1 = (ImageObjectPosition[i].z - boxRadius) - projectorPos.z;
-					a2 = (ImageObjectPosition[i].z + boxRadius) - projectorPos.z;
+					a1 = (ImageBlockPosition[i].z - boxRadius) - projectorPos.z;
+					a2 = (ImageBlockPosition[i].z + boxRadius) - projectorPos.z;
 
-					b = boxRadius + (projectorPos.y - ImageObjectPosition[i].y);
+					b = boxRadius + (projectorPos.y - ImageBlockPosition[i].y);
 
-					c = (ImageObjectPosition[i].y + boxRadius) - projectorPos.y;
+					c = (ImageBlockPosition[i].y + boxRadius) - projectorPos.y;
 
 					A = screenPos.z - projectorPos.z;
 
-					if (abs(ImageObjectPosition[i].y - projectorPos.y) <= boxRadius) {
+					if (abs(ImageBlockPosition[i].y - projectorPos.y) <= boxRadius) {
 						B = (b * A) / a1;
 						C = (c * A) / a1;
 						float lineY = projectorPos.y - B;
@@ -665,14 +701,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						temp[1].y = lineLength;
 					}
 
-					else if (ImageObjectPosition[i].y < projectorPos.y) {
+					else if (ImageBlockPosition[i].y < projectorPos.y) {
 						B = (b * A) / a1;
 						C = (c * A) / a2;
 						float lineY = projectorPos.y - B;
 						float lineLength = B + C;
 						temp[0].y = lineY;
 						temp[1].y = lineLength;
-					} else if (ImageObjectPosition[i].y > projectorPos.y) {
+					} else if (ImageBlockPosition[i].y > projectorPos.y) {
 						B = (b * A) / a2;
 						C = (c * A) / a1;
 						float lineY = projectorPos.y - B;
@@ -681,30 +717,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						temp[1].y = lineLength;
 					}
 
-					a1 = (ImageObjectPosition[i].z - boxRadius) - projectorPos.z;
-					a2 = (ImageObjectPosition[i].z + boxRadius) - projectorPos.z;
+					a1 = (ImageBlockPosition[i].z - boxRadius) - projectorPos.z;
+					a2 = (ImageBlockPosition[i].z + boxRadius) - projectorPos.z;
 
-					b = boxRadius + (projectorPos.x - ImageObjectPosition[i].x);
+					b = boxRadius + (projectorPos.x - ImageBlockPosition[i].x);
 
-					c = (ImageObjectPosition[i].x + boxRadius) - projectorPos.x;
+					c = (ImageBlockPosition[i].x + boxRadius) - projectorPos.x;
 
 					A = screenPos.z - projectorPos.z;
 
-					if (abs(ImageObjectPosition[i].x - projectorPos.x) <= boxRadius) {
+					if (abs(ImageBlockPosition[i].x - projectorPos.x) <= boxRadius) {
 						B = (b * A) / a1;
 						C = (c * A) / a1;
 						float lineY = projectorPos.x - B;
 						float lineLength = B + C;
 						temp[2].x = lineY;
 						temp[3].x = lineLength;
-					} else if (ImageObjectPosition[i].x < projectorPos.x) {
+					} else if (ImageBlockPosition[i].x < projectorPos.x) {
 						B = (b * A) / a1;
 						C = (c * A) / a2;
 						float lineY = projectorPos.x - B;
 						float lineLength = B + C;
 						temp[2].x = lineY;
 						temp[3].x = lineLength;
-					} else if (ImageObjectPosition[i].x > projectorPos.x) {
+					} else if (ImageBlockPosition[i].x > projectorPos.x) {
 						B = (b * A) / a2;
 						C = (c * A) / a1;
 						float lineY = projectorPos.x - B;
@@ -722,42 +758,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				float kageYR = (kage[3].y - kage[0].y) / 2;
 				kage[0].x = kage[0].x + kageXR;
 				kage[0].y = kage[0].y + kageYR;
-				for (int i = 0; i < OBJECT_NUM; i++) {
+				for (int i = 0; i < Block_NUM; i++) {
 					if (SetFlag[i] == 0) {
 						//移動処理
 						if (input->PushKey(DIK_UP)) {
-							ImageObjectPosition[i].y += 0.5f;
+							ImageBlockPosition[i].y += 0.5f;
 						}
 
 						if (input->PushKey(DIK_DOWN)) {
-							ImageObjectPosition[i].y -= 0.5f;
+							ImageBlockPosition[i].y -= 0.5f;
 						}
 
 						if (input->PushKey(DIK_LEFT)) {
-							ImageObjectPosition[i].x -= 0.5f;
+							ImageBlockPosition[i].x -= 0.5f;
 							//PlayerRotation.z = 270;
 						}
 						if (input->PushKey(DIK_RIGHT)) {
-							ImageObjectPosition[i].x += 0.5f;
+							ImageBlockPosition[i].x += 0.5f;
 						}
-						MarkobjectPosition[i].x = kage[0].x;
-						MarkobjectPosition[i].y = kage[0].y;
-						MarkobjectPosition[i].z = 134.0f;
+						MarkBlockPosition[i].x = kage[0].x;
+						MarkBlockPosition[i].y = kage[0].y;
+						MarkBlockPosition[i].z = 134.0f;
 					}
 
 					//ブロックを置く処理
 					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0) && (ItemCount != 0)) {
 						ItemCount--;
 						SetFlag[i] = 1;
-						SetobjectPosition[i].x = kage[0].x;
-						SetobjectPosition[i].y = kage[0].y;
-						SetobjectPosition[i].z = 134.0f;
+						SetBlockPosition[i].x = kage[0].x;
+						SetBlockPosition[i].y = kage[0].y;
+						SetBlockPosition[i].z = 134.0f;
 						break;
 					}
 				}
 				//ジャンプ処理
 				PlayerPosition.y -= JumpG;
 				JumpG += 0.025f;
+				leverRota.z -= 3.0f;
+				for (int i = 0; i < 2; i++) {
+					gearRota[i].x += 3.0f;
+				}
 			}
 
 			//アニメーションタイマー
@@ -771,26 +811,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			//カメラ移動
 			//障害物との当たり判定
-			for (int i = 0; i < OBJECT_NUM; i++) {
+			for (int i = 0; i < Block_NUM; i++) {
 				if (SetFlag[i] == 1) {
-					if (SetobjectColor[i].w > 0.0f) {
+					if (SetBlockColor[i].w > 0.0f) {
 						//playerとブロック左辺の当たり判定
-						if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5.4,4 }, SetobjectPosition[i], { 7.5,4,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5.4,4 }, SetBlockPosition[i], { 7.5,4,4 }) == TRUE) {
 							PlayerPosition.x = OldPlayerPosition.x;
 						}
 						//playerとブロック右辺の当たり判定
-						if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5.4,4 }, SetobjectPosition[i], { 7.5,4,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5.4,4 }, SetBlockPosition[i], { 7.5,4,4 }) == TRUE) {
 							PlayerPosition.x = OldPlayerPosition.x;
 						}
 
 						//playerとブロック下辺の当たり判定
-						if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5.3,4 }, SetobjectPosition[i], { 3,5.3,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5.3,4 }, SetBlockPosition[i], { 3,5.3,4 }) == TRUE) {
 							PlayerPosition.y = OldPlayerPosition.y;
 							JumpG = 0.0f;
 						}
 
 						//playerとブロック上辺の当たり判定(高いところからだと死)
-						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, SetobjectPosition[i], { 3.2,5.2,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, SetBlockPosition[i], { 3.2,5.2,4 }) == TRUE) {
 							PlayerPosition.y = OldPlayerPosition.y;
 							if (JumpG >= 1.85f) {
 								PlayerAlive = 0;
@@ -805,25 +845,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			for (int i = 0; i < FIELD_NUM; i++) {
 				//playerとブロック左辺の当たり判定
-				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5.4,4 }, FieldobjectPosition[i], { 7.5,5.4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.5,5.4,4 }, FieldBlockPosition[i], { 7.5,5.4,4 }) == TRUE) {
 					PlayerHitNumber = 1;
 					PlayerPosition.x = OldPlayerPosition.x;
 				}
 				//playerとブロック右辺の当たり判定
-				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5.4,4 }, FieldobjectPosition[i], { 7.5,5.4,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.5,5.4,4 }, FieldBlockPosition[i], { 7.5,5.4,4 }) == TRUE) {
 					PlayerHitNumber = 2;
 					PlayerPosition.x = OldPlayerPosition.x;
 				}
 
 				//playerとブロック下辺の当たり判定
-				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5.3,4 }, FieldobjectPosition[i], { 3,5.3,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5.3,4 }, FieldBlockPosition[i], { 3,5.3,4 }) == TRUE) {
 					PlayerHitNumber = 3;
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
 
 				//playerとブロック上辺の当たり判定(高いところからだと死)
-				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, FieldobjectPosition[i], { 3.2,5.2,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, FieldBlockPosition[i], { 3.2,5.2,4 }) == TRUE) {
 					PlayerHitNumber = 4;
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpFlag = 0;
@@ -838,10 +878,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			//光とブロックの当たり判定
-			for (int i = 0; i < _countof(Setobject); i++) {
-				if (SetFlag[i] == 1) {
-					if (Boxcollision->CircleCollision(SetobjectPosition[i].x, SetobjectPosition[i].y, 3, LightPosition.x, LightPosition.y, 3) == 1) {
-						//SetobjectColor[i].w -= 0.01;
+			for (int i = 0; i < _countof(SetBlock); i++) {
+				for (int j = 0; j < Light_NUM; j++) {
+					if (SetFlag[i] == 1) {
+						if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 3, LightPosition[j].x, LightPosition[j].y, 3) == 1) {
+							//SetBlockColor[i].w -= 0.01;
+						}
 					}
 				}
 			}
@@ -916,13 +958,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			PlayerDirectionNumber = 0;
 			ItemCount = 0;
 			mode = 0;
-			for (int i = 0; i < _countof(Setobject); i++) {
-				SetobjectPosition[i] = { 0.0f,400.0f,0.0f };
+			for (int i = 0; i < _countof(SetBlock); i++) {
+				SetBlockPosition[i] = { 0.0f,400.0f,0.0f };
 				SetFlag[i] = 0;
 			}
 
-			for (int i = 0; i < _countof(Markobject); i++) {
-				MarkobjectPosition[i] = { 0.0f,0.0f,134.0f };
+			for (int i = 0; i < _countof(MarkBlock); i++) {
+				MarkBlockPosition[i] = { 0.0f,0.0f,134.0f };
 			}
 
 			for (int i = 0; i < Item_NUM; i++) {
@@ -930,29 +972,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemAlive[i] = 1;
 				item[i]->SetPosition(ItemPosition[i]);
 			}
-			for (int i = 0; i < _countof(Imageobject); i++) {
-				ImageObjectPosition[i] = { 0.0f,0.0f,70.0f };
+			for (int i = 0; i < _countof(ImageBlock); i++) {
+				ImageBlockPosition[i] = { 0.0f,0.0f,70.0f };
 			}
 
-			for (int i = 0; i < _countof(Fieldobject); i++) {
-				FieldobjectPosition[i] = { 0.0f,400.0f,0.0f };
+			for (int i = 0; i < _countof(FieldBlock); i++) {
+				FieldBlockPosition[i] = { 0.0f,400.0f,0.0f };
 			}
 
 			if (StageNumber == 1) {
 				PlayerPosition = { -140.0f,20.0f,135.0f };
 				for (int i = 0; i < 4; i++) {
-					FieldobjectPosition[i] = { -150 + ((float)i * 10),0,134 };
-					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+					FieldBlockPosition[i] = { -150 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				for (int i = 4; i < 10; i++) {
-					FieldobjectPosition[i] = { -100 + ((float)i * 10),0,134 };
-					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+					FieldBlockPosition[i] = { -100 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				for (int i = 10; i < 20; i++) {
-					FieldobjectPosition[i] = { -80 + ((float)i * 10),-70,134 };
-					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+					FieldBlockPosition[i] = { -80 + ((float)i * 10),-70,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				ItemPosition[0] = { -120,10,134 };
@@ -962,18 +1004,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			else if (StageNumber == 2) {
 				PlayerPosition = { -140.0f,20.0f,135.0f };
 				for (int i = 0; i < 5; i++) {
-					FieldobjectPosition[i] = { -150 + ((float)i * 10),0,134 };
-					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+					FieldBlockPosition[i] = { -150 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				for (int i = 5; i < 10; i++) {
-					FieldobjectPosition[i] = { -70 + ((float)i * 10),40,134 };
-					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+					FieldBlockPosition[i] = { -70 + ((float)i * 10),40,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				for (int i = 10; i < 15; i++) {
-					FieldobjectPosition[i] = { -20 + ((float)i * 10),-70,134 };
-					Fieldobject[i]->SetPosition({ FieldobjectPosition[i] });
+					FieldBlockPosition[i] = { -20 + ((float)i * 10),-70,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				ItemPosition[0] = { -120,10,134 };
@@ -983,35 +1025,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 #pragma endregion
 #pragma region//Update
-		for (int i = 0; i < _countof(Setobject); i++) {
-			Setobject[i]->Update(matview);
+		for (int i = 0; i < _countof(SetBlock); i++) {
+			SetBlock[i]->Update(matview);
 			//ルートシグネチャの設定コマンド
-			Setobject[i]->SetPosition(SetobjectPosition[i]);
-			Setobject[i]->SetColor(SetobjectColor[i]);
+			SetBlock[i]->SetPosition(SetBlockPosition[i]);
+			SetBlock[i]->SetColor(SetBlockColor[i]);
 		}
 
-		for (int i = 0; i < _countof(Imageobject); i++) {
-			Imageobject[i]->Update(matview);
+		for (int i = 0; i < _countof(ImageBlock); i++) {
+			ImageBlock[i]->Update(matview);
 			//ルートシグネチャの設定コマンド
-			Imageobject[i]->SetPosition(ImageObjectPosition[i]);
-			Imageobject[i]->SetColor(ImageObjectColor[i]);
+			ImageBlock[i]->SetPosition(ImageBlockPosition[i]);
+			ImageBlock[i]->SetColor(ImageBlockColor[i]);
 		}
 
-		for (int i = 0; i < _countof(Markobject); i++) {
-			Markobject[i]->Update(matview);
+		for (int i = 0; i < _countof(MarkBlock); i++) {
+			MarkBlock[i]->Update(matview);
 			//ルートシグネチャの設定コマンド
-			Markobject[i]->SetPosition(MarkobjectPosition[i]);
-			Markobject[i]->SetColor(MarkobjectColor[i]);
+			MarkBlock[i]->SetPosition(MarkBlockPosition[i]);
+			MarkBlock[i]->SetColor(MarkBlockColor[i]);
 		}
 
-		for (int i = 0; i < _countof(Fieldobject); i++) {
-			Fieldobject[i]->Update(matview);
+		for (int i = 0; i < _countof(FieldBlock); i++) {
+			FieldBlock[i]->Update(matview);
 		}
 
 		for (int i = 0; i < Item_NUM; i++) {
 			item[i]->Update(matview);
 			item[i]->SetPosition(ItemPosition[i]);
 		}
+
+		for (int i = 0; i < Light_NUM; i++) {
+			light[i]->SetPosition(LightPosition[i]);
+			light[i]->Update(matview);
+		}
+
+		for (int i = 0; i < 2; i++) {
+			gear[i]->SetRotaition(gearRota[i]);
+			gear[i]->Update(matview);
+		}
+
 		//移動のやつ
 		//カメラの注視点をプレイヤーの位置に固定
 		target2.m128_f32[2] = 0;
@@ -1034,9 +1087,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk2->Update(matview);
 		playerrightwalk3->Update(matview);
 		playerrightwalk4->Update(matview);
-		light->Update(matview);
+	
 		screen->Update(matview);
 		projector->Update(matview);
+		lever->Update(matview);
 		goal->Update(matview);
 		lightSource->Update(matview);
 		playerleftwalk->SetPosition(PlayerPosition);
@@ -1048,10 +1102,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk3->SetPosition(PlayerPosition);
 		playerrightwalk4->SetPosition(PlayerPosition);
 		screen->SetPosition({0,50,400});
-		projector->SetPosition({ 0,-20,-50 });
+		projector->SetPosition({ 0,-20,-70 });
+		lever->SetPosition(leverPos);
+		lever->SetRotaition(leverRota);
 		goal->SetPosition(GoalPosition);
-		lightSource->SetPosition({ 0,0,180 });
-		light->SetPosition(LightPosition);
+		lightSource->SetPosition({ 0,0,190 });
 	
 #pragma endregion
 #pragma endregion
@@ -1073,6 +1128,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
+
+			if (ImGui::TreeNode("lever"))
+			{
+				ImGui::SliderFloat("Position.x", &leverPos.x, 50, -50);
+				ImGui::SliderFloat("Position.y", &leverPos.y, 50, -50);
+				ImGui::SliderFloat("Position.z", &leverPos.z, 50, -50);
+				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
 			ImGui::TreePop();
 		}
 		ImGui::End();
@@ -1080,7 +1145,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Sprite::PreDraw(dxCommon->GetCmdList());
 	
 		Sprite::PostDraw();
-		Object::PreDraw(dxCommon->GetCmdList());
+		Block::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk2::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk3::PreDraw(dxCommon->GetCmdList());
@@ -1093,6 +1158,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		Screen::PreDraw(dxCommon->GetCmdList());
 		Projector::PreDraw(dxCommon->GetCmdList());
+		Lever::PreDraw(dxCommon->GetCmdList());
+		Gear::PreDraw(dxCommon->GetCmdList());
 		Goal::PreDraw(dxCommon->GetCmdList());
 		LightSource::PreDraw(dxCommon->GetCmdList());
 		Item::PreDraw(dxCommon->GetCmdList());
@@ -1101,8 +1168,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//background->Draw();
 			//スクリーン
 			screen->Draw();
-			//プロジェクター
-			projector->Draw();
+		
 			//プレイヤー
 			if (AnimetionCount == 0) {
 				if (PlayerDirectionNumber == 0) {
@@ -1142,25 +1208,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//ゴール
 			goal->Draw();
 			//ブロック
-			for (int i = 0; i < _countof(Fieldobject); i++) {
-				Fieldobject[i]->Draw();
+			for (int i = 0; i < _countof(FieldBlock); i++) {
+				FieldBlock[i]->Draw();
 			}
-			for (int i = 0; i < _countof(Setobject); i++) {
+			for (int i = 0; i < _countof(SetBlock); i++) {
 				if (SetFlag[i] == 1) {
-					if (SetobjectColor[i].w > 0.0f) {
-						Setobject[i]->Draw();
+					if (SetBlockColor[i].w > 0.0f) {
+						SetBlock[i]->Draw();
 					}
 				} 
 				else if((SetFlag[i] == 0) && (mode == 1) && (ItemCount != 0)) {
-					Markobject[i]->Draw();
+					MarkBlock[i]->Draw();
 				}
 			}
 
 			if (mode == 1) {
-				for (int i = 0; i < _countof(Imageobject); i++) {
-					Imageobject[i]->Draw();
+				for (int i = 0; i < _countof(ImageBlock); i++) {
+					ImageBlock[i]->Draw();
 				}
 				lightSource->Draw();
+			}
+
+			//プロジェクター
+			projector->Draw();
+			lever->Draw();
+			for (int i = 0; i < 2; i++) {
+				gear[i]->Draw();
 			}
 		}
 	
@@ -1195,7 +1268,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		Sprite::PostDraw();
 		// 3Dオブジェクト描画後処理
-		Object::PostDraw();
+		Block::PostDraw();
 		PlayerLeftWalk::PostDraw();
 		PlayerLeftWalk2::PostDraw();
 		PlayerLeftWalk3::PostDraw();
@@ -1208,6 +1281,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PostDraw();
 		Screen::PostDraw();
 		Projector::PostDraw();
+		Lever::PostDraw();
+		Gear::PostDraw();
 		Goal::PostDraw();
 		LightSource::PostDraw();
 		Item::PostDraw();
@@ -1233,22 +1308,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete playerrightwalk2;
 	delete playerrightwalk3;
 	delete playerrightwalk4;
-	delete light;
+	for (int i = 0; i < Light_NUM; i++) {
+		delete light[i];
+	}
 	for (int i = 0; i < Item_NUM; i++) {
 		delete item[i];
 	}
+	for (int i = 0; i < 2; i++) {
+		delete gear[i];
+	}
 	delete screen;
 	delete projector;
+	delete lever;
 	delete lightSource;
 	delete goal;
-	for (int i = 0; i < _countof(Imageobject); i++) {
-		delete Imageobject[i];
+	for (int i = 0; i < _countof(ImageBlock); i++) {
+		delete ImageBlock[i];
 	}
-	for (int i = 0; i < _countof(Markobject); i++) {
-		delete Markobject[i];
+	for (int i = 0; i < _countof(MarkBlock); i++) {
+		delete MarkBlock[i];
 	}
-	for (int i = 0; i < _countof(Fieldobject); i++) {
-		delete Fieldobject[i];
+	for (int i = 0; i < _countof(FieldBlock); i++) {
+		delete FieldBlock[i];
 	}
 	winApp = nullptr;
 	return 0;
