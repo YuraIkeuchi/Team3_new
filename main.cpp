@@ -492,7 +492,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	};
 #pragma endregion
 #pragma region//カメラ
-	XMVECTOR v0 = { 0,0,-50,0 };
+	XMVECTOR v0 = { 0,60,-140,0 };
 	XMMATRIX rotM;// = XMMatrixIdentity();
 	XMVECTOR eye2;
 	XMVECTOR target2 = { PlayerPosition.x, 0,0,0};
@@ -755,6 +755,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						break;
 					}
 				}
+				//ジャンプ処理
+				PlayerPosition.y -= JumpG;
+				JumpG += 0.025f;
 			}
 
 			//アニメーションタイマー
@@ -912,6 +915,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			PlayerAlive = 1;
 			PlayerDirectionNumber = 0;
 			ItemCount = 0;
+			mode = 0;
 			for (int i = 0; i < _countof(Setobject); i++) {
 				SetobjectPosition[i] = { 0.0f,400.0f,0.0f };
 				SetFlag[i] = 0;
