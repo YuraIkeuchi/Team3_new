@@ -143,6 +143,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(20, L"Resources/SecondText.png");
 	Sprite::LoadTexture(21, L"Resources/ThirdText.png");
 	Sprite::LoadTexture(22, L"Resources/FourText.png");
+	Sprite::LoadTexture(23, L"Resources/Film.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -156,6 +157,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	sprite[10] = Sprite::Create(20, { 0.0f,0.0f });
 	sprite[11] = Sprite::Create(21, { 0.0f,0.0f });
 	sprite[12] = Sprite::Create(22, { 0.0f,0.0f });
+	sprite[13] = Sprite::Create(23, { 0.0f,0.0f });
+	sprite[14] = Sprite::Create(23, { 0.0f,0.0f });
 	Sprite* spriteNumber[SpriteNumberMax] = { nullptr };
 	spriteNumber[0] = Sprite::Create(3, { 0.0f,0.0f });
 	spriteNumber[1] = Sprite::Create(4, { 0.0f,0.0f });
@@ -167,10 +170,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	spriteNumber[7] = Sprite::Create(10, { 0.0f,0.0f });
 	spriteNumber[8] = Sprite::Create(11, { 0.0f,0.0f });
 	spriteNumber[9] = Sprite::Create(12, { 0.0f,0.0f });
+	sprite[2]->SetPosition({ 100.0f,0.0f });
 	for (int i = 0; i < SpriteNumberMax; i++) {
 		spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
 		spriteNumber[i]->SetSize({ 120.0f,120.0f });
-		spriteNumber[i]->SetPosition({ 210,0 });
+		spriteNumber[i]->SetPosition({ 310,0 });
 	}
 
 	sprite[8]->SetPosition({ 0.0f,505.0f });
@@ -178,6 +182,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	for (int i = 9; i < 13; i++) {
 		sprite[i]->SetPosition({ 25.0f,545.0f });
 	}
+
+	XMFLOAT2 FilmPos[2];
+	FilmPos[0] = { 0,-720 };
+	FilmPos[1] = { 0,0 };
+	sprite[13]->SetPosition(FilmPos[0]);
+	sprite[14]->SetPosition(FilmPos[1]);
 	int ExplanationNumber = 0;
 	int TextNumber = 0;
 #pragma endregion
@@ -448,7 +458,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	playerrightwalk4->Update(matview);
 #pragma endregion
 	XMFLOAT3 PlayerPosition;
-	PlayerPosition = { -140.0f,10.0f,135.0f };
+	PlayerPosition = { -140.0f,20.0f,135.0f };
 	
 	XMFLOAT3 OldPlayerPosition;
 	XMFLOAT3 PlayerRotation;
@@ -659,7 +669,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			OldPlayerPosition.y = PlayerPosition.y;
 			OldPlayerPosition.z = PlayerPosition.z;
 			//プレイ中のプレイヤー移動
-			if (mode == 0) {
+			if ((mode == 0) && (modeflag == 1)) {
 				//移動処理
 				if (input->PushKey(DIK_LEFT)) {
 					PlayerPosition.x -= 0.5f;
@@ -940,6 +950,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (PlayerAlive == 0) {
 				Scene = gameOver;
 			}
+
+			for (int i = 0; i < 2; i++) {
+				FilmPos[i].y += 2.0f;
+
+				if (FilmPos[i].y >= 720) {
+					FilmPos[i].y = -720;
+				}
+
+				sprite[13]->SetPosition(FilmPos[0]);
+				sprite[14]->SetPosition(FilmPos[1]);
+			}
 		}
 
 #pragma region//ステージクリア
@@ -1140,32 +1161,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		dxCommon->PreDraw();
 		////4.描画コマンドここから
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		ImGui::Begin("test");
+		/*ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
-			if (ImGui::TreeNode("Player"))
+			if (ImGui::TreeNode("Film"))
 			{
 				ImGui::Text("playerHitNumber,%d", PlayerHitNumber);
-				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
-				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
-				ImGui::SliderFloat("Position.z", &PlayerPosition.z, 50, -50);
+				ImGui::SliderFloat("Position.x", &FilmPos[0].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &FilmPos[0].y, 50, -50);
 				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("lever"))
+			if (ImGui::TreeNode("Film"))
 			{
-				ImGui::SliderFloat("Position.x", &leverPos.x, 50, -50);
-				ImGui::SliderFloat("Position.y", &leverPos.y, 50, -50);
-				ImGui::SliderFloat("Position.z", &leverPos.z, 50, -50);
+				ImGui::Text("playerHitNumber,%d", PlayerHitNumber);
+				ImGui::SliderFloat("Position.x", &FilmPos[1].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &FilmPos[1].y, 50, -50);
 				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
+
 			ImGui::TreePop();
 		}
-		ImGui::End();
+		ImGui::End();*/
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
 	
@@ -1278,6 +1299,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		else if (Scene == gamePlay) {
 			sprite[2]->Draw();
 			spriteNumber[ItemCount]->Draw();
+			if (modeflag == 1 && mode == 0) {
+				sprite[13]->Draw();
+				sprite[14]->Draw();
+			}
 			if (StageNumber == 1) {
 				sprite[8]->Draw();
 				if (TextNumber == 0) {
