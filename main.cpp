@@ -668,14 +668,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			if (mode == 1) {
 				v0.m128_f32[2] -= 3.5f;
+				v0.m128_f32[1] += 0.5f;
 				if (v0.m128_f32[2] <= -135.0f) {
 					v0.m128_f32[2] = -135.0f;
-					v0.m128_f32[1] += 2.8f;
+		
 				}
-				if (v0.m128_f32[1] >= 30.0f) {
-					v0.m128_f32[1] = 30.0f;
+				if (v0.m128_f32[1] >= 33.0f) {
+					v0.m128_f32[1] = 33.0f;
 				}
-				if (v0.m128_f32[2] == -135.0f && v0.m128_f32[1] == 30.0f) {
+				if (v0.m128_f32[2] == -135.0f && v0.m128_f32[1] == 33.0f) {
 					modeflag = 0;
 				}
 			}
@@ -1170,9 +1171,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk2->SetPosition(PlayerPosition);
 		playerrightwalk3->SetPosition(PlayerPosition);
 		playerrightwalk4->SetPosition(PlayerPosition);
-		screen->SetPosition({0,50,400});
+		screen->SetPosition({0,0,400});
 		projector->SetPosition({ 0,-20,-70 });
-		under->SetPosition({ -40,130,150 });
+		under->SetPosition({ -32,115,150 });
 		lever->SetPosition(leverPos);
 		lever->SetRotaition(leverRota);
 		goal->SetPosition(GoalPosition);

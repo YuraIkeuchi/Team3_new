@@ -323,7 +323,7 @@ bool Under::InitializeGraphicsPipeline() {
 
 	return true;
 }
-
+ 
 bool Under::LoadTexture() {
 	HRESULT result = S_FALSE;
 
