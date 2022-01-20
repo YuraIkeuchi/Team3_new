@@ -114,7 +114,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return 0;
 	}
 
-	const int SpriteMax = 20;
+	const int SpriteMax = 30;
 	const int SpriteNumberMax = 10;
 	Sprite* sprite[SpriteMax] = { nullptr };
 	// スプライト共通テクスチャ読み込み
@@ -138,6 +138,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(15, L"Resources/GAMEOVER.png");
 	Sprite::LoadTexture(16, L"Resources/EXPLATION.png");
 	Sprite::LoadTexture(17, L"Resources/EXPLATION2.png");
+	Sprite::LoadTexture(18, L"Resources/TextUI.png");
+	Sprite::LoadTexture(19, L"Resources/FirstText.png");
+	Sprite::LoadTexture(20, L"Resources/SecondText.png");
+	Sprite::LoadTexture(21, L"Resources/ThirdText.png");
+	Sprite::LoadTexture(22, L"Resources/FourText.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -146,6 +151,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	sprite[5] = Sprite::Create(15, { 0.0f,0.0f });
 	sprite[6] = Sprite::Create(16, { 0.0f,0.0f });
 	sprite[7] = Sprite::Create(17, { 0.0f,0.0f });
+	sprite[8] = Sprite::Create(18, { 0.0f,0.0f });
+	sprite[9] = Sprite::Create(19, { 0.0f,0.0f });
+	sprite[10] = Sprite::Create(20, { 0.0f,0.0f });
+	sprite[11] = Sprite::Create(21, { 0.0f,0.0f });
+	sprite[12] = Sprite::Create(22, { 0.0f,0.0f });
 	Sprite* spriteNumber[SpriteNumberMax] = { nullptr };
 	spriteNumber[0] = Sprite::Create(3, { 0.0f,0.0f });
 	spriteNumber[1] = Sprite::Create(4, { 0.0f,0.0f });
@@ -162,7 +172,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		spriteNumber[i]->SetSize({ 120.0f,120.0f });
 		spriteNumber[i]->SetPosition({ 210,0 });
 	}
+
+	sprite[8]->SetPosition({ 0.0f,505.0f });
+	sprite[8]->SetSize({ 600.0f,200.0f });
+	for (int i = 9; i < 13; i++) {
+		sprite[i]->SetPosition({ 25.0f,545.0f });
+	}
 	int ExplanationNumber = 0;
+	int TextNumber = 0;
 #pragma endregion
 #pragma region//オーディオ
 	const int AudioMax = 3;
@@ -610,6 +627,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				mode = 0;
 			}
 
+#pragma region//プレイ画面
 			if (mode == 0) {
 				v0.m128_f32[2] += 1.5f;
 				v0.m128_f32[1] -= 1.0f;
@@ -664,8 +682,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				PlayerPosition.y -= JumpG;
 				JumpG += 0.025f;
 			}
-
-			//設置画面
+#pragma endregion
+#pragma region//設置画面
 			if (mode == 1) {
 				XMFLOAT3 temp[4];
 				for (int i = 0; i < 4; i++) {
@@ -788,6 +806,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						SetBlockPosition[i].x = kage[0].x;
 						SetBlockPosition[i].y = kage[0].y;
 						SetBlockPosition[i].z = 134.0f;
+						TextNumber++;
 						break;
 					}
 				}
@@ -799,6 +818,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					gearRota[i].x += 3.0f;
 				}
 			}
+#pragma endregion
 
 			//アニメーションタイマー
 			if (AnimetionTimer >= 8) {
@@ -808,8 +828,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (AnimetionCount == 4) {
 				AnimetionCount = 0;
 			}
-
-			//カメラ移動
+#pragma region//当たり判定
 			//障害物との当たり判定
 			for (int i = 0; i < Block_NUM; i++) {
 				if (SetFlag[i] == 1) {
@@ -894,6 +913,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, ItemPosition[i].x, ItemPosition[i].y, 3) == 1) {
 						ItemCount++;
 						ItemAlive[i] = 0;
+						TextNumber++;
 					}
 				}
 			}
@@ -908,6 +928,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
+			if ((TextNumber == 1) && input->TriggerKey(DIK_M)) {
+				TextNumber++;
+			}
+#pragma endregion
 			//画面外で死
 			if (PlayerPosition.y <= -130) {
 				PlayerAlive = 0;
@@ -958,6 +982,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			PlayerDirectionNumber = 0;
 			ItemCount = 0;
 			mode = 0;
+			TextNumber = 0;
 			for (int i = 0; i < _countof(SetBlock); i++) {
 				SetBlockPosition[i] = { 0.0f,400.0f,0.0f };
 				SetFlag[i] = 0;
@@ -1253,6 +1278,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		else if (Scene == gamePlay) {
 			sprite[2]->Draw();
 			spriteNumber[ItemCount]->Draw();
+			if (StageNumber == 1) {
+				sprite[8]->Draw();
+				if (TextNumber == 0) {
+					sprite[9]->Draw();
+				} else if (TextNumber == 1) {
+					sprite[10]->Draw();
+				} else if (TextNumber == 2) {
+					sprite[11]->Draw();
+				} else {
+					sprite[12]->Draw();
+				}
+			}
 		}
 
 		else if (Scene == stageClear) {
