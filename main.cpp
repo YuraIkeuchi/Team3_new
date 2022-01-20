@@ -36,6 +36,7 @@
 #include "Goal.h"
 #include "Lever.h"
 #include "Gear.h"
+#include "under.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -365,6 +366,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	 XMFLOAT3 leverPos;
 	 leverPos = { -4.0,-5.0f,-70.0f };
 	 lever->SetPosition(leverPos);
+
+	 Under* under;
+	 if (!under->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		 assert(0);
+		 return 1;
+	 }
+	 under = Under::Create();
+	 under->Update(matview);
+
+	 XMFLOAT3 underPos;
+	 underPos = { -100,-50.0f,-70.0f };
+	 under->SetPosition(underPos);
 	 XMFLOAT3 leverRota = lever->GetRotaition();
 	 Gear* gear[2];
 	 XMFLOAT3 gearPos[2];
@@ -636,31 +649,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			{
 				mode = 0;
 			}
-
+		
 #pragma region//プレイ画面
 			if (mode == 0) {
-				v0.m128_f32[2] += 1.5f;
-				v0.m128_f32[1] -= 1.0f;
+				v0.m128_f32[1] -= 3.0f;
+				v0.m128_f32[2] += 2.7f;
 				if (v0.m128_f32[2] >= -20.0f) {
 					v0.m128_f32[2] = -20.0f;
 				}
 				if (v0.m128_f32[1] <= 0.0f) {
 					v0.m128_f32[1] = 0.0f;
+
 				}
+				
 				if (v0.m128_f32[2] == -20.0f && v0.m128_f32[1] == 0.0f) {
 					modeflag = 1;
 				}
 			}
 			if (mode == 1) {
-				v0.m128_f32[2] -= 1.5f;
-				v0.m128_f32[1] += 1.0f;
-				if (v0.m128_f32[2] <= -140.0f) {
-					v0.m128_f32[2] = -140.0f;
+				v0.m128_f32[2] -= 3.5f;
+				if (v0.m128_f32[2] <= -135.0f) {
+					v0.m128_f32[2] = -135.0f;
+					v0.m128_f32[1] += 2.8f;
 				}
-				if (v0.m128_f32[1] >= 60.0f) {
-					v0.m128_f32[1] = 60.0f;
+				if (v0.m128_f32[1] >= 30.0f) {
+					v0.m128_f32[1] = 30.0f;
 				}
-				if (v0.m128_f32[2] == -140.0f && v0.m128_f32[1] == 60.0f) {
+				if (v0.m128_f32[2] == -135.0f && v0.m128_f32[1] == 30.0f) {
 					modeflag = 0;
 				}
 			}
@@ -672,25 +687,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if ((mode == 0) && (modeflag == 1)) {
 				//移動処理
 				if (input->PushKey(DIK_LEFT)) {
-					PlayerPosition.x -= 0.5f;
+					PlayerPosition.x -= 0.6f;
 					AnimetionTimer++;
 					PlayerDirectionNumber = 1;
 				}
 				if (input->PushKey(DIK_RIGHT)) {
-					PlayerPosition.x += 0.5f;
+					PlayerPosition.x += 0.6f;
 					AnimetionTimer++;
 					PlayerDirectionNumber = 0;
 				}
-
+				if (JumpFlag == 1) {
+					if (input->PushKey(DIK_RIGHT)) {
+						PlayerPosition.x += 0.1f;
+					}
+					if (input->PushKey(DIK_LEFT)) {
+						PlayerPosition.x -= 0.1f;
+					}
+				}
 				//ジャンプ処理
 				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && ( JumpG >= 0.0f) && (JumpG <= 0.1f)) {
-					JumpG = -1.0f;
+					JumpG = -1.2f;
 					JumpFlag = 1;
 				}
 
 				//ジャンプ処理
 				PlayerPosition.y -= JumpG;
-				JumpG += 0.025f;
+				JumpG += 0.05f;
 			}
 #pragma endregion
 #pragma region//設置画面
@@ -790,19 +812,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					if (SetFlag[i] == 0) {
 						//移動処理
 						if (input->PushKey(DIK_UP)) {
-							ImageBlockPosition[i].y += 0.5f;
+							ImageBlockPosition[i].y += 1.0f;
 						}
 
 						if (input->PushKey(DIK_DOWN)) {
-							ImageBlockPosition[i].y -= 0.5f;
+							ImageBlockPosition[i].y -= 1.0f;
 						}
 
 						if (input->PushKey(DIK_LEFT)) {
-							ImageBlockPosition[i].x -= 0.5f;
+							ImageBlockPosition[i].x -= 1.0f;
 							//PlayerRotation.z = 270;
 						}
 						if (input->PushKey(DIK_RIGHT)) {
-							ImageBlockPosition[i].x += 0.5f;
+							ImageBlockPosition[i].x += 1.0f;
 						}
 						MarkBlockPosition[i].x = kage[0].x;
 						MarkBlockPosition[i].y = kage[0].y;
@@ -1136,6 +1158,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	
 		screen->Update(matview);
 		projector->Update(matview);
+		under->Update(matview);
 		lever->Update(matview);
 		goal->Update(matview);
 		lightSource->Update(matview);
@@ -1149,10 +1172,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk4->SetPosition(PlayerPosition);
 		screen->SetPosition({0,50,400});
 		projector->SetPosition({ 0,-20,-70 });
+		under->SetPosition({ -40,130,150 });
 		lever->SetPosition(leverPos);
 		lever->SetRotaition(leverRota);
 		goal->SetPosition(GoalPosition);
-		lightSource->SetPosition({ 0,0,190 });
+		lightSource->SetPosition({ 0,80,190 });
 	
 #pragma endregion
 #pragma endregion
@@ -1204,6 +1228,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PreDraw(dxCommon->GetCmdList());
 		Screen::PreDraw(dxCommon->GetCmdList());
 		Projector::PreDraw(dxCommon->GetCmdList());
+		Under::PreDraw(dxCommon->GetCmdList());
 		Lever::PreDraw(dxCommon->GetCmdList());
 		Gear::PreDraw(dxCommon->GetCmdList());
 		Goal::PreDraw(dxCommon->GetCmdList());
@@ -1213,8 +1238,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Scene == gamePlay) {
 			//background->Draw();
 			//スクリーン
+
 			screen->Draw();
-		
+	
 			//プレイヤー
 			if (AnimetionCount == 0) {
 				if (PlayerDirectionNumber == 0) {
@@ -1274,9 +1300,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 				lightSource->Draw();
 			}
-
+			under->Draw();
 			//プロジェクター
 			projector->Draw();
+		
 			lever->Draw();
 			for (int i = 0; i < 2; i++) {
 				gear[i]->Draw();
@@ -1343,6 +1370,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BackGround::PostDraw();
 		Screen::PostDraw();
 		Projector::PostDraw();
+		Under::PostDraw();
 		Lever::PostDraw();
 		Gear::PostDraw();
 		Goal::PostDraw();
@@ -1381,6 +1409,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	delete screen;
 	delete projector;
+	delete under;
 	delete lever;
 	delete lightSource;
 	delete goal;
