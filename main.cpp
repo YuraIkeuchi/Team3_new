@@ -145,6 +145,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(21, L"Resources/ThirdText.png");
 	Sprite::LoadTexture(22, L"Resources/FourText.png");
 	Sprite::LoadTexture(23, L"Resources/Film.png");
+	Sprite::LoadTexture(24, L"Resources/NewSceneCut4.png");
+	Sprite::LoadTexture(25, L"Resources/NewSceneCut3.png");
+	Sprite::LoadTexture(26, L"Resources/NewSceneCut2.png");
+	Sprite::LoadTexture(27, L"Resources/NewSceneCut1.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -171,6 +175,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	spriteNumber[7] = Sprite::Create(10, { 0.0f,0.0f });
 	spriteNumber[8] = Sprite::Create(11, { 0.0f,0.0f });
 	spriteNumber[9] = Sprite::Create(12, { 0.0f,0.0f });
+	const int SceneCutMax = 4;
+	Sprite* SpriteSceneCut[SceneCutMax] = { nullptr };
+	SpriteSceneCut[0] = Sprite::Create(24, { 0.0f,0.0f });
+	SpriteSceneCut[1] = Sprite::Create(25, { 0.0f,0.0f });
+	SpriteSceneCut[2] = Sprite::Create(26, { 0.0f,0.0f });
+	SpriteSceneCut[3] = Sprite::Create(27, { 0.0f,0.0f });
 	sprite[2]->SetPosition({ 100.0f,0.0f });
 	for (int i = 0; i < SpriteNumberMax; i++) {
 		spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
@@ -202,33 +212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
 	//audio->LoopWave(0, 0.5f);
 #pragma endregion
-#pragma region//デスクリプタやシェーダリソースビュー
-	//定数バッファ用でスクリプタヒープの生成
-	ComPtr<ID3D12DescriptorHeap>basicDescHeap;
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-	descHeapDesc.NumDescriptors = constantBufferNum + 1;
 
-	result = dxCommon->GetDev()->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&basicDescHeap));
-
-	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc{};
-
-	auto basicHeapHandle0 = CD3DX12_CPU_DESCRIPTOR_HANDLE(basicDescHeap->GetCPUDescriptorHandleForHeapStart(),
-		0, dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-
-	//2
-	auto basicHeapHandle1 = CD3DX12_CPU_DESCRIPTOR_HANDLE(basicDescHeap->GetCPUDescriptorHandleForHeapStart(),
-		1, dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-
-	//シェーダリソースビューのアドレス計算処理
-	D3D12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV = basicDescHeap->GetCPUDescriptorHandleForHeapStart();
-	D3D12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV = basicDescHeap->GetGPUDescriptorHandleForHeapStart();
-
-	//ハンドルのアドレスを進める
-	cpuDescHandleSRV.ptr += constantBufferNum * dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	gpuDescHandleSRV.ptr += constantBufferNum * dxCommon->GetDev()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-#pragma endregion
 #pragma region//キー処理
 	//入力の初期化
 	input = new Input();
@@ -559,6 +543,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int StageNumber = 1;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
+	int CutTimer = 0;
+	int CutCount = 0;
 	enum Scene {
 		title,
 		explation,
@@ -638,7 +624,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//ゲームプレイ中
 		if (Scene == gamePlay) {
+			CutTimer++;
+			if (CutTimer == 8) {
+				CutCount++;
+				CutTimer = 0;
+			}
 
+			if (CutCount == 4) {
+				CutCount = 0;
+			}
 			//カメラ
 			if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 			{
@@ -1343,6 +1337,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					sprite[12]->Draw();
 				}
 			}
+
+			SpriteSceneCut[CutCount]->Draw();
 		}
 
 		else if (Scene == stageClear) {
