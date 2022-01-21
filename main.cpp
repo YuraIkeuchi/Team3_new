@@ -201,6 +201,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	sprite[14]->SetPosition(FilmPos[1]);
 	int ExplanationNumber = 0;
 	int TextNumber = 0;
+	XMFLOAT2 SceneCutPos = {1280,0};
+	for (int i = 0; i < SceneCutMax; i++) {
+		SpriteSceneCut[i]->SetPosition(SceneCutPos);
+	}
+	int SceneCutFlag = 0;
 #pragma endregion
 #pragma region//オーディオ
 	const int AudioMax = 3;
@@ -624,15 +629,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//ゲームプレイ中
 		if (Scene == gamePlay) {
-			CutTimer++;
-			if (CutTimer == 8) {
-				CutCount++;
-				CutTimer = 0;
-			}
-
-			if (CutCount == 4) {
-				CutCount = 0;
-			}
+		
 			//カメラ
 			if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 			{
@@ -878,11 +875,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						//playerとブロック上辺の当たり判定(高いところからだと死)
 						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, SetBlockPosition[i], { 3.2,5.2,4 }) == TRUE) {
 							PlayerPosition.y = OldPlayerPosition.y;
-							if (JumpG >= 1.85f) {
-								PlayerAlive = 0;
-							} else {
-								JumpG = 0.0f;
-							}
+							JumpG = 0.0f;
 							JumpFlag = 0;
 						}
 					}
@@ -902,22 +895,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 
 				//playerとブロック下辺の当たり判定
-				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5.3,4 }, FieldBlockPosition[i], { 3,5.3,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,5.5,4 }, FieldBlockPosition[i], { 3,5.5,4 }) == TRUE) {
 					PlayerHitNumber = 3;
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
 
 				//playerとブロック上辺の当たり判定(高いところからだと死)
-				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.2,4 }, FieldBlockPosition[i], { 3.2,5.2,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.2,5.5,4 }, FieldBlockPosition[i], { 3.2,5.5,4 }) == TRUE) {
 					PlayerHitNumber = 4;
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpFlag = 0;
-					if (JumpG >= 1.85f) {
-						PlayerAlive = 0;
-					} else {
-						JumpG = 0.0f;
-					}
+					JumpG = 0.0f;
 				} else {
 					PlayerHitNumber = 0;
 				}
@@ -947,11 +936,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			//ゴール判定
 			if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, GoalPosition.x, GoalPosition.y, 3) == 1) {
-				StageNumber++;
-				if (StageNumber != 3) {
+				SceneCutFlag = 1;
+			/*	if (StageNumber != 3) {
 					Scene = stageClear;
 				} else {
 					Scene = gameClear;
+				}*/
+			}
+
+			if (SceneCutFlag == 1) {
+
+			
+				if (SceneCutPos.x != 0.0f) {
+					SceneCutPos.x -= 10.0f;
+				}
+
+				if (SceneCutPos.x == 10.0f) {
+					StageNumber++;
+				}
+
+				else if (SceneCutPos.x == 0.0f) {
+					CutTimer++;
+					ResetFlag = 1;
+				}
+			
+				if (CutTimer == 8 && CutCount != 4) {
+					CutCount++;
+					CutTimer = 0;
+					
+				}
+				if (CutCount == 4) {
+					SceneCutFlag = 0;
+					ResetFlag = 0;
 				}
 			}
 
@@ -978,17 +994,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				sprite[13]->SetPosition(FilmPos[0]);
 				sprite[14]->SetPosition(FilmPos[1]);
 			}
+
+			for (int i = 0; i < SceneCutMax; i++) {
+				SpriteSceneCut[i]->SetPosition(SceneCutPos);
+			}
 		}
 
 #pragma region//ステージクリア
-		if (Scene == stageClear) {
-			ResetFlag = 1;
+	/*	if (Scene == stageClear) {
+			
 			if (input->TriggerKey(DIK_SPACE)) {
 				Scene = gamePlay;
-				ResetFlag = 0;
 			
 			}
-		}
+		}*/
 #pragma endregion
 #pragma region//ゲームオーバー
 		if (Scene == gameOver) {
@@ -1180,20 +1199,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		dxCommon->PreDraw();
 		////4.描画コマンドここから
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		/*ImGui::Begin("test");
+		ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
 			if (ImGui::TreeNode("Film"))
 			{
-				ImGui::Text("playerHitNumber,%d", PlayerHitNumber);
-				ImGui::SliderFloat("Position.x", &FilmPos[0].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &FilmPos[0].y, 50, -50);
+				ImGui::Text("modeFlag,%d", modeflag);
+				ImGui::Text("ResetFlag,%d", ResetFlag);
+				ImGui::Text("SyageNumber,%d", StageNumber);
+				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
+				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("Film"))
+			/*if (ImGui::TreeNode("Film"))
 			{
 				ImGui::Text("playerHitNumber,%d", PlayerHitNumber);
 				ImGui::SliderFloat("Position.x", &FilmPos[1].x, 50, -50);
@@ -1201,11 +1222,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
-			}
+			}*/
 
 			ImGui::TreePop();
 		}
-		ImGui::End();*/
+		ImGui::End();
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
 	
@@ -1338,7 +1359,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
-			SpriteSceneCut[CutCount]->Draw();
+			if (SceneCutFlag == 1) {
+				SpriteSceneCut[CutCount]->Draw();
+			}
 		}
 
 		else if (Scene == stageClear) {
