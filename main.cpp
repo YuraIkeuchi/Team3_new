@@ -80,7 +80,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region//構造体
 	
 	const int constantBufferNum = 128;
-	const int Block_NUM = 5;
+	const int Block_NUM = 30;
 #pragma endregion
 #pragma region//行列
 	//射影変換行列の作り
@@ -675,12 +675,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//プレイ中のプレイヤー移動
 			if ((mode == 0) && (modeflag == 1) && (SceneCutFlag == 0)) {
 				//移動処理
-				if (input->PushKey(DIK_LEFT)) {
+				if (input->PushKey(DIK_LEFT) && PlayerPosition.x >= -140.0f) {
 					PlayerPosition.x -= 0.6f;
 					AnimetionTimer++;
 					PlayerDirectionNumber = 1;
 				}
-				if (input->PushKey(DIK_RIGHT)) {
+				if (input->PushKey(DIK_RIGHT) && PlayerPosition.x <= 140.0f) {
 					PlayerPosition.x += 0.6f;
 					AnimetionTimer++;
 					PlayerDirectionNumber = 0;
@@ -956,7 +956,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					ResetFlag = 0;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 3) {
+					if (StageNumber == 4) {
 						Scene = gameClear;
 					}
 				}
@@ -1075,7 +1075,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			else if (StageNumber == 2) {
-				GoalPosition = { 0.0f, 10.0f, 134.0f };
+				GoalPosition = { 110.0f, 10.0f, 134.0f };
 				PlayerPosition = { -140.0f,20.0f,135.0f };
 				for (int i = 0; i < 10; i++) {
 					FieldBlockPosition[i] = { -150 + ((float)i * 10),0,134 };
@@ -1090,6 +1090,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemPosition[0] = { -120,10,134 };
 				ItemPosition[1] = { -100,10,134 };
 				ItemPosition[2] = { -80,10,134 };
+			}
+
+			else if (StageNumber == 3) {
+				GoalPosition = { -110.0f, 10.0f, 134.0f };
+				PlayerPosition = { -140.0f,-40.0f,135.0f };
+				for (int i = 0; i < 10; i++) {
+					FieldBlockPosition[i] = { -150 + ((float)i * 10),-80,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 10; i < 20; i++) {
+					FieldBlockPosition[i] = { -20 + ((float)i * 10),-40,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 20; i < 30; i++) {
+					FieldBlockPosition[i] = { -350 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				ItemPosition[0] = { -120,-70,134 };
+				ItemPosition[1] = { -100,-70,134 };
+				ItemPosition[2] = { -80,-70,134 };
+				ItemPosition[3] = { -60,-70,134 };
+				ItemPosition[4] = { 80, -30,134 };
+				ItemPosition[5] = { 50, -15,134 };
+				ItemPosition[6] = { 20,  0,134 };
+				ItemPosition[7] = { -10,  15,134 };
 			}
 		}
 #pragma endregion
@@ -1218,6 +1246,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ImGui::Text("SceneCutFlag,%d", SceneCutFlag);
 				ImGui::SliderFloat("Position.x", &SceneCutPos.x, 50, -50);
 				ImGui::SliderFloat("Position.y", &SceneCutPos.y, 50, -50);
+				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
+				ImGui::Unindent();
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Field"))
+			{
+				ImGui::SliderFloat("Position.x", &FieldBlockPosition[20].x, 50, -50);
+				ImGui::SliderFloat("Position.y", &FieldBlockPosition[20].y, 50, -50);
 				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
