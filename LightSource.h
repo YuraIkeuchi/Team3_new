@@ -134,12 +134,11 @@ public: // メンバ関数//
 	void SetColor(XMFLOAT4 color) { this->color = color; }
 	//カメラをその位置に移動させる処理
 	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
-private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// 色
 	XMFLOAT4 color = { 0.8,0.8,0.0,0.2 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 32.0,32.0,25.0 };
+	XMFLOAT3 scale = { 35.0,35.0,25.0 };
 	// X,Y,Z軸回りのローカル回転角
 	XMFLOAT3 rotation = { 0,0,135 };
 	// ローカル座標

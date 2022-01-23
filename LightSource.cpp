@@ -399,7 +399,7 @@ void LightSource::CreateModel()
 
 	const float topHeight = 10.0f;
 	const int DIV = 4;
-	const float radius = 10.0f;
+	const float radius = 7.8f;
 	VertexPosNormalUv vertices[DIV + 1 + 1] = {};
 
 	for (int i = 0; i < DIV; i++) {

@@ -11,7 +11,6 @@
 #include<DirectXTex.h>
 #include<wrl.h>
 #include <stdio.h>
-
 #include "Input.h"
 #include "WinApp.h"
 #include "DirectXCommon.h"
@@ -548,9 +547,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int SpaceCount = 0;
 	int CutTimer = 0;
 	int CutCount = 0;
+	int LightCount = 0;
+	int LightFlag = 0;
+	int AppearanceCount = 0;
 	enum Scene {
 		title,
 		explation,
+		appearance,
 		gamePlay,
 		gameOver,
 		stageClear,
@@ -558,11 +561,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	};
 #pragma endregion
 #pragma region//カメラ
-	XMVECTOR v0 = { 0,60,-140,0 };
+	XMVECTOR v0 = { 50,60,-140,0 };
 	XMMATRIX rotM;// = XMMatrixIdentity();
 	XMVECTOR eye2;
 	XMVECTOR target2 = { PlayerPosition.x, 0,0,0};
 	XMVECTOR up2 = { 0,0.0f,0,0 };
+	XMFLOAT3 targetPosition = { 0.0f,0.0f,0.0f };
 #pragma endregion
 #pragma region//当たり判定
 	Collision* Boxcollision = nullptr;
@@ -619,14 +623,50 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			if (SpaceCount == 2) {
-				Scene = gamePlay;
+				Scene = appearance;
 				SpaceCount = 0;
+				targetPosition = { projectorPos.x,projectorPos.y,projectorPos.z };
+				v0.m128_f32[0] = -20;
+				v0.m128_f32[1] = 0;
+				v0.m128_f32[2] = -90;
 			}
+		}
+#pragma endregion
+#pragma region//導入
+		if (Scene == appearance) {
+			AppearanceCount++;
+
+			if (AppearanceCount >= 100) {
+				LightFlag = 1;
+			}
+
+			if (LightFlag == 1) {
+				LightCount++;
+				leverRota.z -= 3.0f;
+				for (int i = 0; i < 2; i++) {
+					gearRota[i].x += 3.0f;
+				}
+			}
+
+			if (LightCount == 100) {
+				LightCount = 0;
+			}
+
+			if (AppearanceCount >= 500) {
+				if (v0.m128_f32[0] != 0.0f) {
+					v0.m128_f32[0] += 1.0f;
+				} else {
+					Scene = gamePlay;
+					LightFlag = 0;
+					AppearanceCount = 0;
+				}
+			}
+		
 		}
 #pragma endregion
 #pragma region//ゲームプレイ中
 		if (Scene == gamePlay) {
-		
+			LightCount++;
 			//カメラ
 			if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 			{
@@ -928,9 +968,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//ゴール判定
 			if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, GoalPosition.x, GoalPosition.y, 3) == 1) {
 				SceneCutFlag = 1;
-			/*	if (StageNumber == 3) {
-					Scene = gameClear;
-				}*/
 			}
 
 			if (SceneCutFlag == 1) {
@@ -1201,11 +1238,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk4->SetPosition(PlayerPosition);
 		screen->SetPosition({0,0,400});
 		projector->SetPosition({ 0,-20,-70 });
-		under->SetPosition({ -32,115,150 });
+		under->SetPosition({ -32,135,150 });
 		lever->SetPosition(leverPos);
 		lever->SetRotaition(leverRota);
 		goal->SetPosition(GoalPosition);
-		lightSource->SetPosition({ 0,80,190 });
+		lightSource->SetPosition({ 0,0,190 });
 	
 #pragma endregion
 #pragma endregion
@@ -1217,30 +1254,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
-			if (ImGui::TreeNode("Player"))
-			{
-				ImGui::Text("modeFlag,%d", modeflag);
-				ImGui::Text("ResetFlag,%d", ResetFlag);
-				ImGui::Text("SyageNumber,%d", StageNumber);
-				ImGui::SliderFloat("Position.x", &PlayerPosition.x, 50, -50);
-				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
-				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Goal"))
-			{
-				ImGui::SliderFloat("Position.x", &GoalPosition.x, 50, -50);
-				ImGui::SliderFloat("Position.y", &GoalPosition.y, 50, -50);
-				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}
-
 			if (ImGui::TreeNode("Film"))
 			{
-				ImGui::Text("SceneCutFlag,%d",SceneCutFlag);
+				ImGui::Text("AppearanceCount,%d",AppearanceCount);
 				ImGui::Text("CutTimer,%d", CutTimer);
 				ImGui::Text("CutCoutn,%d", CutCount);
 				ImGui::Text("SceneCutFlag,%d", SceneCutFlag);
@@ -1286,43 +1302,87 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Goal::PreDraw(dxCommon->GetCmdList());
 		LightSource::PreDraw(dxCommon->GetCmdList());
 		Item::PreDraw(dxCommon->GetCmdList());
+
+		if ((Scene == appearance) || (Scene == gamePlay)) {
+			screen->Draw();
+			under->Draw();
+			//プロジェクター
+			projector->Draw();
+
+			lever->Draw();
+			for (int i = 0; i < 2; i++) {
+				gear[i]->Draw();
+			}
+
+			if ((mode == 1) || (LightFlag == 1) && (LightCount != 80)) {
+				lightSource->Draw();
+			}
+
+			if (LightFlag == 1) {
+				//プレイヤー
+				if (AnimetionCount == 0) {
+					if (PlayerDirectionNumber == 0) {
+						playerrightwalk->Draw();
+					} else if (PlayerDirectionNumber == 1) {
+						playerleftwalk->Draw();
+					}
+				} else if (AnimetionCount == 1) {
+					if (PlayerDirectionNumber == 0) {
+						playerrightwalk2->Draw();
+					} else if (PlayerDirectionNumber == 1) {
+						playerleftwalk2->Draw();
+					}
+				} else if (AnimetionCount == 2) {
+					if (PlayerDirectionNumber == 0) {
+						playerrightwalk3->Draw();
+					} else if (PlayerDirectionNumber == 1) {
+						playerleftwalk3->Draw();
+					}
+				} else if (AnimetionCount == 3) {
+					if (PlayerDirectionNumber == 0) {
+						playerrightwalk4->Draw();
+					} else if (PlayerDirectionNumber == 1) {
+						playerleftwalk4->Draw();
+					}
+				}
+
+				for (int i = 0; i < _countof(FieldBlock); i++) {
+					FieldBlock[i]->Draw();
+				}
+			}
+		}
+
 		//背景
 		if (Scene == gamePlay) {
 			//background->Draw();
 			//スクリーン
 
-			screen->Draw();
-	
-			//プレイヤー
 			if (AnimetionCount == 0) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk->Draw();
-				}
-				else if (PlayerDirectionNumber == 1) {
+				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk->Draw();
 				}
-			}
-			else if (AnimetionCount == 1) {
+			} else if (AnimetionCount == 1) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk2->Draw();
 				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk2->Draw();
 				}
-			}
-			else if (AnimetionCount == 2) {
+			} else if (AnimetionCount == 2) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk3->Draw();
 				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk3->Draw();
 				}
-			}
-			else if (AnimetionCount == 3) {
+			} else if (AnimetionCount == 3) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk4->Draw();
 				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk4->Draw();
 				}
 			}
+
 			//アイテム
 			for (int i = 0; i < Item_NUM; i++) {
 				if (ItemAlive[i] == 1) {
@@ -1332,6 +1392,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//ゴール
 			goal->Draw();
 			//ブロック
+
 			for (int i = 0; i < _countof(FieldBlock); i++) {
 				FieldBlock[i]->Draw();
 			}
@@ -1352,14 +1413,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 				lightSource->Draw();
 			}
-			under->Draw();
-			//プロジェクター
-			projector->Draw();
 		
-			lever->Draw();
-			for (int i = 0; i < 2; i++) {
-				gear[i]->Draw();
-			}
 		}
 	
 		Sprite::PreDraw(dxCommon->GetCmdList());
