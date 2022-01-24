@@ -570,7 +570,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//当たり判定
 	Collision* Boxcollision = nullptr;
-
+	int HitNumber = 0;
 #pragma endregion
 #pragma region//ループ処理
 	XMFLOAT3 kage[4];
@@ -735,7 +735,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 				//ジャンプ処理
 				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && ( JumpG >= 0.0f) && (JumpG <= 0.1f)) {
-					JumpG = -1.2f;
+					JumpG = -1.5f;
 					JumpFlag = 1;
 				}
 
@@ -895,25 +895,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				if (SetFlag[i] == 1) {
 					if (SetBlockColor[i].w > 0.0f) {
 						//playerとブロック左辺の当たり判定
-						if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,5.5,4 }, SetBlockPosition[i], { 7.6,5.5,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,5.6,4 }, SetBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
 							PlayerPosition.x = OldPlayerPosition.x;
+							HitNumber = 1;
 						}
 						//playerとブロック右辺の当たり判定
-						if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,5.5,4 }, SetBlockPosition[i], { 7.6,5.5,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,5.6,4 }, SetBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
 							PlayerPosition.x = OldPlayerPosition.x;
+							HitNumber = 2;
 						}
 
 						//playerとブロック下辺の当たり判定
-						if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3.3,5.5,4 }, SetBlockPosition[i], { 3.3,5.5,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3.7,5.5,4 }, SetBlockPosition[i], { 3.7,5.5,4 }) == TRUE) {
 							PlayerPosition.y = OldPlayerPosition.y;
 							JumpG = 0.0f;
+							HitNumber = 3;
 						}
 
 						//playerとブロック上辺の当たり判定(高いところからだと死)
-						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.8,5.5,4 }, SetBlockPosition[i], { 3.8,5.5,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.7,5.5,4 }, SetBlockPosition[i], { 3.7,5.5,4 }) == TRUE) {
 							PlayerPosition.y = OldPlayerPosition.y;
 							JumpG = 0.0f;
 							JumpFlag = 0;
+							HitNumber = 4;
 						}
 					}
 				}
@@ -1256,13 +1260,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		{
 			if (ImGui::TreeNode("Film"))
 			{
-				ImGui::Text("AppearanceCount,%d",AppearanceCount);
-				ImGui::Text("CutTimer,%d", CutTimer);
-				ImGui::Text("CutCoutn,%d", CutCount);
-				ImGui::Text("SceneCutFlag,%d", SceneCutFlag);
-				ImGui::SliderFloat("Position.x", &SceneCutPos.x, 50, -50);
-				ImGui::SliderFloat("Position.y", &SceneCutPos.y, 50, -50);
-				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
+				ImGui::Text("HitNumber,%d",HitNumber);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
