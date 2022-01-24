@@ -581,7 +581,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		for (int i = 0; i < _countof(ImageBlock); i++) {
 			ImageBlockPosition[i] = ImageBlock[i]->GetPosition();
-			if (ItemCount != 0) {
+			if ((ItemCount != 0) || (SetFlag[i] == 1)) {
 				ImageBlock[i]->SetColor({ 0.0f,1.0f,0.0f,1.0 });
 			} else {
 				ImageBlock[i]->SetColor({ 1.0f,0.0f,0.0f,1.0 });
@@ -636,7 +636,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Scene == appearance) {
 			AppearanceCount++;
 
-			if (AppearanceCount >= 100) {
+			if (AppearanceCount >= 10) {
 				LightFlag = 1;
 			}
 
@@ -652,7 +652,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightCount = 0;
 			}
 
-			if (AppearanceCount >= 500) {
+			if (AppearanceCount >= 50) {
 				if (v0.m128_f32[0] != 0.0f) {
 					v0.m128_f32[0] += 1.0f;
 				} else {
@@ -693,6 +693,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				if (v0.m128_f32[2] == -20.0f && v0.m128_f32[1] == 0.0f) {
 					modeflag = 1;
 				}
+
+				//光とブロックの当たり判定
+				for (int i = 0; i < _countof(SetBlock); i++) {
+					for (int j = 0; j < Light_NUM; j++) {
+						if (SetFlag[i] == 1) {
+							if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 6, LightPosition[j].x, LightPosition[j].y, 6) == 1) {
+								SetBlockColor[i].w -= 0.005;
+							}
+						}
+					}
+				}
+
 			}
 			if (mode == 1) {
 				v0.m128_f32[2] -= 3.5f;
@@ -880,7 +892,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 #pragma endregion
-
 			//アニメーションタイマー
 			if (AnimetionTimer >= 8) {
 				AnimetionCount++;
@@ -947,17 +958,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
-			//光とブロックの当たり判定
-			for (int i = 0; i < _countof(SetBlock); i++) {
-				for (int j = 0; j < Light_NUM; j++) {
-					if (SetFlag[i] == 1) {
-						if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 3, LightPosition[j].x, LightPosition[j].y, 3) == 1) {
-							//SetBlockColor[i].w -= 0.01;
-						}
-					}
-				}
-			}
-
 			//アイテム取得判定
 			for (int i = 0; i < Item_NUM; i++) {
 				if (ItemAlive[i] == 1) {
@@ -997,7 +997,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					ResetFlag = 0;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 4) {
+					if (StageNumber == 5) {
 						Scene = gameClear;
 					}
 				}
@@ -1074,6 +1074,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			TextNumber = 0;
 			for (int i = 0; i < _countof(SetBlock); i++) {
 				SetBlockPosition[i] = { 0.0f,400.0f,0.0f };
+				SetBlockColor[i].w = 1.0f;
 				SetFlag[i] = 0;
 			}
 
@@ -1107,10 +1108,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				for (int i = 22; i < 30; i++) {
-					FieldBlockPosition[i] = { -80 + ((float)i * 10),-700,134 };
-					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
-				}
+				//for (int i = 22; i < 30; i++) {
+				//	FieldBlockPosition[i] = { -80 + ((float)i * 10),-700,134 };
+				//	FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				//}
 
 				ItemPosition[0] = { -40,10,134 };
 			}
@@ -1123,7 +1124,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				for (int i = 10; i < 20; i++) {
+				for (int i = 10; i < 19; i++) {
 					FieldBlockPosition[i] = { -20 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
@@ -1141,12 +1142,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				for (int i = 10; i < 20; i++) {
+				for (int i = 10; i < 19; i++) {
 					FieldBlockPosition[i] = { -20 + ((float)i * 10),-40,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				for (int i = 20; i < 30; i++) {
+				for (int i = 19; i < 29; i++) {
 					FieldBlockPosition[i] = { -350 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
@@ -1160,6 +1161,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemPosition[6] = { 20,  0,134 };
 				ItemPosition[7] = { -10,  15,134 };
 			}
+
+			if (StageNumber == 4) {
+				PlayerPosition = { -140.0f,20.0f,135.0f };
+				GoalPosition = { 110.0f,10.0f,134.0f };
+				for (int i = 0; i < 8; i++) {
+					FieldBlockPosition[i] = { -140 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 8; i < 12; i++) {
+					FieldBlockPosition[i] = { -80 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 12; i < 18; i++) {
+					FieldBlockPosition[i] = { -20 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				ItemPosition[0] = { -100,10,134 };
+				ItemPosition[1] = { 20,10,134 };
+				LightPosition[0] = { -40, 10 , 134 };
+				LightPosition[1] = { 60, 10, 134 };
+			}
+
 		}
 #pragma endregion
 #pragma region//Update
@@ -1304,16 +1330,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if ((Scene == appearance) || (Scene == gamePlay)) {
 			screen->Draw();
 			under->Draw();
+			if ((mode == 1) || (LightFlag == 1) && (LightCount != 80)) {
+				lightSource->Draw();
+			}
+
 			//プロジェクター
 			projector->Draw();
 
 			lever->Draw();
 			for (int i = 0; i < 2; i++) {
 				gear[i]->Draw();
-			}
-
-			if ((mode == 1) || (LightFlag == 1) && (LightCount != 80)) {
-				lightSource->Draw();
 			}
 
 			if (LightFlag == 1) {
@@ -1352,9 +1378,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		//背景
 		if (Scene == gamePlay) {
-			//background->Draw();
-			//スクリーン
-
 			if (AnimetionCount == 0) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk->Draw();
@@ -1389,8 +1412,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			//ゴール
 			goal->Draw();
+			for (int i = 0; i < _countof(light); i++) {
+				light[i]->Draw();
+			}
 			//ブロック
-
 			for (int i = 0; i < _countof(FieldBlock); i++) {
 				FieldBlock[i]->Draw();
 			}
@@ -1411,7 +1436,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 				lightSource->Draw();
 			}
-		
 		}
 	
 		Sprite::PreDraw(dxCommon->GetCmdList());
