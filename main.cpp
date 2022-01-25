@@ -1246,7 +1246,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 
 				ItemPosition[0] = { -10,-70,134 };
-				ItemPosition[1] = { 20,10,134 };
+				ItemPosition[1] = { 20,-30,134 };
 				LightPosition[0] = { 115, -50 ,134 };
 				LightPosition[1] = { 115, -70 ,134 };
 				LightPosition[2] = { -120, -30 ,134 };
