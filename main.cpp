@@ -106,7 +106,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region//構造体
 
 	const int constantBufferNum = 128;
-	const int Block_NUM = 50;
+	const int Block_NUM = 30;
 #pragma endregion
 #pragma region//行列
 	//射影変換行列の作り
@@ -316,7 +316,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	//普通のブロック
-	const int FIELD_NUM = 30;
+	const int FIELD_NUM = 80;
 	Block* FieldBlock[FIELD_NUM];
 	XMFLOAT3 FieldBlockPosition[FIELD_NUM];
 	XMFLOAT4 FieldBlockColor[FIELD_NUM];
@@ -340,7 +340,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 	}
 
-	for (int i = 22; i < 30; i++) {
+	for (int i = 22; i < 80; i++) {
 		FieldBlockPosition[i] = { -80 + ((float)i * 10),-700,134 };
 		FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 	}
@@ -569,7 +569,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 1;
+	int StageNumber = 5;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -972,7 +972,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 
 				//playerとブロック下辺の当たり判定
-				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3,8.5,4 }, FieldBlockPosition[i], { 3,8.5,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 3.8,5.5,4 }, FieldBlockPosition[i], { 3.8,5.5,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 				}
@@ -1024,7 +1024,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					ResetFlag = 0;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 5) {
+					if (StageNumber == 6) {
 						Scene = gameClear;
 					}
 				}
@@ -1099,6 +1099,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			ItemCount = 0;
 			mode = 0;
 			TextNumber = 0;
+			for (int i = 0; i < Light_NUM; i++) {
+				LightPosition[i] = { 0.0f,700.0f,0.0f };
+			}
 			for (int i = 0; i < _countof(SetBlock); i++) {
 				SetBlockPosition[i] = { 0.0f,400.0f,0.0f };
 				SetBlockColor[i].w = 1.0f;
@@ -1134,11 +1137,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlockPosition[i] = { -80 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
-
-				//for (int i = 22; i < 30; i++) {
-				//	FieldBlockPosition[i] = { -80 + ((float)i * 10),-700,134 };
-				//	FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
-				//}
 
 				ItemPosition[0] = { -40,10,134 };
 			}
@@ -1189,7 +1187,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemPosition[7] = { -10,  15,134 };
 			}
 
-			if (StageNumber == 4) {
+			else if (StageNumber == 4) {
 				PlayerPosition = { -140.0f,20.0f,135.0f };
 				GoalPosition = { 110.0f,10.0f,134.0f };
 				for (int i = 0; i < 8; i++) {
@@ -1211,6 +1209,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemPosition[1] = { 20,10,134 };
 				LightPosition[0] = { -40, 10 , 134 };
 				LightPosition[1] = { 60, 10, 134 };
+			}
+
+			else if (StageNumber == 5) {
+				PlayerPosition = { -140.0f,-60.0f,135.0f };
+				GoalPosition = { 110.0f,10.0f,134.0f };
+				for (int i = 0; i < 6; i++) {
+					FieldBlockPosition[i] = { -140 + ((float)i * 10),-80,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 6; i < 12; i++) {
+					FieldBlockPosition[i] = { -120 + ((float)i * 10),-80,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 12; i < 20; i++) {
+					FieldBlockPosition[i] = { -90 + ((float)i * 10),-80,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 20; i < 45; i++) {
+					FieldBlockPosition[i] = { -350 + ((float)i * 10),-40,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 45; i < 70; i++) {
+					FieldBlockPosition[i] = { -550 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				ItemPosition[0] = { -10,-70,134 };
+				ItemPosition[1] = { 20,10,134 };
+				LightPosition[0] = { 115, -50 ,134 };
+				LightPosition[1] = { 115, -70 ,134 };
+				LightPosition[2] = { -120, -30 ,134 };
+				LightPosition[3] = { -120, -10 ,134 };
 			}
 
 		}
@@ -1320,8 +1354,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (ImGui::TreeNode("Field"))
 			{
-				ImGui::SliderFloat("Position.x", &FieldBlockPosition[20].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &FieldBlockPosition[20].y, 50, -50);
+				ImGui::SliderFloat("Position.x", &PlayerPosition.y, 50, -50);
+				ImGui::SliderFloat("Position.y", &PlayerPosition.y, 50, -50);
 				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();

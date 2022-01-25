@@ -136,7 +136,7 @@ public: // メンバ関数//
 	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	// 色
-	XMFLOAT4 color = { 0.8,0.8,0.0,0.2 };
+	XMFLOAT4 color = { 0.8,0.8,0.0,0.05 };
 	// ローカルスケール
 	XMFLOAT3 scale = { 35.0,35.0,25.0 };
 	// X,Y,Z軸回りのローカル回転角
