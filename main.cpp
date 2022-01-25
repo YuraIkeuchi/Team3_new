@@ -106,7 +106,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region//構造体
 
 	const int constantBufferNum = 128;
-	const int Block_NUM = 30;
+	const int Block_NUM = 50;
 #pragma endregion
 #pragma region//行列
 	//射影変換行列の作り
