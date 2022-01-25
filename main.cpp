@@ -1219,7 +1219,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			else if (StageNumber == 5) {
 				PlayerPosition = { -140.0f,-60.0f,135.0f };
-				GoalPosition = { 70.0f,10.0f,134.0f };
+				GoalPosition = { 110.0f,10.0f,134.0f };
 				for (int i = 0; i < 6; i++) {
 					FieldBlockPosition[i] = { -140 + ((float)i * 10),-80,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
@@ -1246,11 +1246,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 
 				ItemPosition[0] = { -10,-70,134 };
-				ItemPosition[1] = { 20,-30,134 };
+				ItemPosition[1] = { 20,10,134 };
 				LightPosition[0] = { 115, -50 ,134 };
 				LightPosition[1] = { 115, -70 ,134 };
-				LightPosition[2] = { -125, -30 ,134 };
-				LightPosition[3] = { -125, -10 ,134 };
+				LightPosition[2] = { -120, -30 ,134 };
+				LightPosition[3] = { -120, -10 ,134 };
 			}
 
 			else if (StageNumber == 6) {
