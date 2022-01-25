@@ -1133,6 +1133,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			if (StageNumber == 1) {
+				GoalPosition = { 110.0f,10.0f,134.0f };
 				PlayerPosition = { -140.0f,20.0f,135.0f };
 				for (int i = 0; i < 15; i++) {
 					FieldBlockPosition[i] = { -140 + ((float)i * 10),0,134 };
