@@ -7,7 +7,7 @@
 #include <d3dx12.h>
 
 /// 3Dオブジェクト
-class Player {
+class Lever {
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -49,7 +49,7 @@ public: // 静的メンバ関数
 	static void PostDraw();
 
 	/// 3Dオブジェクト生成
-	static Player* Create();
+	static Lever* Create();
 
 	/// 視点座標の取得
 	static const XMFLOAT3& GetEye() { return eye; }
@@ -104,8 +104,11 @@ private: // 静的メンバ変数
 	// インデックスバッファビュー
 	static D3D12_INDEX_BUFFER_VIEW ibView;
 	// 頂点データ配列
-	static VertexPosNormalUv vertices[vertexCount];
-	static unsigned short indices[planeCount * 3];
+	//static VertexPosNormalUv vertices[vertexCount];
+	static std::vector<VertexPosNormalUv> vertices;
+	// 頂点インデックス配列
+	//static unsigned short indices[planeCount * 3];
+	static std::vector<unsigned short> indices;
 private:// 静的メンバ関数
 	/// デスクリプタヒープの初期化
 	static bool InitializeDescriptorHeap();
@@ -128,7 +131,7 @@ private:// 静的メンバ関数
 public: // メンバ関数
 	bool Initialize();
 	/// 毎フレーム処理
-	void Update();
+	void Update(XMMATRIX& matView);
 
 	/// 描画
 	void Draw();
@@ -140,30 +143,32 @@ public: // メンバ関数
 	const int& GetDamageCount() { return damageCount; }
 
 	const int& GetHp() { return hp; }
-
+	const int& GetDamageTimer() { return damageTimer; }
 	/// 座標の設定
 	void SetPosition(XMFLOAT3 position) { this->position = position; }
 	void SetRotaition(XMFLOAT3 rotaition) { this->rotation = rotaition; }
 	void SetHitFlag(int HitFlag) { this->HitFlag = HitFlag; }
 	void SetHp(int hp) { this->hp = hp; }
+
 	//カメラをその位置に移動させる処理
 	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
 	float speed = 0.2f;
 	int HitFlag = 0;
-	int hp = 5;
+	int hp = 20;
 	int damageCount = 0;
+	int damageTimer = 0;
 	// 色
 	XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 0.25f,0.25f,0 };
+	XMFLOAT3 scale = { 8.0f,8.0f,8.0f };
 	// X,Y,Z軸回りのローカル回転角
-	XMFLOAT3 rotation = { 0,0,0 };
+	XMFLOAT3 rotation = { 0,-90,0 };
 	// ローカル座標
-	XMFLOAT3 position = { 0,0,20 };
+	XMFLOAT3 position = { 0,-20,-60 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	Player* parent = nullptr;
+	Lever* parent = nullptr;
 };

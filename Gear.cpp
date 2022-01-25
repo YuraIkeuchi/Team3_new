@@ -1,6 +1,13 @@
-																																																																																																																																																																																																																																																																																																																																																																								#include "Player2.h"
+#include "Gear.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
+#include<fstream>
+#include<sstream>
+#include<string>
+
+#include<vector>
+using namespace std;
+
 
 #pragma comment(lib, "d3dcompiler.lib")
 
@@ -10,30 +17,36 @@ using namespace Microsoft::WRL;
 /// <summary>
 /// 静的メンバ変数の実体
 /// </summary>
-ID3D12Device* Player2::device = nullptr;
-UINT Player2::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Player2::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Player2::rootsignature;
-ComPtr<ID3D12PipelineState> Player2::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Player2::descHeap;
-ComPtr<ID3D12Resource> Player2::vertBuff;
-ComPtr<ID3D12Resource> Player2::indexBuff;
-ComPtr<ID3D12Resource> Player2::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Player2::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Player2::gpuDescHandleSRV;
-XMMATRIX Player2::matView{};
-XMMATRIX Player2::matProjection{};
-XMFLOAT3 Player2::eye = { 0, 0, -50.0f };
-XMFLOAT3 Player2::target = { 0, 0, 0 };
-XMFLOAT3 Player2::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Player2::vbView{};
-D3D12_INDEX_BUFFER_VIEW Player2::ibView{};
+const float Gear::radius = 5.0f;				// 底面の半径
+const float Gear::prizmHeight = 8.0f;			// 柱の高さ
+ID3D12Device* Gear::device = nullptr;
+UINT Gear::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* Gear::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> Gear::rootsignature;
+ComPtr<ID3D12PipelineState> Gear::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> Gear::descHeap;
+ComPtr<ID3D12Resource> Gear::vertBuff;
+ComPtr<ID3D12Resource> Gear::indexBuff;
+ComPtr<ID3D12Resource> Gear::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE Gear::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE Gear::gpuDescHandleSRV;
+XMMATRIX Gear::matView{};
+XMMATRIX Gear::matProjection{};
+XMFLOAT3 Gear::eye = { 0, 0, -50.0f };
+XMFLOAT3 Gear::target = { 0, 0, 0 };
+XMFLOAT3 Gear::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW Gear::vbView{};
+D3D12_INDEX_BUFFER_VIEW Gear::ibView{};
+//Gear::VertexPosNormalUv Gear::vertices[vertexCount];
+//unsigned short Gear::indices[planeCount * 3];
+std::vector<Gear::VertexPosNormalUv>Gear::vertices;
+std::vector<unsigned short> Gear::indices;
 
-bool Player2::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
+bool Gear::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
 	// nullptrチェック
 	assert(device);
 
-	Player2::device = device;
+	Gear::device = device;
 
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
@@ -53,12 +66,13 @@ bool Player2::StaticInitialize(ID3D12Device* device, int window_width, int windo
 	return true;
 }
 
-void Player2::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void Gear::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Player2::cmdList == nullptr);
+	assert(Gear::cmdList == nullptr);
+	// 3Dオブジェクト描画前処理
 
 	// コマンドリストをセット
-	Player2::cmdList = cmdList;
+	Gear::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -66,43 +80,44 @@ void Player2::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	cmdList->SetGraphicsRootSignature(rootsignature.Get());
 	// プリミティブ形状を設定
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 }
 
-void Player2::PostDraw() {
+void Gear::PostDraw() {
 	// コマンドリストを解除
-	Player2::cmdList = nullptr;
+	Gear::cmdList = nullptr;
 }
 
-Player2* Player2::Create() {
+Gear* Gear::Create() {
 	// 3Dオブジェクトのインスタンスを生成
-	Player2* player2 = new Player2();
-	if (player2 == nullptr) {
+	Gear* gear = new Gear();
+	if (gear == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!player2->Initialize()) {
-		delete player2;
+	if (!gear->Initialize()) {
+		delete gear;
 		assert(0);
 		return nullptr;
 	}
 
-	return player2;
+	return gear;
 }
 
-void Player2::SetEye(XMFLOAT3 eye) {
-	Player2::eye = eye;
+void Gear::SetEye(XMFLOAT3 eye) {
+	Gear::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Player2::SetTarget(XMFLOAT3 target) {
-	Player2::target = target;
+void Gear::SetTarget(XMFLOAT3 target) {
+	Gear::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Player2::CameraMoveVector(XMFLOAT3 move) {
+void Gear::CameraMoveVector(XMFLOAT3 move) {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
 
@@ -118,7 +133,7 @@ void Player2::CameraMoveVector(XMFLOAT3 move) {
 	SetTarget(target_moved);
 }
 
-bool Player2::InitializeDescriptorHeap() {
+bool Gear::InitializeDescriptorHeap() {
 	HRESULT result = S_FALSE;
 
 	// デスクリプタヒープを生成	
@@ -138,7 +153,7 @@ bool Player2::InitializeDescriptorHeap() {
 	return true;
 }
 
-void Player2::InitializeCamera(int window_width, int window_height) {
+void Gear::InitializeCamera(int window_width, int window_height) {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
 		XMLoadFloat3(&eye),
@@ -158,7 +173,7 @@ void Player2::InitializeCamera(int window_width, int window_height) {
 	);
 }
 
-bool Player2::InitializeGraphicsPipeline() {
+bool Gear::InitializeGraphicsPipeline() {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
@@ -242,7 +257,7 @@ bool Player2::InitializeGraphicsPipeline() {
 	//gpipeline.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	// デプスステンシルステート
 	gpipeline.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	gpipeline.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+
 	// レンダーターゲットのブレンド設定
 	D3D12_RENDER_TARGET_BLEND_DESC blenddesc{};
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	// RBGA全てのチャンネルを描画
@@ -309,7 +324,7 @@ bool Player2::InitializeGraphicsPipeline() {
 	return true;
 }
 
-bool Player2::LoadTexture() {
+bool Gear::LoadTexture() {
 	HRESULT result = S_FALSE;
 
 	// WICテクスチャのロード
@@ -317,7 +332,8 @@ bool Player2::LoadTexture() {
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/Player_walk1.png", WIC_FLAGS_NONE,
+		//L"Resources/mameneko.jpg", WIC_FLAGS_NONE,
+		L"Resources/Gear/Gear.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -378,25 +394,86 @@ bool Player2::LoadTexture() {
 	return true;
 }
 
-void Player2::CreateModel() {
+void Gear::CreateModel() {
 	HRESULT result = S_FALSE;
 
-	VertexPosNormalUv vertices[4] = {
-		{{-10.0f,-10.0f,0.0f},{0,0,0}, {0.0f,1.0f}},
-		{{-10.0f,+10.0f,0.0f },{0,0,0},{0.0f,0.0f}},
-		{{+10.0f,-10.0f,0.0f},{0,0,0},{1.0f,1.0f}},
-		{{+10.0f,+10.0f,0.0f},{0,0,0},{1.0f,0.0f}},
-	};
+	std::vector<VertexPosNormalUv> realVertices;
+	//ファイルストリーム
+	std::ifstream file;
+	//.objファイルを開く
+	file.open("Resources/Gear/Gear.obj");
+	//ファイルオープン失敗をチャック
+	if (file.fail()) {
+		assert(0);
+	}
+	vector<XMFLOAT3>positions;
+	vector<XMFLOAT3>normals;
+	vector<XMFLOAT2>texcoords;
+	//一行ずつ読み込む
+	string line;
+	while (getline(file, line)) {
+		//
+		std::istringstream line_stream(line);
 
-	unsigned short indices[6] = {
-		0,1,2,
-		2,1,3,
-	};
+		//半角スペース区切りで業おお先端文字列を取得
+		string key;
+		getline(line_stream, key, ' ');
+		if (key == "v") {
+			XMFLOAT3 position{};
+			line_stream >> position.x;
+			line_stream >> position.y;
+			line_stream >> position.z;
+
+			positions.emplace_back(position);
+			//VertexPosNormalUv vertex{};
+			//vertex.pos = position;
+			//vertices.emplace_back(vertex);
+		}
+		if (key == "vt") {
+			XMFLOAT2 texcoord{};
+			line_stream >> texcoord.x;
+			line_stream >> texcoord.y;
+
+			texcoord.y = 1.0f - texcoord.y;
+			texcoords.emplace_back(texcoord);
+		}
+		if (key == "vn") {
+			XMFLOAT3 normal{};
+			line_stream >> normal.x;
+			line_stream >> normal.y;
+			line_stream >> normal.z;
+			normals.emplace_back(normal);
+		}
+		if (key == "f") {
+			string index_string;
+			while (getline(line_stream, index_string, ' ')) {
+				std::istringstream index_stream(index_string);
+				unsigned short indexPosition, indexNormal, indexTexcoord;
+				index_stream >> indexPosition;
+				index_stream.seekg(1, ios_base::cur);
+				index_stream >> indexTexcoord;
+				index_stream.seekg(1, ios_base::cur);
+				index_stream >> indexNormal;
+				VertexPosNormalUv vertex{};
+				vertex.pos = positions[indexPosition - 1];
+				vertex.normal = normals[indexNormal - 1];
+				vertex.uv = texcoords[indexTexcoord - 1];
+				vertices.emplace_back(vertex);
+				indices.emplace_back((unsigned short)indices.size());
+			}
+		}
+	}
+	//
+	file.close();
+	UINT sizeVB = static_cast<UINT>(sizeof(VertexPosNormalUv) * vertices.size());
+	UINT sizeIB = static_cast<UINT>(sizeof(unsigned short) * indices.size());
+
 	// 頂点バッファ生成
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices)),
+		//&CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices)),
+		&CD3DX12_RESOURCE_DESC::Buffer(sizeVB),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&vertBuff));
@@ -409,7 +486,8 @@ void Player2::CreateModel() {
 	result = device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices)),
+		//&CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices)),
+		&CD3DX12_RESOURCE_DESC::Buffer(sizeIB),
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&indexBuff));
@@ -422,7 +500,8 @@ void Player2::CreateModel() {
 	VertexPosNormalUv* vertMap = nullptr;
 	result = vertBuff->Map(0, nullptr, (void**)&vertMap);
 	if (SUCCEEDED(result)) {
-		memcpy(vertMap, vertices, sizeof(vertices));
+		//memcpy(vertMap, vertices, sizeof(vertices));
+		std::copy(vertices.begin(), vertices.end(), vertMap);
 		vertBuff->Unmap(0, nullptr);
 	}
 
@@ -430,32 +509,33 @@ void Player2::CreateModel() {
 	unsigned short* indexMap = nullptr;
 	result = indexBuff->Map(0, nullptr, (void**)&indexMap);
 	if (SUCCEEDED(result)) {
-
-		// 全インデックスに対して
-		for (int i = 0; i < _countof(indices); i++) {
-			indexMap[i] = indices[i];	// インデックスをコピー
-		}
-
+		//// 全インデックスに対して
+		//for (int i = 0; i < _countof(indices); i++)
+		//{
+		//	indexMap[i] = indices[i];	// インデックスをコピー
+		//}
+		std::copy(indices.begin(), indices.end(), indexMap);
 		indexBuff->Unmap(0, nullptr);
 	}
 
 	// 頂点バッファビューの作成
 	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
-	vbView.SizeInBytes = sizeof(vertices);
+	//vbView.SizeInBytes = sizeof(vertices);
+	vbView.SizeInBytes = sizeVB;
 	vbView.StrideInBytes = sizeof(vertices[0]);
 
 	// インデックスバッファビューの作成
 	ibView.BufferLocation = indexBuff->GetGPUVirtualAddress();
 	ibView.Format = DXGI_FORMAT_R16_UINT;
-	ibView.SizeInBytes = sizeof(indices);
+	//ibView.SizeInBytes = sizeof(indices);
+	ibView.SizeInBytes = sizeIB;
 }
 
-void Player2::UpdateViewMatrix() {
+void Gear::UpdateViewMatrix() {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
-
-bool Player2::Initialize() {
+bool Gear::Initialize() {
 	// nullptrチェック
 	assert(device);
 
@@ -468,11 +548,10 @@ bool Player2::Initialize() {
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&constBuff));
-
 	return true;
 }
 
-void Player2::Update() {
+void Gear::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 
@@ -501,13 +580,14 @@ void Player2::Update() {
 	constMap->color = color;
 	constMap->mat = matWorld * matView * matProjection;	// 行列の合成
 	constBuff->Unmap(0, nullptr);
+
 }
 
-void Player2::Draw() {
+void Gear::Draw() {
 	// nullptrチェック
 	assert(device);
-	assert(Player2::cmdList);
-
+	assert(Gear::cmdList);
+	//assert(constBuff);
 	// 頂点バッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &vbView);
 	// インデックスバッファの設定
@@ -522,12 +602,11 @@ void Player2::Draw() {
 	// シェーダリソースビューをセット
 	cmdList->SetGraphicsRootDescriptorTable(1, gpuDescHandleSRV);
 	// 描画コマンド
-	cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-
+	cmdList->DrawIndexedInstanced((UINT)indices.size(), 1, 0, 0, 0);
 }
 
 //カメラの操作
-void Player2::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+void Gear::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();

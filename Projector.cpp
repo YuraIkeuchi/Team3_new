@@ -333,7 +333,7 @@ bool Projector::LoadTexture() {
 
 	result = LoadFromWICFile(
 		//L"Resources/mameneko.jpg", WIC_FLAGS_NONE,
-		L"Resources/post/post.png", WIC_FLAGS_NONE,
+		L"Resources/projector/projector.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -401,7 +401,7 @@ void Projector::CreateModel() {
 	//ファイルストリーム
 	std::ifstream file;
 	//.objファイルを開く
-	file.open("Resources/post/post.obj");
+	file.open("Resources/projector/projector.obj");
 	//ファイルオープン失敗をチャック
 	if (file.fail()) {
 		assert(0);
@@ -551,7 +551,7 @@ bool Projector::Initialize() {
 	return true;
 }
 
-void Projector::Update() {
+void Projector::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 

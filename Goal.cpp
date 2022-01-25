@@ -1,4 +1,4 @@
-#include "Player.h"
+#include "Goal.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 
@@ -10,30 +10,30 @@ using namespace Microsoft::WRL;
 /// <summary>
 /// 静的メンバ変数の実体
 /// </summary>
-ID3D12Device* Player::device = nullptr;
-UINT Player::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Player::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Player::rootsignature;
-ComPtr<ID3D12PipelineState> Player::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Player::descHeap;
-ComPtr<ID3D12Resource> Player::vertBuff;
-ComPtr<ID3D12Resource> Player::indexBuff;
-ComPtr<ID3D12Resource> Player::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Player::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Player::gpuDescHandleSRV;
-XMMATRIX Player::matView{};
-XMMATRIX Player::matProjection{};
-XMFLOAT3 Player::eye = { 0, 0, -50.0f };
-XMFLOAT3 Player::target = { 0, 0, 0 };
-XMFLOAT3 Player::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Player::vbView{};
-D3D12_INDEX_BUFFER_VIEW Player::ibView{};
+ID3D12Device* Goal::device = nullptr;
+UINT Goal::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* Goal::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> Goal::rootsignature;
+ComPtr<ID3D12PipelineState> Goal::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> Goal::descHeap;
+ComPtr<ID3D12Resource> Goal::vertBuff;
+ComPtr<ID3D12Resource> Goal::indexBuff;
+ComPtr<ID3D12Resource> Goal::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE Goal::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE Goal::gpuDescHandleSRV;
+XMMATRIX Goal::matView{};
+XMMATRIX Goal::matProjection{};
+XMFLOAT3 Goal::eye = { 0, 0, -50.0f };
+XMFLOAT3 Goal::target = { 0, 0, 0 };
+XMFLOAT3 Goal::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW Goal::vbView{};
+D3D12_INDEX_BUFFER_VIEW Goal::ibView{};
 
-bool Player::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
+bool Goal::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
 	// nullptrチェック
 	assert(device);
 
-	Player::device = device;
+	Goal::device = device;
 
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
@@ -53,12 +53,12 @@ bool Player::StaticInitialize(ID3D12Device* device, int window_width, int window
 	return true;
 }
 
-void Player::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void Goal::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Player::cmdList == nullptr);
+	assert(Goal::cmdList == nullptr);
 
 	// コマンドリストをセット
-	Player::cmdList = cmdList;
+	Goal::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -68,41 +68,41 @@ void Player::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Player::PostDraw() {
+void Goal::PostDraw() {
 	// コマンドリストを解除
-	Player::cmdList = nullptr;
+	Goal::cmdList = nullptr;
 }
 
-Player* Player::Create() {
+Goal* Goal::Create() {
 	// 3Dオブジェクトのインスタンスを生成
-	Player* player = new Player();
-	if (player == nullptr) {
+	Goal* goal = new Goal();
+	if (goal == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!player->Initialize()) {
-		delete player;
+	if (!goal->Initialize()) {
+		delete goal;
 		assert(0);
 		return nullptr;
 	}
 
-	return player;
+	return goal;
 }
 
-void Player::SetEye(XMFLOAT3 eye) {
-	Player::eye = eye;
+void Goal::SetEye(XMFLOAT3 eye) {
+	Goal::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Player::SetTarget(XMFLOAT3 target) {
-	Player::target = target;
+void Goal::SetTarget(XMFLOAT3 target) {
+	Goal::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Player::CameraMoveVector(XMFLOAT3 move) {
+void Goal::CameraMoveVector(XMFLOAT3 move) {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
 
@@ -118,7 +118,7 @@ void Player::CameraMoveVector(XMFLOAT3 move) {
 	SetTarget(target_moved);
 }
 
-bool Player::InitializeDescriptorHeap() {
+bool Goal::InitializeDescriptorHeap() {
 	HRESULT result = S_FALSE;
 
 	// デスクリプタヒープを生成	
@@ -138,7 +138,7 @@ bool Player::InitializeDescriptorHeap() {
 	return true;
 }
 
-void Player::InitializeCamera(int window_width, int window_height) {
+void Goal::InitializeCamera(int window_width, int window_height) {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
 		XMLoadFloat3(&eye),
@@ -158,7 +158,7 @@ void Player::InitializeCamera(int window_width, int window_height) {
 	);
 }
 
-bool Player::InitializeGraphicsPipeline() {
+bool Goal::InitializeGraphicsPipeline() {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
@@ -238,11 +238,14 @@ bool Player::InitializeGraphicsPipeline() {
 	gpipeline.SampleMask = D3D12_DEFAULT_SAMPLE_MASK; // 標準設定
 	// ラスタライザステート
 	gpipeline.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	//gpipeline.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	gpipeline.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
 	//gpipeline.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
 	// デプスステンシルステート
+	// デプスステンシルステート
 	gpipeline.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	gpipeline.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	//gpipeline.DepthStencilState.DepthWrGoalask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	//時計回り(clockwise)の頂点を持つ面を表と見なす(デフォルト)
+	//gpipeline.RasterizerState.FrontCounterClockwise = FALSE;
 	// レンダーターゲットのブレンド設定
 	D3D12_RENDER_TARGET_BLEND_DESC blenddesc{};
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	// RBGA全てのチャンネルを描画
@@ -254,7 +257,8 @@ bool Player::InitializeGraphicsPipeline() {
 	blenddesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	blenddesc.SrcBlendAlpha = D3D12_BLEND_ONE;
 	blenddesc.DestBlendAlpha = D3D12_BLEND_ZERO;
-
+	//デプスの書き込みを禁止
+	gpipeline.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	// ブレンドステートの設定
 	gpipeline.BlendState.RenderTarget[0] = blenddesc;
 
@@ -309,7 +313,7 @@ bool Player::InitializeGraphicsPipeline() {
 	return true;
 }
 
-bool Player::LoadTexture() {
+bool Goal::LoadTexture() {
 	HRESULT result = S_FALSE;
 
 	// WICテクスチャのロード
@@ -317,7 +321,7 @@ bool Player::LoadTexture() {
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/Player_walk.png", WIC_FLAGS_NONE,
+		L"Resources/Goal.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -378,7 +382,7 @@ bool Player::LoadTexture() {
 	return true;
 }
 
-void Player::CreateModel() {
+void Goal::CreateModel() {
 	HRESULT result = S_FALSE;
 
 	VertexPosNormalUv vertices[4] = {
@@ -450,12 +454,12 @@ void Player::CreateModel() {
 	ibView.SizeInBytes = sizeof(indices);
 }
 
-void Player::UpdateViewMatrix() {
+void Goal::UpdateViewMatrix() {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
-bool Player::Initialize() {
+bool Goal::Initialize() {
 	// nullptrチェック
 	assert(device);
 
@@ -472,7 +476,7 @@ bool Player::Initialize() {
 	return true;
 }
 
-void Player::Update() {
+void Goal::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 
@@ -503,10 +507,10 @@ void Player::Update() {
 	constBuff->Unmap(0, nullptr);
 }
 
-void Player::Draw() {
+void Goal::Draw() {
 	// nullptrチェック
 	assert(device);
-	assert(Player::cmdList);
+	assert(Goal::cmdList);
 
 	// 頂点バッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &vbView);
@@ -527,7 +531,7 @@ void Player::Draw() {
 }
 
 //カメラの操作
-void Player::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+void Goal::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();

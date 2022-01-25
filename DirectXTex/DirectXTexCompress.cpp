@@ -1,9 +1,9 @@
 //-------------------------------------------------------------------------------------
 // DirectXTexCompress.cpp
-//
+//  
 // DirectX Texture Library - Texture compression
 //
-// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 //
 // http://go.microsoft.com/fwlink/?LinkId=248926
@@ -22,7 +22,7 @@ using namespace DirectX;
 
 namespace
 {
-    inline uint32_t GetBCFlags(_In_ TEX_COMPRESS_FLAGS compress) noexcept
+    inline DWORD GetBCFlags(_In_ DWORD compress) noexcept
     {
         static_assert(static_cast<int>(TEX_COMPRESS_RGB_DITHER) == static_cast<int>(BC_FLAGS_DITHER_RGB), "TEX_COMPRESS_* flags should match BC_FLAGS_*");
         static_assert(static_cast<int>(TEX_COMPRESS_A_DITHER) == static_cast<int>(BC_FLAGS_DITHER_A), "TEX_COMPRESS_* flags should match BC_FLAGS_*");
@@ -33,34 +33,33 @@ namespace
         return (compress & (BC_FLAGS_DITHER_RGB | BC_FLAGS_DITHER_A | BC_FLAGS_UNIFORM | BC_FLAGS_USE_3SUBSETS | BC_FLAGS_FORCE_BC7_MODE6));
     }
 
-    inline TEX_FILTER_FLAGS GetSRGBFlags(_In_ TEX_COMPRESS_FLAGS compress) noexcept
+    inline DWORD GetSRGBFlags(_In_ DWORD compress) noexcept
     {
-        static_assert(TEX_FILTER_SRGB_IN == 0x1000000, "TEX_FILTER_SRGB flag values don't match TEX_FILTER_SRGB_MASK");
         static_assert(static_cast<int>(TEX_COMPRESS_SRGB_IN) == static_cast<int>(TEX_FILTER_SRGB_IN), "TEX_COMPRESS_SRGB* should match TEX_FILTER_SRGB*");
         static_assert(static_cast<int>(TEX_COMPRESS_SRGB_OUT) == static_cast<int>(TEX_FILTER_SRGB_OUT), "TEX_COMPRESS_SRGB* should match TEX_FILTER_SRGB*");
         static_assert(static_cast<int>(TEX_COMPRESS_SRGB) == static_cast<int>(TEX_FILTER_SRGB), "TEX_COMPRESS_SRGB* should match TEX_FILTER_SRGB*");
-        return static_cast<TEX_FILTER_FLAGS>(compress & TEX_FILTER_SRGB_MASK);
+        return (compress & TEX_COMPRESS_SRGB);
     }
 
-    inline bool DetermineEncoderSettings(_In_ DXGI_FORMAT format, _Out_ BC_ENCODE& pfEncode, _Out_ size_t& blocksize, _Out_ TEX_FILTER_FLAGS& cflags) noexcept
+    inline bool DetermineEncoderSettings(_In_ DXGI_FORMAT format, _Out_ BC_ENCODE& pfEncode, _Out_ size_t& blocksize, _Out_ DWORD& cflags) noexcept
     {
         switch (format)
         {
         case DXGI_FORMAT_BC1_UNORM:
-        case DXGI_FORMAT_BC1_UNORM_SRGB:    pfEncode = nullptr;         blocksize = 8;   cflags = TEX_FILTER_DEFAULT; break;
+        case DXGI_FORMAT_BC1_UNORM_SRGB:    pfEncode = nullptr;         blocksize = 8;   cflags = 0; break;
         case DXGI_FORMAT_BC2_UNORM:
-        case DXGI_FORMAT_BC2_UNORM_SRGB:    pfEncode = D3DXEncodeBC2;   blocksize = 16;  cflags = TEX_FILTER_DEFAULT; break;
+        case DXGI_FORMAT_BC2_UNORM_SRGB:    pfEncode = D3DXEncodeBC2;   blocksize = 16;  cflags = 0; break;
         case DXGI_FORMAT_BC3_UNORM:
-        case DXGI_FORMAT_BC3_UNORM_SRGB:    pfEncode = D3DXEncodeBC3;   blocksize = 16;  cflags = TEX_FILTER_DEFAULT; break;
+        case DXGI_FORMAT_BC3_UNORM_SRGB:    pfEncode = D3DXEncodeBC3;   blocksize = 16;  cflags = 0; break;
         case DXGI_FORMAT_BC4_UNORM:         pfEncode = D3DXEncodeBC4U;  blocksize = 8;   cflags = TEX_FILTER_RGB_COPY_RED; break;
         case DXGI_FORMAT_BC4_SNORM:         pfEncode = D3DXEncodeBC4S;  blocksize = 8;   cflags = TEX_FILTER_RGB_COPY_RED; break;
         case DXGI_FORMAT_BC5_UNORM:         pfEncode = D3DXEncodeBC5U;  blocksize = 16;  cflags = TEX_FILTER_RGB_COPY_RED | TEX_FILTER_RGB_COPY_GREEN; break;
         case DXGI_FORMAT_BC5_SNORM:         pfEncode = D3DXEncodeBC5S;  blocksize = 16;  cflags = TEX_FILTER_RGB_COPY_RED | TEX_FILTER_RGB_COPY_GREEN; break;
-        case DXGI_FORMAT_BC6H_UF16:         pfEncode = D3DXEncodeBC6HU; blocksize = 16;  cflags = TEX_FILTER_DEFAULT; break;
-        case DXGI_FORMAT_BC6H_SF16:         pfEncode = D3DXEncodeBC6HS; blocksize = 16;  cflags = TEX_FILTER_DEFAULT; break;
+        case DXGI_FORMAT_BC6H_UF16:         pfEncode = D3DXEncodeBC6HU; blocksize = 16;  cflags = 0; break;
+        case DXGI_FORMAT_BC6H_SF16:         pfEncode = D3DXEncodeBC6HS; blocksize = 16;  cflags = 0; break;
         case DXGI_FORMAT_BC7_UNORM:
-        case DXGI_FORMAT_BC7_UNORM_SRGB:    pfEncode = D3DXEncodeBC7;   blocksize = 16;  cflags = TEX_FILTER_DEFAULT; break;
-        default:                            pfEncode = nullptr;         blocksize = 0;   cflags = TEX_FILTER_DEFAULT; return false;
+        case DXGI_FORMAT_BC7_UNORM_SRGB:    pfEncode = D3DXEncodeBC7;   blocksize = 16;  cflags = 0; break;
+        default:                            pfEncode = nullptr;         blocksize = 0;   cflags = 0; return false;
         }
 
         return true;
@@ -71,9 +70,9 @@ namespace
     HRESULT CompressBC(
         const Image& image,
         const Image& result,
-        uint32_t bcflags,
-        TEX_FILTER_FLAGS srgb,
-        float threshold) noexcept
+        DWORD bcflags,
+        DWORD srgb,
+        float threshold)
     {
         if (!image.pixels || !result.pixels)
             return E_POINTER;
@@ -89,7 +88,7 @@ namespace
         if (sbpp < 8)
         {
             // We don't support compressing from monochrome (DXGI_FORMAT_R1_UNORM)
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         }
 
         // Round to bytes
@@ -100,11 +99,11 @@ namespace
         // Determine BC format encoder
         BC_ENCODE pfEncode;
         size_t blocksize;
-        TEX_FILTER_FLAGS cflags;
+        DWORD cflags;
         if (!DetermineEncoderSettings(result.format, pfEncode, blocksize, cflags))
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
 
-        XM_ALIGNED_DATA(16) XMVECTOR temp[16];
+        __declspec(align(16)) XMVECTOR temp[16];
         const uint8_t *pSrc = image.pixels;
         const uint8_t *pEnd = image.pixels + image.slicePitch;
         const size_t rowPitch = image.rowPitch;
@@ -200,9 +199,9 @@ namespace
     HRESULT CompressBC_Parallel(
         const Image& image,
         const Image& result,
-        uint32_t bcflags,
-        TEX_FILTER_FLAGS srgb,
-        float threshold) noexcept
+        DWORD bcflags,
+        DWORD srgb,
+        float threshold)
     {
         if (!image.pixels || !result.pixels)
             return E_POINTER;
@@ -218,7 +217,7 @@ namespace
         if (sbpp < 8)
         {
             // We don't support compressing from monochrome (DXGI_FORMAT_R1_UNORM)
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         }
 
         // Round to bytes
@@ -229,9 +228,9 @@ namespace
         // Determine BC format encoder
         BC_ENCODE pfEncode;
         size_t blocksize;
-        TEX_FILTER_FLAGS cflags;
+        DWORD cflags;
         if (!DetermineEncoderSettings(result.format, pfEncode, blocksize, cflags))
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
 
         // Refactored version of loop to support parallel independance
         const size_t nBlocks = std::max<size_t>(1, (image.width + 3) / 4) * std::max<size_t>(1, (image.height + 3) / 4);
@@ -263,7 +262,7 @@ namespace
             assert(bytesLeft > 0);
             size_t bytesToRead = std::min<size_t>(rowPitch, size_t(bytesLeft));
 
-            XM_ALIGNED_DATA(16) XMVECTOR temp[16];
+            __declspec(align(16)) XMVECTOR temp[16];
             if (!_LoadScanline(&temp[0], pw, pSrc, bytesToRead, format))
                 fail = true;
 
@@ -394,7 +393,7 @@ namespace
         if (dbpp < 8)
         {
             // We don't support decompressing to monochrome (DXGI_FORMAT_R1_UNORM)
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         }
 
         // Round to bytes
@@ -438,10 +437,10 @@ namespace
         case DXGI_FORMAT_BC7_UNORM:
         case DXGI_FORMAT_BC7_UNORM_SRGB:    pfDecode = D3DXDecodeBC7;   sbpp = 16;  break;
         default:
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         }
 
-        XM_ALIGNED_DATA(16) XMVECTOR temp[16];
+        __declspec(align(16)) XMVECTOR temp[16];
         const uint8_t *pSrc = cImage.pixels;
         const size_t rowPitch = result.rowPitch;
         for (size_t h = 0; h < cImage.height; h += 4)
@@ -453,7 +452,7 @@ namespace
             for (size_t count = 0; (count < cImage.rowPitch) && (w < cImage.width); count += sbpp, w += 4)
             {
                 pfDecode(temp, sptr);
-                _ConvertScanline(temp, 16, format, cformat, TEX_FILTER_DEFAULT);
+                _ConvertScanline(temp, 16, format, cformat, 0);
 
                 size_t pw = std::min<size_t>(4, cImage.width - w);
                 assert(pw > 0 && ph > 0);
@@ -534,7 +533,7 @@ namespace DirectX
         // Scan blocks for non-opaque alpha
         static const XMVECTORF32 threshold = { { { 0.99f, 0.99f, 0.99f, 0.99f } } };
 
-        XM_ALIGNED_DATA(16) XMVECTOR temp[16];
+        __declspec(align(16)) XMVECTOR temp[16];
         const uint8_t *pPixels = cImage.pixels;
         for (size_t h = 0; h < cImage.height; h += 4)
         {
@@ -594,16 +593,16 @@ _Use_decl_annotations_
 HRESULT DirectX::Compress(
     const Image& srcImage,
     DXGI_FORMAT format,
-    TEX_COMPRESS_FLAGS compress,
+    DWORD compress,
     float threshold,
-    ScratchImage& image) noexcept
+    ScratchImage& image)
 {
     if (IsCompressed(srcImage.format) || !IsCompressed(format))
         return E_INVALIDARG;
 
     if (IsTypeless(format)
         || IsTypeless(srcImage.format) || IsPlanar(srcImage.format) || IsPalettized(srcImage.format))
-        return HRESULT_E_NOT_SUPPORTED;
+        return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
 
     // Create compressed image
     HRESULT hr = image.Initialize2D(format, srcImage.width, srcImage.height, 1, 1);
@@ -643,9 +642,9 @@ HRESULT DirectX::Compress(
     size_t nimages,
     const TexMetadata& metadata,
     DXGI_FORMAT format,
-    TEX_COMPRESS_FLAGS compress,
+    DWORD compress,
     float threshold,
-    ScratchImage& cImages) noexcept
+    ScratchImage& cImages)
 {
     if (!srcImages || !nimages)
         return E_INVALIDARG;
@@ -655,7 +654,7 @@ HRESULT DirectX::Compress(
 
     if (IsTypeless(format)
         || IsTypeless(metadata.format) || IsPlanar(metadata.format) || IsPalettized(metadata.format))
-        return HRESULT_E_NOT_SUPPORTED;
+        return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
 
     cImages.Release();
 
@@ -749,7 +748,7 @@ HRESULT DirectX::Decompress(
             return E_INVALIDARG;
 
         if (IsTypeless(format) || IsPlanar(format) || IsPalettized(format))
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
     }
 
     // Create decompressed image
@@ -802,7 +801,7 @@ HRESULT DirectX::Decompress(
             return E_INVALIDARG;
 
         if (IsTypeless(format) || IsPlanar(format) || IsPalettized(format))
-            return HRESULT_E_NOT_SUPPORTED;
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
     }
 
     images.Release();

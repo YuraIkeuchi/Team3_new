@@ -131,7 +131,7 @@ private:// 静的メンバ関数
 public: // メンバ関数
 	bool Initialize();
 	/// 毎フレーム処理
-	void Update();
+	void Update(XMMATRIX& matView);
 
 	/// 描画
 	void Draw();
@@ -162,11 +162,11 @@ private: // メンバ変数
 	// 色
 	XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 5.0f,5.0f,5.0f };
+	XMFLOAT3 scale = { 8.0f,8.0f,8.0f };
 	// X,Y,Z軸回りのローカル回転角
-	XMFLOAT3 rotation = { 0,0,0 };
+	XMFLOAT3 rotation = { 0,-90,0 };
 	// ローカル座標
-	XMFLOAT3 position = { 0,-20,-50 };
+	XMFLOAT3 position = { 0,-20,-60 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト

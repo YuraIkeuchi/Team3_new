@@ -1,4 +1,4 @@
-#include "Player4.h"
+#include "PlayerRightWalk4.h"
 #include <d3dcompiler.h>
 #include <DirectXTex.h>
 
@@ -10,30 +10,30 @@ using namespace Microsoft::WRL;
 /// <summary>
 /// 静的メンバ変数の実体
 /// </summary>
-ID3D12Device* Player4::device = nullptr;
-UINT Player4::descriptorHandleIncrementSize = 0;
-ID3D12GraphicsCommandList* Player4::cmdList = nullptr;
-ComPtr<ID3D12RootSignature> Player4::rootsignature;
-ComPtr<ID3D12PipelineState> Player4::pipelinestate;
-ComPtr<ID3D12DescriptorHeap> Player4::descHeap;
-ComPtr<ID3D12Resource> Player4::vertBuff;
-ComPtr<ID3D12Resource> Player4::indexBuff;
-ComPtr<ID3D12Resource> Player4::texbuff;
-CD3DX12_CPU_DESCRIPTOR_HANDLE Player4::cpuDescHandleSRV;
-CD3DX12_GPU_DESCRIPTOR_HANDLE Player4::gpuDescHandleSRV;
-XMMATRIX Player4::matView{};
-XMMATRIX Player4::matProjection{};
-XMFLOAT3 Player4::eye = { 0, 0, -50.0f };
-XMFLOAT3 Player4::target = { 0, 0, 0 };
-XMFLOAT3 Player4::up = { 0, 1, 0 };
-D3D12_VERTEX_BUFFER_VIEW Player4::vbView{};
-D3D12_INDEX_BUFFER_VIEW Player4::ibView{};
+ID3D12Device* PlayerRightWalk4::device = nullptr;
+UINT PlayerRightWalk4::descriptorHandleIncrementSize = 0;
+ID3D12GraphicsCommandList* PlayerRightWalk4::cmdList = nullptr;
+ComPtr<ID3D12RootSignature> PlayerRightWalk4::rootsignature;
+ComPtr<ID3D12PipelineState> PlayerRightWalk4::pipelinestate;
+ComPtr<ID3D12DescriptorHeap> PlayerRightWalk4::descHeap;
+ComPtr<ID3D12Resource> PlayerRightWalk4::vertBuff;
+ComPtr<ID3D12Resource> PlayerRightWalk4::indexBuff;
+ComPtr<ID3D12Resource> PlayerRightWalk4::texbuff;
+CD3DX12_CPU_DESCRIPTOR_HANDLE PlayerRightWalk4::cpuDescHandleSRV;
+CD3DX12_GPU_DESCRIPTOR_HANDLE PlayerRightWalk4::gpuDescHandleSRV;
+XMMATRIX PlayerRightWalk4::matView{};
+XMMATRIX PlayerRightWalk4::matProjection{};
+XMFLOAT3 PlayerRightWalk4::eye = { 0, 0, -50.0f };
+XMFLOAT3 PlayerRightWalk4::target = { 0, 0, 0 };
+XMFLOAT3 PlayerRightWalk4::up = { 0, 1, 0 };
+D3D12_VERTEX_BUFFER_VIEW PlayerRightWalk4::vbView{};
+D3D12_INDEX_BUFFER_VIEW PlayerRightWalk4::ibView{};
 
-bool Player4::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
+bool PlayerRightWalk4::StaticInitialize(ID3D12Device* device, int window_width, int window_height) {
 	// nullptrチェック
 	assert(device);
 
-	Player4::device = device;
+	PlayerRightWalk4::device = device;
 
 	// デスクリプタヒープの初期化
 	InitializeDescriptorHeap();
@@ -53,12 +53,12 @@ bool Player4::StaticInitialize(ID3D12Device* device, int window_width, int windo
 	return true;
 }
 
-void Player4::PreDraw(ID3D12GraphicsCommandList* cmdList) {
+void PlayerRightWalk4::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	// PreDrawとPostDrawがペアで呼ばれていなければエラー
-	assert(Player4::cmdList == nullptr);
+	assert(PlayerRightWalk4::cmdList == nullptr);
 
 	// コマンドリストをセット
-	Player4::cmdList = cmdList;
+	PlayerRightWalk4::cmdList = cmdList;
 
 	// パイプラインステートの設定
 	cmdList->SetPipelineState(pipelinestate.Get());
@@ -68,41 +68,41 @@ void Player4::PreDraw(ID3D12GraphicsCommandList* cmdList) {
 	cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Player4::PostDraw() {
+void PlayerRightWalk4::PostDraw() {
 	// コマンドリストを解除
-	Player4::cmdList = nullptr;
+	PlayerRightWalk4::cmdList = nullptr;
 }
 
-Player4* Player4::Create() {
+PlayerRightWalk4* PlayerRightWalk4::Create() {
 	// 3Dオブジェクトのインスタンスを生成
-	Player4* player4 = new Player4();
-	if (player4 == nullptr) {
+	PlayerRightWalk4* playerRightWalk4 = new PlayerRightWalk4();
+	if (playerRightWalk4 == nullptr) {
 		return nullptr;
 	}
 
 	// 初期化
-	if (!player4->Initialize()) {
-		delete player4;
+	if (!playerRightWalk4->Initialize()) {
+		delete playerRightWalk4;
 		assert(0);
 		return nullptr;
 	}
 
-	return player4;
+	return playerRightWalk4;
 }
 
-void Player4::SetEye(XMFLOAT3 eye) {
-	Player4::eye = eye;
+void PlayerRightWalk4::SetEye(XMFLOAT3 eye) {
+	PlayerRightWalk4::eye = eye;
 
 	UpdateViewMatrix();
 }
 
-void Player4::SetTarget(XMFLOAT3 target) {
-	Player4::target = target;
+void PlayerRightWalk4::SetTarget(XMFLOAT3 target) {
+	PlayerRightWalk4::target = target;
 
 	UpdateViewMatrix();
 }
 
-void Player4::CameraMoveVector(XMFLOAT3 move) {
+void PlayerRightWalk4::CameraMoveVector(XMFLOAT3 move) {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();
 
@@ -118,7 +118,7 @@ void Player4::CameraMoveVector(XMFLOAT3 move) {
 	SetTarget(target_moved);
 }
 
-bool Player4::InitializeDescriptorHeap() {
+bool PlayerRightWalk4::InitializeDescriptorHeap() {
 	HRESULT result = S_FALSE;
 
 	// デスクリプタヒープを生成	
@@ -138,7 +138,7 @@ bool Player4::InitializeDescriptorHeap() {
 	return true;
 }
 
-void Player4::InitializeCamera(int window_width, int window_height) {
+void PlayerRightWalk4::InitializeCamera(int window_width, int window_height) {
 	// ビュー行列の生成
 	matView = XMMatrixLookAtLH(
 		XMLoadFloat3(&eye),
@@ -158,7 +158,7 @@ void Player4::InitializeCamera(int window_width, int window_height) {
 	);
 }
 
-bool Player4::InitializeGraphicsPipeline() {
+bool PlayerRightWalk4::InitializeGraphicsPipeline() {
 	HRESULT result = S_FALSE;
 	ComPtr<ID3DBlob> vsBlob; // 頂点シェーダオブジェクト
 	ComPtr<ID3DBlob> psBlob;	// ピクセルシェーダオブジェクト
@@ -309,7 +309,7 @@ bool Player4::InitializeGraphicsPipeline() {
 	return true;
 }
 
-bool Player4::LoadTexture() {
+bool PlayerRightWalk4::LoadTexture() {
 	HRESULT result = S_FALSE;
 
 	// WICテクスチャのロード
@@ -317,7 +317,7 @@ bool Player4::LoadTexture() {
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/Player_walk3.png", WIC_FLAGS_NONE,
+		L"Resources/Player/Player_Rightwalk4.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
@@ -378,7 +378,7 @@ bool Player4::LoadTexture() {
 	return true;
 }
 
-void Player4::CreateModel() {
+void PlayerRightWalk4::CreateModel() {
 	HRESULT result = S_FALSE;
 
 	VertexPosNormalUv vertices[4] = {
@@ -450,12 +450,12 @@ void Player4::CreateModel() {
 	ibView.SizeInBytes = sizeof(indices);
 }
 
-void Player4::UpdateViewMatrix() {
+void PlayerRightWalk4::UpdateViewMatrix() {
 	// ビュー行列の更新
 	matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 }
 
-bool Player4::Initialize() {
+bool PlayerRightWalk4::Initialize() {
 	// nullptrチェック
 	assert(device);
 
@@ -472,7 +472,7 @@ bool Player4::Initialize() {
 	return true;
 }
 
-void Player4::Update() {
+void PlayerRightWalk4::Update(XMMATRIX& matView) {
 	HRESULT result;
 	XMMATRIX matScale, matRot, matTrans;
 
@@ -503,10 +503,10 @@ void Player4::Update() {
 	constBuff->Unmap(0, nullptr);
 }
 
-void Player4::Draw() {
+void PlayerRightWalk4::Draw() {
 	// nullptrチェック
 	assert(device);
-	assert(Player4::cmdList);
+	assert(PlayerRightWalk4::cmdList);
 
 	// 頂点バッファの設定
 	cmdList->IASetVertexBuffers(0, 1, &vbView);
@@ -527,7 +527,7 @@ void Player4::Draw() {
 }
 
 //カメラの操作
-void Player4::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
+void PlayerRightWalk4::SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition)
 {
 	XMFLOAT3 eye_moved = GetEye();
 	XMFLOAT3 target_moved = GetTarget();

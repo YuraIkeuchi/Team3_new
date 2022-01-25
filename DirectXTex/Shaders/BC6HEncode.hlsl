@@ -3,7 +3,7 @@
 //
 // The Compute Shader for BC6H Encoder
 //
-// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 //--------------------------------------------------------------------------------------
 
