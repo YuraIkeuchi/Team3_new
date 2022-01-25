@@ -57,7 +57,6 @@ float aseInSine(const float x) {
 	return 1 - cos((x * PI) / 2);
 }
 
-<<<<<<< HEAD
 //ブロック置く処理
 XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Projector, XMFLOAT3 object) {
 	XMFLOAT3 result = { screen.x,0,0 };
@@ -85,8 +84,6 @@ XMFLOAT3 sankaku(XMFLOAT3 screen, XMFLOAT3 Projector, XMFLOAT3 object) {
 	return result;
 }
 
-=======
->>>>>>> c05fa84d800f94ab7b8bdf96e13d2aac648fc310
 #pragma endregion
 #pragma region//WinMain
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -107,7 +104,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #endif
 	//directx初期化
 #pragma region//構造体
-	
+
 	const int constantBufferNum = 128;
 	const int Block_NUM = 30;
 #pragma endregion
@@ -229,7 +226,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	sprite[14]->SetPosition(FilmPos[1]);
 	int ExplanationNumber = 0;
 	int TextNumber = 0;
-	XMFLOAT2 SceneCutPos = {1280,0};
+	XMFLOAT2 SceneCutPos = { 1280,0 };
 	for (int i = 0; i < SceneCutMax; i++) {
 		SpriteSceneCut[i]->SetPosition(SceneCutPos);
 	}
@@ -330,7 +327,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		FieldBlock[i] = Block::Create();
 		FieldBlock[i]->Update(matview);
-	
+
 	}
 
 	for (int i = 0; i < 15; i++) {
@@ -365,64 +362,64 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		assert(0);
 		return 1;
 	}
-	 projector = Projector::Create();
-	 projector->Update(matview);
+	projector = Projector::Create();
+	projector->Update(matview);
 
-	 XMFLOAT3 projectorPos;
-	 projectorPos = { 0,-20.0f,-70.0f };
-	 projector->SetPosition(projectorPos);
+	XMFLOAT3 projectorPos;
+	projectorPos = { 0,-20.0f,-70.0f };
+	projector->SetPosition(projectorPos);
 
-	 Lever* lever;
-	 if (!lever->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-		 assert(0);
-		 return 1;
-	 }
-	 lever = Lever::Create();
-	 lever->Update(matview);
+	Lever* lever;
+	if (!lever->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	lever = Lever::Create();
+	lever->Update(matview);
 
-	 XMFLOAT3 leverPos;
-	 leverPos = { -4.0,-5.0f,-70.0f };
-	 lever->SetPosition(leverPos);
+	XMFLOAT3 leverPos;
+	leverPos = { -4.0,-5.0f,-70.0f };
+	lever->SetPosition(leverPos);
 
-	 Under* under;
-	 if (!under->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-		 assert(0);
-		 return 1;
-	 }
-	 under = Under::Create();
-	 under->Update(matview);
+	Under* under;
+	if (!under->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	under = Under::Create();
+	under->Update(matview);
 
-	 XMFLOAT3 underPos;
-	 underPos = { -100,-50.0f,-70.0f };
-	 under->SetPosition(underPos);
-	 XMFLOAT3 leverRota = lever->GetRotaition();
-	 Gear* gear[2];
-	 XMFLOAT3 gearPos[2];
-	 gearPos[0] = { 0.7f,0.0f,-72.0f };
-	 gearPos[1] = { 0.7f,-6.0f,-76.0f };
-	 XMFLOAT3 gearRota[2];
-	 for (int i = 0; i < 2; i++) {
-		 if (!gear[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-			 assert(0);
-			 return 1;
-		 }
-		 gear[i] = Gear::Create();
-		 gear[i]->Update(matview);
-		 gearRota[i] = gear[i]->GetRotaition();
-		 gear[i]->SetPosition(gearPos[i]);
-	 }
+	XMFLOAT3 underPos;
+	underPos = { -100,-50.0f,-70.0f };
+	under->SetPosition(underPos);
+	XMFLOAT3 leverRota = lever->GetRotaition();
+	Gear* gear[2];
+	XMFLOAT3 gearPos[2];
+	gearPos[0] = { 0.7f,0.0f,-72.0f };
+	gearPos[1] = { 0.7f,-6.0f,-76.0f };
+	XMFLOAT3 gearRota[2];
+	for (int i = 0; i < 2; i++) {
+		if (!gear[i]->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+			assert(0);
+			return 1;
+		}
+		gear[i] = Gear::Create();
+		gear[i]->Update(matview);
+		gearRota[i] = gear[i]->GetRotaition();
+		gear[i]->SetPosition(gearPos[i]);
+	}
 
 #pragma endregion
 #pragma region//光源
-	 LightSource* lightSource;
-	 if (!lightSource->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
-		 assert(0);
-		 return 1;
-	 }
-	 lightSource = LightSource::Create();
-	 lightSource->Update(matview);
+	LightSource* lightSource;
+	if (!lightSource->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	lightSource = LightSource::Create();
+	lightSource->Update(matview);
 
-	 XMFLOAT3 lightSourcePos = lightSource->GetPosition();
+	XMFLOAT3 lightSourcePos = lightSource->GetPosition();
 #pragma endregion
 #pragma region//プレイヤー変数
 #pragma region//左向きのプレイヤー変数
@@ -489,7 +486,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 	XMFLOAT3 PlayerPosition;
 	PlayerPosition = { -140.0f,20.0f,135.0f };
-	
+
 	XMFLOAT3 OldPlayerPosition;
 	XMFLOAT3 PlayerRotation;
 	PlayerRotation = playerleftwalk->GetRotaition();
@@ -594,7 +591,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	XMVECTOR v0 = { 50,60,-140,0 };
 	XMMATRIX rotM;// = XMMatrixIdentity();
 	XMVECTOR eye2;
-	XMVECTOR target2 = { PlayerPosition.x, 0,0,0};
+	XMVECTOR target2 = { PlayerPosition.x, 0,0,0 };
 	XMVECTOR up2 = { 0,0.0f,0,0 };
 	XMFLOAT3 targetPosition = { 0.0f,0.0f,0.0f };
 #pragma endregion
@@ -616,7 +613,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			} else {
 				ImageBlock[i]->SetColor({ 1.0f,0.0f,0.0f,1.0 });
 			}
-			ImageBlock[i]->SetScale({ 1.0f,1.0f,1.0f});
+			ImageBlock[i]->SetScale({ 1.0f,1.0f,1.0f });
 		}
 
 		for (int i = 0; i < _countof(SetBlock); i++) {
@@ -631,7 +628,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			FieldBlock[i]->SetColor({ 0.3f,0.3f,0.3f,1.0f });
 		}
 		SpritePosition = sprite[0]->GetPosition();
-		
+
 #pragma region//更新処理
 		//キーの更新
 		input->Update();
@@ -691,7 +688,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					AppearanceCount = 0;
 				}
 			}
-		
+
 		}
 #pragma endregion
 #pragma region//ゲームプレイ中
@@ -707,7 +704,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			{
 				mode = 0;
 			}
-		
+
 #pragma region//プレイ画面
 			if (mode == 0) {
 				v0.m128_f32[1] -= 3.0f;
@@ -719,7 +716,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					v0.m128_f32[1] = 0.0f;
 
 				}
-				
+
 				if (v0.m128_f32[2] == -20.0f && v0.m128_f32[1] == 0.0f) {
 					modeflag = 1;
 				}
@@ -741,7 +738,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				v0.m128_f32[1] += 0.5f;
 				if (v0.m128_f32[2] <= -135.0f) {
 					v0.m128_f32[2] = -135.0f;
-		
+
 				}
 				if (v0.m128_f32[1] >= 33.0f) {
 					v0.m128_f32[1] = 33.0f;
@@ -776,7 +773,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					}
 				}
 				//ジャンプ処理
-				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && ( JumpG >= 0.0f) && (JumpG <= 0.1f)) {
+				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && (JumpG >= 0.0f) && (JumpG <= 0.1f)) {
 					JumpG = -1.5f;
 					JumpFlag = 1;
 				}
@@ -1017,7 +1014,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					CutTimer++;
 					ResetFlag = 1;
 				}
-			
+
 				if (CutTimer == 8 && CutCount != 4) {
 					CutCount++;
 					CutTimer = 0;
@@ -1063,8 +1060,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 #pragma region//ステージクリア
-	if (Scene == stageClear) {
-		ResetFlag = 1;
+		if (Scene == stageClear) {
+			ResetFlag = 1;
 			if (input->TriggerKey(DIK_SPACE)) {
 				Scene = gamePlay;
 				ResetFlag = 0;
@@ -1087,7 +1084,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			ResetFlag = 1;
 			if (input->TriggerKey(DIK_SPACE)) {
 				Scene = title;
-				
+
 				ResetFlag = 0;
 				SpaceCount = 0;
 			}
@@ -1281,7 +1278,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk2->Update(matview);
 		playerrightwalk3->Update(matview);
 		playerrightwalk4->Update(matview);
-	
+
 		screen->Update(matview);
 		projector->Update(matview);
 		under->Update(matview);
@@ -1296,14 +1293,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerrightwalk2->SetPosition(PlayerPosition);
 		playerrightwalk3->SetPosition(PlayerPosition);
 		playerrightwalk4->SetPosition(PlayerPosition);
-		screen->SetPosition({0,0,400});
+		screen->SetPosition({ 0,0,400 });
 		projector->SetPosition({ 0,-20,-70 });
 		under->SetPosition({ -32,135,150 });
 		lever->SetPosition(leverPos);
 		lever->SetRotaition(leverRota);
 		goal->SetPosition(GoalPosition);
 		lightSource->SetPosition({ 0,0,190 });
-	
+
 #pragma endregion
 #pragma endregion
 #pragma region//描画
@@ -1316,7 +1313,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		{
 			if (ImGui::TreeNode("Film"))
 			{
-				ImGui::Text("HitNumber,%d",HitNumber);
+				ImGui::Text("HitNumber,%d", HitNumber);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -1335,7 +1332,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::End();
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
-	
+
 		Sprite::PostDraw();
 		Block::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk::PreDraw(dxCommon->GetCmdList());
@@ -1454,8 +1451,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					if (SetBlockColor[i].w > 0.0f) {
 						SetBlock[i]->Draw();
 					}
-				} 
-				else if((SetFlag[i] == 0) && (mode == 1) && (ItemCount != 0)) {
+				} else if ((SetFlag[i] == 0) && (mode == 1) && (ItemCount != 0)) {
 					MarkBlock[i]->Draw();
 				}
 			}
@@ -1467,7 +1463,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				lightSource->Draw();
 			}
 		}
-	
+
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		if (Scene == title) {
 			sprite[0]->Draw();
@@ -1513,7 +1509,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		else if (Scene == gameClear) {
 			sprite[4]->Draw();
 		}
-	
+
 		else if (Scene == gameOver) {
 			sprite[5]->Draw();
 		}
