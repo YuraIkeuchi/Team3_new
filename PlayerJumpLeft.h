@@ -7,8 +7,7 @@
 #include <d3dx12.h>
 
 /// 3Dオブジェクト
-class Screen
-{
+class PlayerJumpLeft {
 private: // エイリアス
 	// Microsoft::WRL::を省略
 	template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
@@ -20,16 +19,14 @@ private: // エイリアス
 
 public: // サブクラス
 	// 頂点データ構造体
-	struct VertexPosNormalUv
-	{
+	struct VertexPosNormalUv {
 		XMFLOAT3 pos; // xyz座標
 		XMFLOAT3 normal; // 法線ベクトル
 		XMFLOAT2 uv;  // uv座標
 	};
 
 	// 定数バッファ用データ構造体
-	struct ConstBufferData
-	{
+	struct ConstBufferData {
 		XMFLOAT4 color;	// 色 (RGBA)
 		XMMATRIX mat;	// ３Ｄ変換行列
 	};
@@ -52,7 +49,7 @@ public: // 静的メンバ関数
 	static void PostDraw();
 
 	/// 3Dオブジェクト生成
-	static Screen* Create();
+	static PlayerJumpLeft* Create();
 
 	/// 視点座標の取得
 	static const XMFLOAT3& GetEye() { return eye; }
@@ -70,27 +67,45 @@ public: // 静的メンバ関数
 	static void CameraMoveVector(XMFLOAT3 move);
 
 private: // 静的メンバ変数
+	// デバイス
 	static ID3D12Device* device;
+	// デスクリプタサイズ
 	static UINT descriptorHandleIncrementSize;
+	// コマンドリスト
 	static ID3D12GraphicsCommandList* cmdList;
+	// ルートシグネチャ
 	static ComPtr<ID3D12RootSignature> rootsignature;
+	// パイプラインステートオブジェクト
 	static ComPtr<ID3D12PipelineState> pipelinestate;
+	// デスクリプタヒープ
 	static ComPtr<ID3D12DescriptorHeap> descHeap;
+	// 頂点バッファ
 	static ComPtr<ID3D12Resource> vertBuff;
+	// インデックスバッファ
 	static ComPtr<ID3D12Resource> indexBuff;
+	// テクスチャバッファ
 	static ComPtr<ID3D12Resource> texbuff;
+	// シェーダリソースビューのハンドル(CPU)
 	static CD3DX12_CPU_DESCRIPTOR_HANDLE cpuDescHandleSRV;
+	// シェーダリソースビューのハンドル(CPU)
 	static CD3DX12_GPU_DESCRIPTOR_HANDLE gpuDescHandleSRV;
+	// ビュー行列
 	static XMMATRIX matView;
+	// 射影行列
 	static XMMATRIX matProjection;
+	// 視点座標
 	static XMFLOAT3 eye;
+	// 注視点座標
 	static XMFLOAT3 target;
+	// 上方向ベクトル
 	static XMFLOAT3 up;
+	// 頂点バッファビュー
 	static D3D12_VERTEX_BUFFER_VIEW vbView;
+	// インデックスバッファビュー
 	static D3D12_INDEX_BUFFER_VIEW ibView;
+	// 頂点データ配列
 	static VertexPosNormalUv vertices[vertexCount];
 	static unsigned short indices[planeCount * 3];
-
 private:// 静的メンバ関数
 	/// デスクリプタヒープの初期化
 	static bool InitializeDescriptorHeap();
@@ -110,42 +125,45 @@ private:// 静的メンバ関数
 	/// ビュー行列を更新
 	static void UpdateViewMatrix();
 
-public: // メンバ関数//
-	//初期化
+public: // メンバ関数
 	bool Initialize();
 	/// 毎フレーム処理
 	void Update(XMMATRIX& matView);
 
 	/// 描画
 	void Draw();
-
+	// bool collide(EnemyBullet *enebullet);
 	/// 座標の取得
 	const XMFLOAT3& GetPosition() { return position; }
-	/// 回転の取得
-	const XMFLOAT3& GetRotation() { return  rotation; }
-	/// 色の取得
-	const XMFLOAT4& GetColor() { return  color; }
+	const XMFLOAT3& GetRotaition() { return rotation; }
+	const int& GetHitFlag() { return HitFlag; }
+	const int& GetDamageCount() { return damageCount; }
+
+	const int& GetHp() { return hp; }
 
 	/// 座標の設定
 	void SetPosition(XMFLOAT3 position) { this->position = position; }
-	/// 回転の設定
-	void SetRotation(XMFLOAT3 rotation) { this->rotation = rotation; }
-	/// 色の設定
-	void SetColor(XMFLOAT4 color) { this->color = color; }
+	void SetRotaition(XMFLOAT3 rotaition) { this->rotation = rotaition; }
+	void SetHitFlag(int HitFlag) { this->HitFlag = HitFlag; }
+	void SetHp(int hp) { this->hp = hp; }
 	//カメラをその位置に移動させる処理
 	static void SetCameraPosition(XMFLOAT3 position, XMFLOAT3 targetposition);
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuff; // 定数バッファ
+	float speed = 0.2f;
+	int HitFlag = 0;
+	int hp = 5;
+	int damageCount = 0;
 	// 色
-	XMFLOAT4 color = { 0.8,0.8,0.8,1.0 };
+	XMFLOAT4 color = { 1,1,1,1 };
 	// ローカルスケール
-	XMFLOAT3 scale = { 33.0,33.0,0.01 };
+	XMFLOAT3 scale = { 0.5f,0.5f,0 };
 	// X,Y,Z軸回りのローカル回転角
-	XMFLOAT3 rotation = { 0,0,0 };
+	XMFLOAT3 rotation = { 0,20,0 };
 	// ローカル座標
-	XMFLOAT3 position = { 0,0,400 };
+	XMFLOAT3 position = { 0,20,135 };
 	// ローカルワールド変換行列
 	XMMATRIX matWorld;
 	// 親オブジェクト
-	Screen* parent = nullptr;
+	PlayerJumpLeft* parent = nullptr;
 };

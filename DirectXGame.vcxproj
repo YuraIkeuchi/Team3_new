@@ -165,6 +165,7 @@
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object3d.cpp" />
+    <ClCompile Include="PlayerJumpLeft.cpp" />
     <ClCompile Include="PlayerLeftWalk.cpp" />
     <ClCompile Include="PlayerLeftWalk2.cpp" />
     <ClCompile Include="PlayerLeftWalk3.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="PlayerRightWalk2.cpp" />
     <ClCompile Include="PlayerRightWalk3.cpp" />
     <ClCompile Include="PlayerRightWalk4.cpp" />
+    <ClCompile Include="PlayerJump.cpp" />
     <ClCompile Include="Projector.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -253,6 +255,7 @@
     <ClInclude Include="Block.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Object3d.h" />
+    <ClInclude Include="PlayerJumpLeft.h" />
     <ClInclude Include="PlayerLeftWalk.h" />
     <ClInclude Include="PlayerLeftWalk2.h" />
     <ClInclude Include="PlayerLeftWalk3.h" />
@@ -261,6 +264,7 @@
     <ClInclude Include="PlayerRightWalk2.h" />
     <ClInclude Include="PlayerRightWalk3.h" />
     <ClInclude Include="PlayerRightWalk4.h" />
+    <ClInclude Include="PlayerJump.h" />
     <ClInclude Include="Projector.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Sprite.h" />

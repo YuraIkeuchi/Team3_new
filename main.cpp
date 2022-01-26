@@ -25,6 +25,8 @@
 #include "PlayerRightWalk2.h"
 #include "PlayerRightWalk3.h"
 #include "PlayerRightWalk4.h"
+#include "PlayerJump.h"
+#include "PlayerJumpLeft.h"
 #include "backGround.h"
 #include "Light.h"
 #include "Screen.h"
@@ -451,6 +453,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 	playerleftwalk4 = PlayerLeftWalk4::Create();
 	playerleftwalk4->Update(matview);
+
+	PlayerJump* playerJump;
+	if (!playerJump->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	playerJump = PlayerJump::Create();
+	playerJump->Update(matview);
+
+	PlayerJumpLeft* playerJumpLeft;
+	if (!playerJumpLeft->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	playerJumpLeft = PlayerJumpLeft::Create();
+	playerJumpLeft->Update(matview);
 #pragma endregion
 #pragma region//右向きのプレイヤー変数
 	//各プレイヤーの初期化
@@ -1364,6 +1382,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerleftwalk2->Update(matview);
 		playerleftwalk3->Update(matview);
 		playerleftwalk4->Update(matview);
+		playerJump->Update(matview);
+		playerJumpLeft->Update(matview);
 		playerrightwalk->Update(matview);
 		playerrightwalk2->Update(matview);
 		playerrightwalk3->Update(matview);
@@ -1379,11 +1399,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		playerleftwalk2->SetPosition(PlayerPosition);
 		playerleftwalk3->SetPosition(PlayerPosition);
 		playerleftwalk4->SetPosition(PlayerPosition);
+		playerJump->SetPosition(PlayerPosition);
+		playerJumpLeft->SetPosition(PlayerPosition);
 		playerrightwalk->SetPosition(PlayerPosition);
 		playerrightwalk2->SetPosition(PlayerPosition);
 		playerrightwalk3->SetPosition(PlayerPosition);
 		playerrightwalk4->SetPosition(PlayerPosition);
-		screen->SetPosition({ 0,0,400 });
+		screen->SetPosition({ 0,0,145 });
 		projector->SetPosition({ 0,-20,-70 });
 		under->SetPosition({ -32,135,150 });
 		lever->SetPosition(leverPos);
@@ -1429,6 +1451,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		PlayerLeftWalk2::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk3::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk4::PreDraw(dxCommon->GetCmdList());
+		PlayerJump::PreDraw(dxCommon->GetCmdList());
+		PlayerJumpLeft::PreDraw(dxCommon->GetCmdList());
 		PlayerRightWalk::PreDraw(dxCommon->GetCmdList());
 		PlayerRightWalk2::PreDraw(dxCommon->GetCmdList());
 		PlayerRightWalk3::PreDraw(dxCommon->GetCmdList());
@@ -1485,6 +1509,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					} else if (PlayerDirectionNumber == 1) {
 						playerleftwalk4->Draw();
 					}
+
 				}
 
 				for (int i = 0; i < _countof(FieldBlock); i++) {
@@ -1495,30 +1520,36 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		//背景
 		if (Scene == gamePlay) {
-			if (AnimetionCount == 0) {
+			if (AnimetionCount == 0 && JumpFlag == 0) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk->Draw();
 				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk->Draw();
 				}
-			} else if (AnimetionCount == 1) {
+			} else if (AnimetionCount == 1 && JumpFlag == 0) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk2->Draw();
 				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk2->Draw();
 				}
-			} else if (AnimetionCount == 2) {
+			} else if (AnimetionCount == 2 && JumpFlag == 0) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk3->Draw();
 				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk3->Draw();
 				}
-			} else if (AnimetionCount == 3) {
+			} else if (AnimetionCount == 3&&JumpFlag==0) {
 				if (PlayerDirectionNumber == 0) {
 					playerrightwalk4->Draw();
 				} else if (PlayerDirectionNumber == 1) {
 					playerleftwalk4->Draw();
 				}
+			}
+			else if (PlayerDirectionNumber == 0 && JumpFlag == 1) {
+				playerJump->Draw();
+			}
+			else if (PlayerDirectionNumber == 1 && JumpFlag == 1) {
+				playerJumpLeft->Draw();
 			}
 
 			//アイテム
@@ -1610,6 +1641,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		PlayerLeftWalk2::PostDraw();
 		PlayerLeftWalk3::PostDraw();
 		PlayerLeftWalk4::PostDraw();
+		PlayerJump::PostDraw();
+		PlayerJumpLeft::PostDraw();
 		PlayerRightWalk::PostDraw();
 		PlayerRightWalk2::PostDraw();
 		PlayerRightWalk3::PostDraw();
@@ -1642,6 +1675,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete playerleftwalk2;
 	delete playerleftwalk3;
 	delete playerleftwalk4;
+	delete playerJump;
+	delete playerJumpLeft;
 	delete playerrightwalk;
 	delete playerrightwalk2;
 	delete playerrightwalk3;
