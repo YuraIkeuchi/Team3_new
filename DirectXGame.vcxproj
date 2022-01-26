@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Area.cpp" />
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="background.cpp" />
     <ClCompile Include="Collision.cpp" />
@@ -270,6 +271,7 @@
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="under.h" />
     <ClInclude Include="WinApp.h" />
+    <ClInclude Include="Area.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -39,7 +39,7 @@ bool  Collision::BoxCollision_Down(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 
 	//object1‚Ìã’¸“_
 	Object2.Up = Object2.Down + 1;
 	//¨‚P‚Æ¶‚Q@¨‚Q‚Æ¶‚P@ã‚P‚Æ‰º‚Q@ã‚Q‚Æ‰º‚P
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up >= Object2.Down && Object2.Up >= Object1.Down;
 }
 
 bool Collision::BoxCollision_Up(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
@@ -64,7 +64,7 @@ bool Collision::BoxCollision_Up(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 obj
 	//object1‚Ì‰º’¸“_
 	Object2.Down = Object2.Up - 1;
 	//¨‚P‚Æ¶‚Q@¨‚Q‚Æ¶‚P@ã‚P‚Æ‰º‚Q@ã‚Q‚Æ‰º‚P
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up >= Object2.Down && Object2.Up >= Object1.Down;
 }
 
 bool Collision::BoxCollision_Left(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
@@ -90,7 +90,7 @@ bool Collision::BoxCollision_Left(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 o
 	Object2.Up = object2.y + radius2.y - 0.5;
 
 	//¨‚P‚Æ¶‚Q@¨‚Q‚Æ¶‚P@ã‚P‚Æ‰º‚Q@ã‚Q‚Æ‰º‚P
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up >= Object2.Down && Object2.Up >= Object1.Down;
 }
 
 bool Collision::BoxCollision_Right(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 object2, XMFLOAT3 radius2) {
@@ -116,7 +116,7 @@ bool Collision::BoxCollision_Right(XMFLOAT3 object1, XMFLOAT3 radius1, XMFLOAT3 
 	Object2.Up = object2.y + radius2.y - 0.5;
 
 	//¨‚P‚Æ¶‚Q@¨‚Q‚Æ¶‚P@ã‚P‚Æ‰º‚Q@ã‚Q‚Æ‰º‚P
-	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up > Object2.Down && Object2.Up > Object1.Down;
+	return Object1.Right > Object2.Left && Object2.Right > Object1.Left && Object1.Up >= Object2.Down && Object2.Up >= Object1.Down;
 }
 
 bool Collision::CircleCollision(const float& X1, const float& Y1, const float& R1, const float& X2, const float& Y2, const float& R2) {
