@@ -509,7 +509,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int AnimetionCount = 0;
 	int PlayerAlive = 1;
 	int PlayerDirectionNumber = 0;
-	int PlayerHitNumber = 0;
+	int PlayerHitFlag = 0;
 #pragma endregion
 #pragma region//ライト変数
 	const int Light_NUM = 10;
@@ -584,7 +584,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 7;
+	int StageNumber = 6;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -743,17 +743,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 				if (v0.m128_f32[2] == -20.0f && v0.m128_f32[1] == 0.0f) {
 					modeflag = 1;
-				}
-
-				//光とブロックの当たり判定
-				for (int i = 0; i < _countof(SetBlock); i++) {
-					for (int j = 0; j < Light_NUM; j++) {
-						if (SetFlag[i] == 1) {
-							if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 6, LightPosition[j].x, LightPosition[j].y, 6) == 1) {
-								SetBlockColor[i].w -= 0.0025;
-							}
-						}
-					}
 				}
 
 			}
@@ -940,11 +929,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				for (int i = 0; i < Block_NUM; i++) {
 					if (SetFlag[i] == 0) {
 						//移動処理
-						if (input->PushKey(DIK_UP)) {
+						if (input->PushKey(DIK_UP) && (ImageBlockPosition[i].y <= 27.0f)) {
 							ImageBlockPosition[i].y += 1.5f;
 						}
 
-						if (input->PushKey(DIK_DOWN)) {
+						if (input->PushKey(DIK_DOWN) && (ImageBlockPosition[i].y >= -63.0f)) {
 							ImageBlockPosition[i].y -= 1.5f;
 						}
 
@@ -961,7 +950,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					}
 
 					//ブロックを置く処理
-					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0) && (ItemCount != 0)) {
+					if (input->TriggerKey(DIK_SPACE) && (SetFlag[i] == 0) && (ItemCount != 0) && (PlayerHitFlag == 0)) {
 						ItemCount--;
 						SetFlag[i] = 1;
 						SetBlockPosition[i].x = kage[0].x;
@@ -1018,19 +1007,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				//playerとブロック左辺の当たり判定
 				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,5.6,4 }, FieldBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
-					PlayerHitNumber = 1;
 				}
 				//playerとブロック右辺の当たり判定
 				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,5.6,4 }, FieldBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
-					PlayerHitNumber = 2;
 				}
 
 				//playerとブロック下辺の当たり判定
 				if (Boxcollision->BoxCollision_Down(PlayerPosition, { 2.7,5.5,4 }, FieldBlockPosition[i], { 2.7,5.5,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
-					PlayerHitNumber = 3;
 				}
 
 				//playerとブロック上辺の当たり判定(高いところからだと死)
@@ -1038,7 +1024,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 					JumpFlag = 0;
-					PlayerHitNumber = 4;
 				}
 			}
 
@@ -1084,10 +1069,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				SceneCutFlag = 1;
 			}
 
+
+			//光とブロックの当たり判定
+			for (int i = 0; i < _countof(SetBlock); i++) {
+				for (int j = 0; j < Light_NUM; j++) {
+					if (SetFlag[i] == 1) {
+						if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 7, LightPosition[j].x, LightPosition[j].y, 7) == 1) {
+							SetBlockColor[i].w -= 0.0025;
+						}
+					}
+				}
+			}
+
 			//スイッチ判定
 			for (int i = 0; i < _countof(SetBlock); i++) {
-				if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 3, AreaPosition.x, AreaPosition.y, 3) == 1) {
+				if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 4, AreaPosition.x, AreaPosition.y, 4) == 1) {
 					AreaFlag = 1;
+				}
+			}
+
+			//プレイヤーとカゲの当たり判定
+			for (int i = 0; i < _countof(MarkBlock); i++) {
+				if (Boxcollision->CircleCollision(MarkBlockPosition[i].x, MarkBlockPosition[i].y, 4, PlayerPosition.x, PlayerPosition.y, 4) == 1) {
+					PlayerHitFlag = 1;
+				} else {
+					PlayerHitFlag = 0;
 				}
 			}
 
@@ -1365,10 +1371,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemPosition[2] = { -90,-70,134 };
 				ItemPosition[3] = { -40,-10,134 };
 				ItemPosition[4] = { -30,-10,134 };
-				LightPosition[0] = { -60, -40 ,134 };
-				LightPosition[1] = { 25, -75 ,134 };
-				LightPosition[2] = { 65, -75 ,134 };
-				LightPosition[3] = { 105, -75 ,134 };
+				LightPosition[0] = { -50, -30 ,134 };
+				LightPosition[1] = { 25, -65 ,134 };
+				LightPosition[2] = { 65, -65 ,134 };
+				LightPosition[3] = { 105, -65 ,134 };
+				LightPosition[4] = { 45, -75 ,134 };
+				LightPosition[5] = { 85, -75 ,134 };
+				LightPosition[6] = { 5, -75 ,134 };
 			}
 
 			else if (StageNumber == 7) {
@@ -1500,15 +1509,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			{
 				ImGui::Text("stageNumber,%d", StageNumber);
 				ImGui::Text("AreaFlag,%d", AreaFlag);
-				ImGui::Text("HitNumber,%d", HitNumber);
+				ImGui::Text("HitNumber,%d", PlayerHitFlag);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
 
 			if (ImGui::TreeNode("Field"))
 			{
-				ImGui::SliderFloat("Position.x", &AreaPosition.x, 50, -50);
-				ImGui::SliderFloat("Position.y", &AreaPosition.y, 50, -50);
+				ImGui::SliderFloat("Position.x", &ImageBlockPosition[0].y, 50, -50);
+				ImGui::SliderFloat("Position.y", &MarkBlockPosition[0].y, 50, -50);
 				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
 				ImGui::Unindent();
 				ImGui::TreePop();
