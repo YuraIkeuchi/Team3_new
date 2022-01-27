@@ -140,6 +140,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(25, L"Resources/SceneCut/NewSceneCut3.png");
 	Sprite::LoadTexture(26, L"Resources/SceneCut/NewSceneCut2.png");
 	Sprite::LoadTexture(27, L"Resources/SceneCut/NewSceneCut1.png");
+	Sprite::LoadTexture(28, L"Resources/Text5.png");
+	Sprite::LoadTexture(29, L"Resources/Text6.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -155,6 +157,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	sprite[12] = Sprite::Create(22, { 0.0f,0.0f });
 	sprite[13] = Sprite::Create(23, { 0.0f,0.0f });
 	sprite[14] = Sprite::Create(23, { 0.0f,0.0f });
+	sprite[15] = Sprite::Create(28, { 0.0f,0.0f });
+	sprite[16] = Sprite::Create(29, { 0.0f,0.0f });
 	Sprite* spriteNumber[SpriteNumberMax] = { nullptr };
 	spriteNumber[0] = Sprite::Create(3, { 0.0f,0.0f });
 	spriteNumber[1] = Sprite::Create(4, { 0.0f,0.0f });
@@ -184,7 +188,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	for (int i = 9; i < 13; i++) {
 		sprite[i]->SetPosition({ 0.0f,605.0f });
 	}
-
+	sprite[15]->SetPosition({ 0.0f,605.0f });
+	sprite[16]->SetPosition({ 0.0f,605.0f });
 	XMFLOAT2 FilmPos[2];
 	FilmPos[0] = { 0,-720 };
 	FilmPos[1] = { 0,0 };
@@ -574,7 +579,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 1;
+	int StageNumber = 4;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -1258,26 +1263,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			else if (StageNumber == 4) {
 				PlayerPosition = { -130.0f,20.0f,135.0f };
-				GoalPosition = { 110.0f,10.0f,134.0f };
+				GoalPosition = { 120.0f,10.0f,134.0f };
 				for (int i = 0; i < 8; i++) {
 					FieldBlockPosition[i] = { -135 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				for (int i = 8; i < 12; i++) {
-					FieldBlockPosition[i] = { -80 + ((float)i * 10),0,134 };
+				for (int i = 8; i < 10; i++) {
+					FieldBlockPosition[i] = { -60 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				for (int i = 12; i < 18; i++) {
-					FieldBlockPosition[i] = { -20 + ((float)i * 10),0,134 };
+				for (int i = 10; i < 13; i++) {
+					FieldBlockPosition[i] = { 10 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				ItemPosition[0] = { -100,10,134 };
 				ItemPosition[1] = { 20,10,134 };
-				LightPosition[0] = { -40, 10 , 134 };
-				LightPosition[1] = { 60, 10, 134 };
+				LightPosition[0] = { -25, 5 , 134 };
+				LightPosition[1] = { 75, 5, 134 };
 			}
 
 			else if (StageNumber == 5) {
@@ -1751,6 +1756,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				} else {
 					sprite[12]->Draw();
 				}
+			}
+
+			else if (StageNumber == 4) {
+				sprite[15]->Draw();
+			}
+			else if (StageNumber == 7) {
+				sprite[16]->Draw();
 			}
 			if (SceneCutFlag == 1) {
 				SpriteSceneCut[CutCount]->Draw();
