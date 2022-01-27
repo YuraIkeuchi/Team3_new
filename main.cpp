@@ -154,6 +154,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(39, L"Resources/SceneCut/SceneCutNumber10.png");
 	Sprite::LoadTexture(40, L"Resources/SceneCut/SceneCutNumber11.png");
 	Sprite::LoadTexture(41, L"Resources/SceneCut/SceneCutNumber12.png");
+	Sprite::LoadTexture(42, L"Resources/UI/PlayerHPUI1.png");
+	Sprite::LoadTexture(43, L"Resources/UI/PlayerHPUI2.png");
+	Sprite::LoadTexture(44, L"Resources/UI/PlayerHPUI3.png");
+	Sprite::LoadTexture(45, L"Resources/UI/PlayerHPUI4.png");
+	Sprite::LoadTexture(46, L"Resources/UI/PlayerHPUI5.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -171,6 +176,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	sprite[14] = Sprite::Create(23, { 0.0f,0.0f });
 	sprite[15] = Sprite::Create(28, { 0.0f,0.0f });
 	sprite[16] = Sprite::Create(29, { 0.0f,0.0f });
+	sprite[17] = Sprite::Create(42, { 0.0f,0.0f });
+	sprite[18] = Sprite::Create(43, { 0.0f,0.0f });
+	sprite[19] = Sprite::Create(44, { 0.0f,0.0f });
+	sprite[20] = Sprite::Create(45, { 0.0f,0.0f });
+	sprite[21] = Sprite::Create(46, { 0.0f,0.0f });
 	Sprite* spriteNumber[SpriteNumberMax] = { nullptr };
 	spriteNumber[0] = Sprite::Create(3, { 0.0f,0.0f });
 	spriteNumber[1] = Sprite::Create(4, { 0.0f,0.0f });
@@ -230,6 +240,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	for (int i = 0; i < SceneCutNumberMax; i++) {
 		SpriteSceneCutNumber[i]->SetPosition(SceneCutPos);
+	}
+
+	for (int i = 17; i < 22; i++) {
+		sprite[i]->SetPosition({ 80.0f,20.0f });
 	}
 	int SceneCutFlag = 1;
 #pragma endregion
@@ -535,6 +549,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int PlayerAlive = 1;
 	int PlayerDirectionNumber = 0;
 	int PlayerHitFlag = 0;
+	int PlayerHP = 400;
 #pragma endregion
 #pragma region//ライト変数
 	const int Light_NUM = 10;
@@ -609,7 +624,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 1;
+	int StageNumber = 3;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -1000,12 +1015,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				if (SetFlag[i] == 1) {
 					if (SetBlockColor[i].w > 0.0f) {
 						//playerとブロック左辺の当たり判定
-						if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,5.6,4 }, SetBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,4.9,4 }, SetBlockPosition[i], { 7.6,4.9,4 }) == TRUE) {
 							PlayerPosition.x = OldPlayerPosition.x;
 							HitNumber = 1;
 						}
 						//playerとブロック右辺の当たり判定
-						if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,5.6,4 }, SetBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,4.9,4 }, SetBlockPosition[i], { 7.6,4.9,4 }) == TRUE) {
 							PlayerPosition.x = OldPlayerPosition.x;
 							HitNumber = 2;
 						}
@@ -1018,7 +1033,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						}
 
 						//playerとブロック上辺の当たり判定(高いところからだと死)
-						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.0,5.5,4 }, SetBlockPosition[i], { 3.0,5.5,4 }) == TRUE) {
+						if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.0,4.8,4 }, SetBlockPosition[i], { 3.0,4.8,4 }) == TRUE) {
 							PlayerPosition.y = OldPlayerPosition.y;
 							JumpG = 0.0f;
 							JumpFlag = 0;
@@ -1030,11 +1045,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			for (int i = 0; i < FIELD_NUM; i++) {
 				//playerとブロック左辺の当たり判定
-				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,5.6,4 }, FieldBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,4.9,4 }, FieldBlockPosition[i], { 7.6,4.9,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
 				}
 				//playerとブロック右辺の当たり判定
-				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,5.6,4 }, FieldBlockPosition[i], { 7.6,5.6,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,4.9,4 }, FieldBlockPosition[i], { 7.6,4.9,4 }) == TRUE) {
 					PlayerPosition.x = OldPlayerPosition.x;
 				}
 
@@ -1045,7 +1060,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 
 				//playerとブロック上辺の当たり判定(高いところからだと死)
-				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.0,5.5,4 }, FieldBlockPosition[i], { 3.0,5.5,4 }) == TRUE) {
+				if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.0,4.8,4 }, FieldBlockPosition[i], { 3.0,4.8,4 }) == TRUE) {
 					PlayerPosition.y = OldPlayerPosition.y;
 					JumpG = 0.0f;
 					JumpFlag = 0;
@@ -1055,11 +1070,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			for (int i = 0; i < Block_Area_NUM; i++) {
 				if (AreaFlag == 0) {
 					//playerとブロック左辺の当たり判定
-					if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,5.5,4 }, AreaBlockPosition[i], { 7.6,5.5,4 }) == TRUE) {
+					if (Boxcollision->BoxCollision_Left(PlayerPosition, { 7.6,4.9,4 }, AreaBlockPosition[i], { 7.6,4.9,4 }) == TRUE) {
 						PlayerPosition.x = OldPlayerPosition.x;
 					}
 					//playerとブロック右辺の当たり判定
-					if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,5.5,4 }, AreaBlockPosition[i], { 7.6,5.5,4 }) == TRUE) {
+					if (Boxcollision->BoxCollision_Right(PlayerPosition, { 7.6,4.9,4 }, AreaBlockPosition[i], { 7.6,4.9,4 }) == TRUE) {
 						PlayerPosition.x = OldPlayerPosition.x;
 					}
 
@@ -1070,7 +1085,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					}
 
 					//playerとブロック上辺の当たり判定(高いところからだと死)
-					if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.0,5.5,4 }, AreaBlockPosition[i], { 3.0,5.5,4 }) == TRUE) {
+					if (Boxcollision->BoxCollision_Up(PlayerPosition, { 3.0,4.8,4 }, AreaBlockPosition[i], { 3.0,4.8,4 }) == TRUE) {
 						PlayerPosition.y = OldPlayerPosition.y;
 						JumpG = 0.0f;
 						JumpFlag = 0;
@@ -1108,6 +1123,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					}
 				}
 			}
+
+			//光とプレイヤーの当たり判定
+			for (int j = 0; j < Light_NUM; j++) {
+				if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 7, LightPosition[j].x, LightPosition[j].y, 7) == 1) {
+					PlayerHP--;
+				}
+			}
+			
 
 			//スイッチ判定
 			for (int i = 0; i < _countof(SetBlock); i++) {
@@ -1253,10 +1276,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			else if (StageNumber == 2) {
-				GoalPosition = { 110.0f, 10.0f, 134.0f };
-				PlayerPosition = { -130.0f,20.0f,135.0f };
+				GoalPosition = { 110.0f, -10.0f, 134.0f };
+				PlayerPosition = { -130.0f,-60.0f,135.0f };
 				for (int i = 0; i < 10; i++) {
-					FieldBlockPosition[i] = { -135 + ((float)i * 10),0,134 };
+					FieldBlockPosition[i] = { -135 + ((float)i * 10),-80,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 10; i < 19; i++) {
+					FieldBlockPosition[i] = { -20 + ((float)i * 10),-20,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				ItemPosition[0] = { -120,-70,134 };
+				ItemPosition[1] = { -100,-70,134 };
+				ItemPosition[2] = { -80,-70,134 };
+			}
+
+			else if (StageNumber == 3) {
+				GoalPosition = { 100.0f, 10.0f, 134.0f };
+				PlayerPosition = { -130.0f,-50.0f,135.0f };
+				for (int i = 0; i < 10; i++) {
+					FieldBlockPosition[i] = { -135 + ((float)i * 10),-80,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
@@ -1265,37 +1306,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				ItemPosition[0] = { -120,10,134 };
-				ItemPosition[1] = { -100,10,134 };
-				ItemPosition[2] = { -80,10,134 };
-			}
-
-			else if (StageNumber == 3) {
-				GoalPosition = { -110.0f, 10.0f, 134.0f };
-				PlayerPosition = { -130.0f,-40.0f,135.0f };
-				for (int i = 0; i < 10; i++) {
-					FieldBlockPosition[i] = { -135 + ((float)i * 10),-80,134 };
+				for (int i = 19; i < 28; i++) {
+					FieldBlockPosition[i] = { -330 + ((float)i * 10),-30,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
-				for (int i = 10; i < 19; i++) {
-					FieldBlockPosition[i] = { -20 + ((float)i * 10),-40,134 };
-					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
-				}
-
-				for (int i = 19; i < 29; i++) {
-					FieldBlockPosition[i] = { -350 + ((float)i * 10),0,134 };
+				for (int i = 28; i < 35; i++) {
+					FieldBlockPosition[i] = { -40,-360 + ((float)i * 10),134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
 
 				ItemPosition[0] = { -120,-70,134 };
 				ItemPosition[1] = { -100,-70,134 };
-				ItemPosition[2] = { -80,-70,134 };
-				ItemPosition[3] = { -60,-70,134 };
-				ItemPosition[4] = { 80, -30,134 };
-				ItemPosition[5] = { 50, -15,134 };
-				ItemPosition[6] = { 20,  0,134 };
-				ItemPosition[7] = { -10,  15,134 };
+				ItemPosition[2] = { -120,-20,134 };
+				ItemPosition[3] = { -100,-20,134 };
+				ItemPosition[4] = { -80,-20,134 };
 			}
 
 			else if (StageNumber == 4) {
@@ -1600,7 +1625,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (ImGui::TreeNode("Film"))
 			{
 				ImGui::SliderFloat("Position.x", &SetBlockColor[0].w, 50, -50);
-				ImGui::Text("HitNumber,%d", SetFlag[0]);
+				ImGui::Text("HP,%d", PlayerHP);
 				ImGui::Unindent();
 				ImGui::TreePop();
 			}
@@ -1776,32 +1801,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 		}
 		else if (Scene == gamePlay) {
-			sprite[2]->Draw();
-			spriteNumber[ItemCount]->Draw();
+		/*	sprite[2]->Draw();
+			spriteNumber[ItemCount]->Draw();*/
 			if (modeflag == 1 && mode == 0) {
 				sprite[13]->Draw();
 				sprite[14]->Draw();
 			}
-			if (StageNumber == 1) {
-				//sprite[8]->Draw();
-				if (TextNumber == 0) {
-					sprite[9]->Draw();
-				} else if (TextNumber == 1) {
-					sprite[10]->Draw();
-				} else if (TextNumber == 2) {
-					sprite[11]->Draw();
+
+			if (SceneCutFlag == 0) {
+				if (StageNumber == 1) {
+					//sprite[8]->Draw();
+					if (TextNumber == 0) {
+						sprite[9]->Draw();
+					} else if (TextNumber == 1) {
+						sprite[10]->Draw();
+					} else if (TextNumber == 2) {
+						sprite[11]->Draw();
+					} else {
+						sprite[12]->Draw();
+					}
+				} else if (StageNumber == 4) {
+					sprite[15]->Draw();
+				} else if (StageNumber == 7) {
+					sprite[16]->Draw();
+				}
+				if (PlayerHP > 300) {
+					sprite[17]->Draw();
+				} else if ((PlayerHP <= 300) && (PlayerHP > 200)) {
+					sprite[18]->Draw();
+				} else if ((PlayerHP <= 200) && (PlayerHP > 100)) {
+					sprite[19]->Draw();
+				} else if ((PlayerHP <= 100) && (PlayerHP > 0)) {
+					sprite[20]->Draw();
 				} else {
-					sprite[12]->Draw();
+					sprite[21]->Draw();
 				}
 			}
-
-			else if (StageNumber == 4) {
-				sprite[15]->Draw();
-			}
-			else if (StageNumber == 7) {
-				sprite[16]->Draw();
-			}
-			if (SceneCutFlag == 1) {
+			else if (SceneCutFlag == 1) {
 				SpriteSceneCut[CutCount]->Draw();
 				SpriteSceneCutNumber[StageNumber - 1]->Draw();
 			}
