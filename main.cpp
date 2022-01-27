@@ -114,34 +114,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SpriteCommonLoadTexture(spriteCommon, 1, L"Resources/house.png", dxCommon->GetDev());*/
 	Sprite::LoadTexture(0, L"Resources/Title.png");
 	Sprite::LoadTexture(1, L"Resources/END.png");
-	Sprite::LoadTexture(2, L"Resources/ItemUI.png");
-	Sprite::LoadTexture(3, L"Resources/0.png");
-	Sprite::LoadTexture(4, L"Resources/1.png");
-	Sprite::LoadTexture(5, L"Resources/2.png");
-	Sprite::LoadTexture(6, L"Resources/3.png");
-	Sprite::LoadTexture(7, L"Resources/4.png");
-	Sprite::LoadTexture(8, L"Resources/5.png");
-	Sprite::LoadTexture(9, L"Resources/6.png");
-	Sprite::LoadTexture(10, L"Resources/7.png");
-	Sprite::LoadTexture(11, L"Resources/8.png");
-	Sprite::LoadTexture(12, L"Resources/9.png");
+	Sprite::LoadTexture(2, L"Resources/UI/ItemUI.png");
+	Sprite::LoadTexture(3, L"Resources/Number/0.png");
+	Sprite::LoadTexture(4, L"Resources/Number/1.png");
+	Sprite::LoadTexture(5, L"Resources/Number/2.png");
+	Sprite::LoadTexture(6, L"Resources/Number/3.png");
+	Sprite::LoadTexture(7, L"Resources/Number/4.png");
+	Sprite::LoadTexture(8, L"Resources/Number/5.png");
+	Sprite::LoadTexture(9, L"Resources/Number/6.png");
+	Sprite::LoadTexture(10, L"Resources/Number/7.png");
+	Sprite::LoadTexture(11, L"Resources/Number/8.png");
+	Sprite::LoadTexture(12, L"Resources/Number/9.png");
 	Sprite::LoadTexture(13, L"Resources/STAGECLEAR.png");
 	Sprite::LoadTexture(14, L"Resources/GAMECLEAR.png");
 	Sprite::LoadTexture(15, L"Resources/GAMEOVER.png");
 	Sprite::LoadTexture(16, L"Resources/EXPLATION.png");
 	Sprite::LoadTexture(17, L"Resources/EXPLATION2.png");
-	Sprite::LoadTexture(18, L"Resources/TextUI.png");
-	Sprite::LoadTexture(19, L"Resources/Text1.png");
-	Sprite::LoadTexture(20, L"Resources/Text2.png");
-	Sprite::LoadTexture(21, L"Resources/Text3.png");
-	Sprite::LoadTexture(22, L"Resources/Text4.png");
+	Sprite::LoadTexture(18, L"Resources/UI/TextUI.png");
+	Sprite::LoadTexture(19, L"Resources/UI/Text1.png");
+	Sprite::LoadTexture(20, L"Resources/UI/Text2.png");
+	Sprite::LoadTexture(21, L"Resources/UI/Text3.png");
+	Sprite::LoadTexture(22, L"Resources/UI/Text4.png");
 	Sprite::LoadTexture(23, L"Resources/Film.png");
 	Sprite::LoadTexture(24, L"Resources/SceneCut/NewSceneCut4.png");
 	Sprite::LoadTexture(25, L"Resources/SceneCut/NewSceneCut3.png");
 	Sprite::LoadTexture(26, L"Resources/SceneCut/NewSceneCut2.png");
 	Sprite::LoadTexture(27, L"Resources/SceneCut/NewSceneCut1.png");
-	Sprite::LoadTexture(28, L"Resources/Text5.png");
-	Sprite::LoadTexture(29, L"Resources/Text6.png");
+	Sprite::LoadTexture(28, L"Resources/UI/Text5.png");
+	Sprite::LoadTexture(29, L"Resources/UI/Text6.png");
+	Sprite::LoadTexture(30, L"Resources/SceneCut/SceneCutNumber1.png");
+	Sprite::LoadTexture(31, L"Resources/SceneCut/SceneCutNumber2.png");
+	Sprite::LoadTexture(32, L"Resources/SceneCut/SceneCutNumber3.png");
+	Sprite::LoadTexture(33, L"Resources/SceneCut/SceneCutNumber4.png");
+	Sprite::LoadTexture(34, L"Resources/SceneCut/SceneCutNumber5.png");
+	Sprite::LoadTexture(35, L"Resources/SceneCut/SceneCutNumber6.png");
+	Sprite::LoadTexture(36, L"Resources/SceneCut/SceneCutNumber7.png");
+	Sprite::LoadTexture(37, L"Resources/SceneCut/SceneCutNumber8.png");
+	Sprite::LoadTexture(38, L"Resources/SceneCut/SceneCutNumber9.png");
+	Sprite::LoadTexture(39, L"Resources/SceneCut/SceneCutNumber10.png");
+	Sprite::LoadTexture(40, L"Resources/SceneCut/SceneCutNumber11.png");
+	Sprite::LoadTexture(41, L"Resources/SceneCut/SceneCutNumber12.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -176,6 +188,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SpriteSceneCut[1] = Sprite::Create(25, { 0.0f,0.0f });
 	SpriteSceneCut[2] = Sprite::Create(26, { 0.0f,0.0f });
 	SpriteSceneCut[3] = Sprite::Create(27, { 0.0f,0.0f });
+	const int SceneCutNumberMax = 12;
+	Sprite* SpriteSceneCutNumber[SceneCutNumberMax] = { nullptr };
+	SpriteSceneCutNumber[0] = Sprite::Create(30, { 0.0f,0.0f });
+	SpriteSceneCutNumber[1] = Sprite::Create(31, { 0.0f,0.0f });
+	SpriteSceneCutNumber[2] = Sprite::Create(32, { 0.0f,0.0f });
+	SpriteSceneCutNumber[3] = Sprite::Create(33, { 0.0f,0.0f });
+	SpriteSceneCutNumber[4] = Sprite::Create(34, { 0.0f,0.0f });
+	SpriteSceneCutNumber[5] = Sprite::Create(35, { 0.0f,0.0f });
+	SpriteSceneCutNumber[6] = Sprite::Create(36, { 0.0f,0.0f });
+	SpriteSceneCutNumber[7] = Sprite::Create(37, { 0.0f,0.0f });
+	SpriteSceneCutNumber[8] = Sprite::Create(38, { 0.0f,0.0f });
+	SpriteSceneCutNumber[9] = Sprite::Create(39, { 0.0f,0.0f });
+	SpriteSceneCutNumber[10] = Sprite::Create(40, { 0.0f,0.0f });
+	SpriteSceneCutNumber[11] = Sprite::Create(41, { 0.0f,0.0f });
 	sprite[2]->SetPosition({ 100.0f,0.0f });
 	for (int i = 0; i < SpriteNumberMax; i++) {
 		spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
@@ -201,7 +227,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	for (int i = 0; i < SceneCutMax; i++) {
 		SpriteSceneCut[i]->SetPosition(SceneCutPos);
 	}
-	int SceneCutFlag = 0;
+
+	for (int i = 0; i < SceneCutNumberMax; i++) {
+		SpriteSceneCutNumber[i]->SetPosition(SceneCutPos);
+	}
+	int SceneCutFlag = 1;
 #pragma endregion
 #pragma region//オーディオ
 	const int AudioMax = 3;
@@ -579,7 +609,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 4;
+	int StageNumber = 1;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -823,6 +853,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			for (int i = 0; i < SceneCutMax; i++) {
 				SpriteSceneCut[i]->SetPosition(SceneCutPos);
 			}
+
+			for (int i = 0; i < SceneCutNumberMax; i++) {
+				SpriteSceneCutNumber[i]->SetPosition(SceneCutPos);
+			}
 #pragma endregion
 #pragma region//設置画面
 			if (mode == 1) {
@@ -1057,7 +1091,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			//ゴール判定
 			if (Boxcollision->CircleCollision(PlayerPosition.x, PlayerPosition.y, 3, GoalPosition.x, GoalPosition.y, 3) == 1) {
-				SceneCutFlag = 1;
+				if (SceneCutFlag == 0) {
+					SceneCutFlag = 1;
+					StageNumber++;
+				}
 			}
 
 
@@ -1096,9 +1133,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					SceneCutPos.x -= 20.0f;
 				}
 
-				if (SceneCutPos.x == 20.0f) {
-					StageNumber++;
-				}
+				//if (SceneCutPos.x == 20.0f) {
+				//	
+				//}
 
 				else if (SceneCutPos.x == 0.0f) {
 					CutTimer++;
@@ -1766,6 +1803,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			if (SceneCutFlag == 1) {
 				SpriteSceneCut[CutCount]->Draw();
+				SpriteSceneCutNumber[StageNumber - 1]->Draw();
 			}
 		}
 
