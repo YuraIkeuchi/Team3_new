@@ -131,10 +131,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(16, L"Resources/EXPLATION.png");
 	Sprite::LoadTexture(17, L"Resources/EXPLATION2.png");
 	Sprite::LoadTexture(18, L"Resources/TextUI.png");
-	Sprite::LoadTexture(19, L"Resources/FirstText.png");
-	Sprite::LoadTexture(20, L"Resources/SecondText.png");
-	Sprite::LoadTexture(21, L"Resources/ThirdText.png");
-	Sprite::LoadTexture(22, L"Resources/FourText.png");
+	Sprite::LoadTexture(19, L"Resources/Text1.png");
+	Sprite::LoadTexture(20, L"Resources/Text2.png");
+	Sprite::LoadTexture(21, L"Resources/Text3.png");
+	Sprite::LoadTexture(22, L"Resources/Text4.png");
 	Sprite::LoadTexture(23, L"Resources/Film.png");
 	Sprite::LoadTexture(24, L"Resources/SceneCut/NewSceneCut4.png");
 	Sprite::LoadTexture(25, L"Resources/SceneCut/NewSceneCut3.png");
@@ -179,10 +179,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		spriteNumber[i]->SetPosition({ 310,0 });
 	}
 
-	sprite[8]->SetPosition({ 0.0f,505.0f });
-	sprite[8]->SetSize({ 600.0f,200.0f });
+	sprite[8]->SetPosition({ 0.0f,605.0f });
+	//sprite[8]->SetSize({ 1000.0f,200.0f });
 	for (int i = 9; i < 13; i++) {
-		sprite[i]->SetPosition({ 25.0f,545.0f });
+		sprite[i]->SetPosition({ 0.0f,605.0f });
 	}
 
 	XMFLOAT2 FilmPos[2];
@@ -574,7 +574,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 8;
+	int StageNumber = 1;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
