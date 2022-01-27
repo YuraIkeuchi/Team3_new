@@ -1783,7 +1783,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				sprite[14]->Draw();
 			}
 			if (StageNumber == 1) {
-				sprite[8]->Draw();
+				//sprite[8]->Draw();
 				if (TextNumber == 0) {
 					sprite[9]->Draw();
 				} else if (TextNumber == 1) {
