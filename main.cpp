@@ -72,7 +72,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//directx初期化
 #pragma region//構造体
 	const int Block_NUM = 10;
-	const int Block_Area_NUM = 20;
+	const int Block_Area_NUM = 40;
 #pragma endregion
 #pragma region//行列
 	//射影変換行列の作り
@@ -243,7 +243,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	for (int i = 17; i < 22; i++) {
-		sprite[i]->SetPosition({ 80.0f,20.0f });
+		sprite[i]->SetPosition({ 60.0f,20.0f });
 	}
 	int SceneCutFlag = 1;
 #pragma endregion
@@ -699,8 +699,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region//タイトル
 		if (Scene == title) {
 			if (input->TriggerKey(DIK_SPACE)) {
-				Scene = explation;
-				SpaceCount++;
+				Scene = appearance;
+				targetPosition = { projectorPos.x,projectorPos.y,projectorPos.z };
+				v0.m128_f32[0] = -20;
+				v0.m128_f32[1] = 0;
+				v0.m128_f32[2] = -90;
 			}
 		}
 #pragma endregion
@@ -716,10 +719,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (SpaceCount == 2) {
 				Scene = appearance;
 				SpaceCount = 0;
-				targetPosition = { projectorPos.x,projectorPos.y,projectorPos.z };
-				v0.m128_f32[0] = -20;
-				v0.m128_f32[1] = 0;
-				v0.m128_f32[2] = -90;
+			
 			}
 		}
 #pragma endregion
@@ -870,6 +870,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					LightMoveCount[i]--;
 					if (LightMoveCount[i] <= 0) {
 						LightMoveNumber[i] = 1;
+					}
+				}else if (LightMoveNumber[i] == 3) {
+					LightPosition[i].x += 1.2f;
+					LightMoveCount[i]++;
+					if (LightMoveCount[i] >= 100) {
+						LightMoveNumber[i] = 4;
+					}
+				} else if (LightMoveNumber[i] == 4) {
+					LightPosition[i].x -= 1.2f;
+					LightMoveCount[i]--;
+					if (LightMoveCount[i] <= 0) {
+						LightMoveNumber[i] = 3;
 					}
 				}
 			}
@@ -1200,7 +1212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					ResetFlag = 0;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 10) {
+					if (StageNumber == 11) {
 						Scene = gameClear;
 					}
 				}
@@ -1562,6 +1574,87 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightMoveCount[2] = 70;
 				AreaPosition = { -120.0f,-55.0f,134.0f };
 			}
+			else if (StageNumber == 10) {
+			GoalPosition = { 80.0f, -20.0f, 134.0f };
+			PlayerPosition = { -100.0f,15.0f,135.0f };
+			for (int i = 0; i < 10; i++) {
+				FieldBlockPosition[i] = { -135 + ((float)i * 10),0,134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			for (int i = 10; i < 19; i++) {
+				FieldBlockPosition[i] = { -90 + ((float)i * 10),-30,134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			for (int i = 19; i < 28; i++) {
+				FieldBlockPosition[i] = { -330 + ((float)i * 10),30,134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			for (int i = 28; i < 38; i++) {
+				FieldBlockPosition[i] = { -40,-340 + ((float)i * 10),134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+
+			for (int i = 38; i < 40; i++) {
+				FieldBlockPosition[i] = { -60,-360 + ((float)i * 10),134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			for (int i = 40; i < 50; i++) {
+				FieldBlockPosition[i] = { -430 + ((float)i * 10),30,134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			for (int i = 50; i < 52; i++) {
+				FieldBlockPosition[i] = { 10,-460 + ((float)i * 10),134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			for (int i = 52; i < 55; i++) {
+				FieldBlockPosition[i] = { 60,-480 + ((float)i * 10),134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			for (int i = 55; i < 65; i++) {
+				FieldBlockPosition[i] = { -550 + ((float)i * 10),0,134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+			for (int i = 65; i < 75; i++) {
+				FieldBlockPosition[i] = { 100,-710 + ((float)i * 10),134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+			for (int i = 75; i < 77; i++) {
+				FieldBlockPosition[i] = { 60,-660 + ((float)i * 10),134 };
+				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+			}
+
+			ItemPosition[0] = { -70,10,134 };
+			ItemPosition[1] = { -60,10,134 };
+			ItemPosition[2] = { -100,40,134 };
+			ItemPosition[3] = {  30,10,134 };
+			ItemPosition[4] = {  50,10,134 };
+			LightPosition[0] = { -50.0f, 33.0f ,134 };
+			LightPosition[1] = { -130.0f, 20.0f ,134 };
+			LightMoveNumber[0] = 3;
+			AreaBlockPosition[0] = { -50.0f,30.0f,134.0f };
+			AreaBlock[0]->SetPosition({ AreaBlockPosition[0] });
+			for (int i = 1; i < 5; i++) {
+				AreaBlockPosition[i] = { 60.0f + ((float)i * 10),30.0f,134.0f };
+				AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+			}
+			for (int i = 5; i < 10; i++) {
+				AreaBlockPosition[i] = { -30.0f,-10.0f + ((float)i * 10),134.0f };
+				AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+			}
+			for (int i = 10; i < 16; i++) {
+				AreaBlockPosition[i] = { 10.0f,-130.0f + ((float)i * 10),134.0f };
+				AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+			}
+			AreaPosition = { -130.0f,10.0f,134.0f };
+			}
 			ResetFlag = 0;
 		}
 #pragma endregion
@@ -1847,8 +1940,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 		}
 		else if (Scene == gamePlay) {
-		/*	sprite[2]->Draw();
-			spriteNumber[ItemCount]->Draw();*/
+			sprite[2]->Draw();
+			spriteNumber[ItemCount]->Draw();
 			if (modeflag == 1 && mode == 0) {
 				sprite[13]->Draw();
 				sprite[14]->Draw();
