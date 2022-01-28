@@ -626,7 +626,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 1;
+	int StageNumber = 11;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -1212,7 +1212,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					ResetFlag = 0;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 11) {
+					if (StageNumber == 12) {
 						Scene = gameClear;
 					}
 				}
@@ -1297,7 +1297,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				AreaBlockColor[i] = AreaBlock[i]->GetColor();
 				AreaBlock[i]->SetPosition(AreaBlockPosition[i]);
 			}
-
 			if (StageNumber == 1) {
 				AreaPosition = { 0.0f,400.0f,134.0f };
 				GoalPosition = { 110.0f,10.0f,134.0f };
@@ -1315,7 +1314,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 				ItemPosition[0] = { -40,10,134 };
 			}
-
 			else if (StageNumber == 2) {
 				GoalPosition = { 110.0f, -10.0f, 134.0f };
 				PlayerPosition = { -130.0f,-60.0f,135.0f };
@@ -1333,7 +1331,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemPosition[1] = { -100,-70,134 };
 				ItemPosition[2] = { -80,-70,134 };
 			}
-
 			else if (StageNumber == 3) {
 				GoalPosition = { 100.0f, 10.0f, 134.0f };
 				PlayerPosition = { -130.0f,-50.0f,135.0f };
@@ -1362,14 +1359,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlockPosition[i] = { -60,-410 + ((float)i * 10),134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
-
 				ItemPosition[0] = { -120,-70,134 };
 				ItemPosition[1] = { -100,-70,134 };
 				ItemPosition[2] = { -120,-20,134 };
 				ItemPosition[3] = { -100,-20,134 };
 				ItemPosition[4] = { -80,-20,134 };
 			}
-
 			else if (StageNumber == 4) {
 				PlayerPosition = { -130.0f,20.0f,135.0f };
 				GoalPosition = { 120.0f,10.0f,134.0f };
@@ -1377,23 +1372,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlockPosition[i] = { -135 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
-
 				for (int i = 8; i < 10; i++) {
 					FieldBlockPosition[i] = { -60 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
-
 				for (int i = 10; i < 13; i++) {
 					FieldBlockPosition[i] = { 10 + ((float)i * 10),0,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
-
 				ItemPosition[0] = { -100,10,134 };
 				ItemPosition[1] = { 20,10,134 };
 				LightPosition[0] = { -25, 5 , 134 };
 				LightPosition[1] = { 75, 5, 134 };
 			}
-
 			else if (StageNumber == 5) {
 				PlayerPosition = { -130.0f,-60.0f,135.0f };
 				GoalPosition = { 110.0f,10.0f,134.0f };
@@ -1431,7 +1422,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightMoveNumber[2] = 1;
 				LightMoveNumber[3] = 2;
 			}
-
 			else if (StageNumber == 6) {
 				PlayerPosition = { -130.0f,-60.0f,135.0f };
 				GoalPosition = { 105.0f,-60.0f,134.0f };
@@ -1463,7 +1453,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					FieldBlockPosition[i] = { -320 + ((float)i * 10),-50,134 };
 					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 				}
-
 				ItemPosition[0] = { -110,-70,134 };
 				ItemPosition[1] = { -100,-70,134 };
 				ItemPosition[2] = { -90,-70,134 };
@@ -1477,7 +1466,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightMoveNumber[2] = 1;
 				LightMoveNumber[3] = 2;
 			}
-
 			else if (StageNumber == 7) {
 				GoalPosition = { 110.0f,10.0f,134.0f };
 				PlayerPosition = { -130.0f,20.0f,135.0f };
@@ -1532,7 +1520,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightMoveCount[2] = 70;
 				AreaPosition = { -120.0f,-55.0f,134.0f };
 			}
-
 			else if (StageNumber == 9) {
 				GoalPosition = { -100.0f,-10.0f,134.0f };
 				PlayerPosition = { -100.0f,-50.0f,135.0f };
@@ -1654,6 +1641,78 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
 			}
 			AreaPosition = { -130.0f,10.0f,134.0f };
+			} 
+			else if (StageNumber == 11) {
+				GoalPosition = { 110.0f,80.0f,134.0f };
+				PlayerPosition = { -130.0f,60.0f,135.0f };
+				for (int i = 0; i < 4; i++) {
+					FieldBlockPosition[i] = { -135 + ((float)i * 10),40,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+				for (int i = 4; i < 15; i++) {
+					FieldBlockPosition[i] = { -100,-100 + ((float)i * 10),134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+				for (int i = 15; i < 30; i++) {
+					FieldBlockPosition[i] = { -20,-190 + ((float)i * 10),134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+				for (int i = 30; i < 32; i++) {
+					FieldBlockPosition[i] = { -1280 + ((float)i * 40),-30,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+				for (int i = 32; i < 45; i++) {
+					FieldBlockPosition[i] = { 90,-380 + ((float)i * 10),134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+				for (int i = 45; i < 49; i++) {
+					FieldBlockPosition[i] = { -360 + ((float)i * 10),70,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+			
+				ItemPosition[0] = { -110.0f,50.0f,134.0f };
+				ItemPosition[1] = { -50.0f,-50.0f,134.0f };
+				ItemPosition[2] = { -40.0f,-50.0f,134.0f };
+				ItemPosition[3] = { -30.0f,-50.0f,134.0f };
+				ItemPosition[4] = { -20.0f,-50.0f,134.0f };
+				ItemPosition[5] = { -10.0f,-50.0f,134.0f };
+				ItemPosition[6] = { 0.0f,-50.0f,134.0f };
+				ItemPosition[7] = { 10.0f,-50.0f,134.0f };
+				ItemPosition[8] = { 20.0f,-50.0f,134.0f };
+				LightPosition[0] = { -80.0f, -58.0f ,134 };
+				LightPosition[1] = { -40.0f, -20.0f ,134 };
+				LightPosition[2] = { 45.0f, -20.0f ,134 };
+				LightPosition[3] = { 35.0f, 20.0f ,134 };
+				LightPosition[4] = { 45.0f, 40.0f ,134 };
+				LightPosition[5] = { -120.0f, -55.0f ,134 };
+				LightMoveNumber[0] = 1;
+				LightMoveNumber[1] = 1;
+				LightMoveNumber[2] = 3;
+				LightMoveNumber[3] = 2;
+				LightMoveNumber[4] = 4;
+				LightMoveCount[0] = 10;
+				LightMoveCount[1] = 70;
+				LightMoveCount[2] = 50;
+				LightMoveCount[3] = 50;
+				LightMoveCount[4] = 50;
+				for (int i = 0; i < 9; i++) {
+					AreaBlockPosition[i] = { -100.0f,40.0f + ((float)i * 10),134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}
+				for (int i = 9; i < 28; i++) {
+					AreaBlockPosition[i] = { -180.0f + ((float)i * 10),-60.0f,134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}
+
+				for (int i = 28; i < 37; i++) {
+					AreaBlockPosition[i] = { -380.0f + ((float)i * 10),20.0f,134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}
+			/*	for (int i = 1; i < 5; i++) {
+					AreaBlockPosition[i] = { 60.0f + ((float)i * 10),30.0f,134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}*/
+				AreaPosition = { -120.0f,-55.0f,134.0f };
 			}
 			ResetFlag = 0;
 		}
@@ -1702,7 +1761,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			gear[i]->SetRotaition(gearRota[i]);
 			gear[i]->Update(matview);
 		}
-
 		//移動のやつ
 		//カメラの注視点をプレイヤーの位置に固定
 		target2.m128_f32[2] = 0;
@@ -1782,7 +1840,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGui::End();
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
-
 		Sprite::PostDraw();
 		Block::PreDraw(dxCommon->GetCmdList());
 		PlayerLeftWalk::PreDraw(dxCommon->GetCmdList());
@@ -1931,7 +1988,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Scene == title) {
 			sprite[0]->Draw();
 		}
-
 		else if (Scene == explation) {
 			if (ExplanationNumber == 0) {
 				sprite[6]->Draw();
