@@ -626,7 +626,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 11;
+	int StageNumber = 1;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -683,7 +683,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		for (int i = 0; i < _countof(AreaBlock); i++) {
 			if (AreaFlag == 0) {
-				AreaBlock[i]->SetColor({ 0.0f,0.0f,0.0f,1.0 });
+				AreaBlock[i]->SetColor({ 0.7f,0.7f,0.7f,1.0 });
 			} else {
 				AreaBlock[i]->SetColor({ 0.0f,0.0f,0.0f,0.0 });
 			}
@@ -786,8 +786,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			}
 			if (mode == 1) {
-				v0.m128_f32[2] -= 3.5f;
-				v0.m128_f32[1] += 0.5f;
+				v0.m128_f32[2] -= 4.5f;
+				v0.m128_f32[1] += 1.5f;
 				if (v0.m128_f32[2] <= -135.0f) {
 					v0.m128_f32[2] = -135.0f;
 
@@ -1149,9 +1149,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					if (SetFlag[i] == 1) {
 						if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 7.5, LightPosition[j].x, LightPosition[j].y, 7.5) == 1) {
 							if (LightMoveNumber[j] == 0) {
-								SetBlockColor[i].w -= 0.0025;
+								SetBlockColor[i].w -= 0.0020;
 							} else {
-								SetBlockColor[i].w -= 0.01;
+								SetBlockColor[i].w -= 0.005;
 							}
 						}
 					}
@@ -1193,6 +1193,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
+			//プレイヤーとカゲの当たり判定
+			for (int i = 0; i < _countof(AreaBlock); i++) {
+				if ((Boxcollision->CircleCollision(AreaBlockPosition[i].x, AreaBlockPosition[i].y, 2.5, PlayerPosition.x, PlayerPosition.y, 2.5) == 1)
+					&& (AreaFlag == 0)) {
+					ResetFlag = 1;
+				}
+			}
+
 			if (SceneCutFlag == 1) {
 				if (SceneCutPos.x != 0.0f) {
 					SceneCutPos.x -= 20.0f;
@@ -1200,7 +1208,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 				else if (SceneCutPos.x == 0.0f) {
 					CutTimer++;
-					ResetFlag = 1;
+				
 				}
 
 				if (CutTimer == 8 && CutCount != 4) {
@@ -1209,10 +1217,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 				if (CutCount == 4) {
 					SceneCutFlag = 0;
-					ResetFlag = 0;
+					ResetFlag = 1;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 12) {
+					if (StageNumber == 13) {
 						Scene = gameClear;
 					}
 				}
@@ -1277,7 +1285,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			for (int i = 0; i < _countof(MarkBlock); i++) {
 				MarkBlockPosition[i] = { 0.0f,0.0f,134.0f };
 			}
-
 			for (int i = 0; i < Item_NUM; i++) {
 				ItemPosition[i] = { 0,300,134 };
 				ItemAlive[i] = 1;
@@ -1286,12 +1293,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			for (int i = 0; i < _countof(ImageBlock); i++) {
 				ImageBlockPosition[i] = { 0.0f,0.0f,70.0f };
 			}
-
 			for (int i = 0; i < _countof(FieldBlock); i++) {
 				FieldBlockPosition[i] = { 0.0f,400.0f,0.0f };
 				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 			}
-
 			for (int i = 0; i < _countof(AreaBlock); i++) {
 				AreaBlockPosition[i] = { 0.0f,400.0f,0.0f };
 				AreaBlockColor[i] = AreaBlock[i]->GetColor();
@@ -1713,6 +1718,98 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
 				}*/
 				AreaPosition = { -120.0f,-55.0f,134.0f };
+			}
+			else if (StageNumber == 12) {
+				GoalPosition = { 120.0f, 10.0f, 134.0f };
+				PlayerPosition = { -110.0f,-60.0f,135.0f };
+				for (int i = 0; i < 10; i++) {
+					FieldBlockPosition[i] = { -135 + ((float)i * 10),-80,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 10; i < 13; i++) {
+					FieldBlockPosition[i] = { 10 + ((float)i * 10),0,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 19; i < 28; i++) {
+					FieldBlockPosition[i] = { -330 + ((float)i * 10),-50,134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 28; i < 42; i++) {
+					FieldBlockPosition[i] = { -40,-360 + ((float)i * 10),134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 42; i < 44; i++) {
+					FieldBlockPosition[i] = { -60,-480 + ((float)i * 10),134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+				for (int i = 46; i < 51; i++) {
+					FieldBlockPosition[46] = { -135.0f,-30.0f,134.0f };
+					FieldBlockPosition[47] = { -50.0f,-30.0f,134.0f };
+					FieldBlockPosition[48] = { -90.0f,-10.0f,134.0f };
+					FieldBlockPosition[49] = { -135.0f,10.0f,134.0f };
+					FieldBlockPosition[50] = { -50.0f,10.0f,134.0f };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 51; i < 65; i++) {
+					FieldBlockPosition[i] = { 30,-560 + ((float)i * 10),134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 65; i < 74; i++) {
+					FieldBlockPosition[i] = { 100,-730 + ((float)i * 10),134 };
+					FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
+				}
+
+				for (int i = 0; i < 8; i++) {
+					AreaBlockPosition[i] = { -130.0f + ((float)i * 10),-30.0f,134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}
+				for (int i = 8; i < 10; i++) {
+					AreaBlockPosition[8] = { -90.0f,20.0f,134.0f };
+					AreaBlockPosition[9] = { -80.0f,30.0f,134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}
+				for (int i = 10; i < 17; i++) {
+					AreaBlockPosition[i] = { -140.0f + ((float)i * 10),50.0f,134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}
+				for (int i = 17; i < 30; i++) {
+					AreaBlockPosition[i] = { -200.0f + ((float)i * 10),-80.0f,134.0f };
+					AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+				}
+				ItemPosition[0] = { -80,-70,134 };
+				ItemPosition[1] = { -100,-40,134 };
+				ItemPosition[2] = { -30,60,134 };
+				ItemPosition[3] = { -20,60,134 };
+				ItemPosition[4] = { -10,60,134 };
+				ItemPosition[5] = { 0,60,134 };
+				ItemPosition[6] = { 30,-70,134 };
+				ItemPosition[7] = { 50,-70,134 };
+				ItemPosition[8] = { 70,-70,134 };
+				LightPosition[0] = { -130.0f, -60.0f ,134 };
+				LightPosition[1] = { -150.0f, -30.0f ,134 };
+				LightPosition[2] = { -90.0f, 20.0f ,134 };
+				LightPosition[3] = { -100.0f, 10.0f ,134 };
+				LightPosition[4] = { 30.0f, -30.0f ,134 };
+				LightPosition[5] = { 30.0f, 10.0f ,134 };
+				LightPosition[6] = { -10.0f, 20.0f ,134 };
+				LightPosition[7] = { 70.0f, 10.0f ,134 };
+				LightMoveNumber[1] = 4;
+				LightMoveNumber[2] = 1;
+				LightMoveNumber[3] = 3;
+				LightMoveNumber[4] = 3;
+				LightMoveNumber[5] = 4;
+				LightMoveNumber[6] = 1;
+				LightMoveNumber[7] = 2;
+				LightMoveCount[1] = 10;
+				LightMoveCount[2] = 70;
+				LightMoveCount[3] = 50;
+				AreaPosition = { -130.0f,-70.0f,134.0f };
 			}
 			ResetFlag = 0;
 		}
