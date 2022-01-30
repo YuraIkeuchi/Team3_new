@@ -112,7 +112,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// スプライト共通テクスチャ読み込み
 	/*SpriteCommonLoadTexture(spriteCommon, 0, L"Resources/texture.png", dxCommon->GetDev());
 	SpriteCommonLoadTexture(spriteCommon, 1, L"Resources/house.png", dxCommon->GetDev());*/
-	Sprite::LoadTexture(0, L"Resources/Title.png");
+	Sprite::LoadTexture(0, L"Resources/180_20220130123604.png");
 	Sprite::LoadTexture(1, L"Resources/END.png");
 	Sprite::LoadTexture(2, L"Resources/UI/ItemUI.png");
 	Sprite::LoadTexture(3, L"Resources/Number/0.png");
@@ -214,7 +214,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SpriteSceneCutNumber[11] = Sprite::Create(41, { 0.0f,0.0f });
 	sprite[2]->SetPosition({ 100.0f,0.0f });
 	for (int i = 0; i < SpriteNumberMax; i++) {
-		spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
+		//spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
 		spriteNumber[i]->SetSize({ 120.0f,120.0f });
 		spriteNumber[i]->SetPosition({ 310,0 });
 	}
@@ -254,6 +254,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		assert(0);
 		return 1;
 	}
+	audio->LoadSound(0, "Resources/Sound/BGM/TitleBGM.wav");
+	audio->LoadSound(1, "Resources/Sound/BGM/InGameBGM.wav");
+	audio->LoadSound(2, "Resources/Sound/BGM/PlayBGM.wav");
+	audio->LoopWave(0, 0.5f);
 	//audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
 	//audio->LoopWave(0, 0.5f);
 #pragma endregion
@@ -704,6 +708,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				v0.m128_f32[0] = -20;
 				v0.m128_f32[1] = 0;
 				v0.m128_f32[2] = -90;
+				audio->StopWave(0);
 			}
 		}
 #pragma endregion
@@ -750,6 +755,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					Scene = gamePlay;
 					LightFlag = 0;
 					AppearanceCount = 0;
+					audio->LoopWave(1, 0.5f);
 				}
 			}
 
@@ -762,10 +768,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 			{
 				mode = 1;
+				audio->LoopWave(1, 0.5f);
+				audio->StopWave(2);
 			}
 			else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
 			{
 				mode = 0;
+				audio->LoopWave(2, 0.5f);
+				audio->StopWave(1);
 			}
 
 #pragma region//プレイ画面
@@ -1027,6 +1037,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 						SetBlockPosition[i].y = kage[0].y;
 						SetBlockPosition[i].z = 134.0f;
 						TextNumber++;
+						audio->PlayWave("Resources/Sound/Makibisi_Roll.wav", 0.7f);
 						break;
 					}
 				}
