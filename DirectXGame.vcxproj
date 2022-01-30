@@ -144,9 +144,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Area.cpp" />
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="background.cpp" />
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="DirectXCommon.cpp" />
+    <ClCompile Include="Gear.cpp" />
+    <ClCompile Include="Goal.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -154,15 +158,28 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="Lever.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Object3d.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Player2.cpp" />
-    <ClCompile Include="Player3.cpp" />
-    <ClCompile Include="Player4.cpp" />
+    <ClCompile Include="PlayerJumpLeft.cpp" />
+    <ClCompile Include="PlayerLeftWalk.cpp" />
+    <ClCompile Include="PlayerLeftWalk2.cpp" />
+    <ClCompile Include="PlayerLeftWalk3.cpp" />
+    <ClCompile Include="PlayerLeftWalk4.cpp" />
+    <ClCompile Include="PlayerRightWalk.cpp" />
+    <ClCompile Include="PlayerRightWalk2.cpp" />
+    <ClCompile Include="PlayerRightWalk3.cpp" />
+    <ClCompile Include="PlayerRightWalk4.cpp" />
+    <ClCompile Include="PlayerJump.cpp" />
     <ClCompile Include="Projector.cpp" />
+    <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="under.cpp" />
     <ClCompile Include="WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -219,7 +236,10 @@
   <ItemGroup>
     <ClInclude Include="Audio.h" />
     <ClInclude Include="background.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="DirectXCommon.h" />
+    <ClInclude Include="Gear.h" />
+    <ClInclude Include="Goal.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_dx12.h" />
@@ -229,15 +249,29 @@
     <ClInclude Include="imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Item.h" />
+    <ClInclude Include="Lever.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="LightSource.h" />
+    <ClInclude Include="Block.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Object3d.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Player2.h" />
-    <ClInclude Include="Player3.h" />
-    <ClInclude Include="Player4.h" />
+    <ClInclude Include="PlayerJumpLeft.h" />
+    <ClInclude Include="PlayerLeftWalk.h" />
+    <ClInclude Include="PlayerLeftWalk2.h" />
+    <ClInclude Include="PlayerLeftWalk3.h" />
+    <ClInclude Include="PlayerLeftWalk4.h" />
+    <ClInclude Include="PlayerRightWalk.h" />
+    <ClInclude Include="PlayerRightWalk2.h" />
+    <ClInclude Include="PlayerRightWalk3.h" />
+    <ClInclude Include="PlayerRightWalk4.h" />
+    <ClInclude Include="PlayerJump.h" />
     <ClInclude Include="Projector.h" />
+    <ClInclude Include="Screen.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="under.h" />
     <ClInclude Include="WinApp.h" />
+    <ClInclude Include="Area.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
