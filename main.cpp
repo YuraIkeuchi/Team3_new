@@ -250,16 +250,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma region//オーディオ
 	const int AudioMax = 3;
 	Audio* audio = new Audio;
+	float GameVolume = 0.0f;
+	float ProjectorVolume = 0.3f;
 	if (!audio->Initialize()) {
 		assert(0);
 		return 1;
 	}
 	audio->LoadSound(0, "Resources/Sound/BGM/TitleBGM.wav");
-	audio->LoadSound(1, "Resources/Sound/BGM/InGameBGM.wav");
-	audio->LoadSound(2, "Resources/Sound/BGM/PlayBGM.wav");
-	audio->LoopWave(0, 0.5f);
-	//audio->LoadSound(0, "Resources/Sound/kadai_BGM.wav");
-	//audio->LoopWave(0, 0.5f);
+	audio->LoadSound(1, "Resources/Sound/BGM/nc63527.wav");
+	audio->LoadSound(2, "Resources/Sound/BGM/fc.wav");
+	audio->LoopWave(0, 0.3);
 #pragma endregion
 #pragma region//キー処理
 	//入力の初期化
@@ -712,27 +712,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 		}
 #pragma endregion
-#pragma region//説明
-		if (Scene == explation) {
-			if (input->TriggerKey(DIK_RIGHT)) {
-				ExplanationNumber = 1;
-			}
-			if ((input->TriggerKey(DIK_SPACE)) && (ExplanationNumber == 1)) {
-				SpaceCount++;
-			}
-
-			if (SpaceCount == 2) {
-				Scene = appearance;
-				SpaceCount = 0;
-			
-			}
-		}
-#pragma endregion
 #pragma region//導入
 		if (Scene == appearance) {
 			AppearanceCount++;
 
-			if (AppearanceCount >= 10) {
+			if (AppearanceCount == 99) {
+				audio->LoopWave(1, 0.3);
+			}
+			if (AppearanceCount >= 100) {
 				LightFlag = 1;
 			}
 
@@ -748,14 +735,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightCount = 0;
 			}
 
-			if (AppearanceCount >= 50) {
+			if (AppearanceCount >= 200) {
 				if (v0.m128_f32[0] != 0.0f) {
 					v0.m128_f32[0] += 1.0f;
 				} else {
 					Scene = gamePlay;
 					LightFlag = 0;
 					AppearanceCount = 0;
-					audio->LoopWave(1, 0.5f);
+					audio->LoopWave(2, 0.3f);
+					audio->StopWave(1);
 				}
 			}
 
@@ -768,14 +756,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if (input->TriggerKey(DIK_M) && mode == 0 && modeflag == 1)
 			{
 				mode = 1;
-				audio->LoopWave(1, 0.5f);
+				audio->LoopWave(1, 0.3);
 				audio->StopWave(2);
 			}
 			else if (input->TriggerKey(DIK_M) && mode == 1 && modeflag == 0)
 			{
 				mode = 0;
-				audio->LoopWave(2, 0.5f);
 				audio->StopWave(1);
+				audio->LoopWave(2, ProjectorVolume);
 			}
 
 #pragma region//プレイ画面
@@ -1222,11 +1210,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				
 				}
 
-				if (CutTimer == 8 && CutCount != 4) {
+				if (CutTimer == 5 && CutCount != 4) {
 					CutCount++;
 					CutTimer = 0;
 				}
 				if (CutCount == 4) {
+					audio->PlayWave("Resources/Sound/nc44551.wav", 0.7f);
 					SceneCutFlag = 0;
 					ResetFlag = 1;
 					CutCount = 0;
