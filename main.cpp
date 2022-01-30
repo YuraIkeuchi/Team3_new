@@ -638,6 +638,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int LightCount = 0;
 	int LightFlag = 0;
 	int AppearanceCount = 0;
+	int GameClearCount = 0;
 	enum Scene {
 		title,
 		explation,
@@ -765,7 +766,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				audio->StopWave(1);
 				audio->LoopWave(2, ProjectorVolume);
 			}
-
 #pragma region//プレイ画面
 			if (mode == 0) {
 				v0.m128_f32[1] -= 3.0f;
@@ -1164,10 +1164,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
-		
 			for (int i = 17; i < 22; i++) {
 				if ((PlayerHP % 40 == 0) && (PlayerHP != 160)) {
 					sprite[i]->SetColor({ 1.0f,0.0f,0.0f,1.0f }); 
+					audio->PlayWave("Resources/Sound/action1, damage1.wav", 0.4f);
+					PlayerHP--;
 				} else {
 					sprite[i]->SetColor({ 1.0f,1.0f,1.0f,1.0f });
 				}
@@ -1215,13 +1216,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					CutTimer = 0;
 				}
 				if (CutCount == 4) {
-					audio->PlayWave("Resources/Sound/nc44551.wav", 0.7f);
+					audio->PlayWave("Resources/Sound/nc44551.wav", 0.4f);
 					SceneCutFlag = 0;
 					ResetFlag = 1;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
 					if (StageNumber == 13) {
 						Scene = gameClear;
+						audio->StopWave(2);
 					}
 				}
 			}
@@ -1233,9 +1235,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 #pragma region//ステージクリア
 		if (Scene == stageClear) {
+			
 			ResetFlag = 1;
 			if (input->TriggerKey(DIK_SPACE)) {
-				Scene = gamePlay;
+				Scene = title;
+				GameClearCount = 0;
 				ResetFlag = 0;
 			}
 		}
@@ -1254,9 +1258,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Scene == gameClear) {
 			StageNumber = 1;
 			ResetFlag = 1;
+			GameClearCount++;
+			if (GameClearCount == 1) {
+				audio->PlayWave("Resources/Sound/ME007-090401-clear03-wav.wav", 0.4f);
+			}
 			if (input->TriggerKey(DIK_SPACE)) {
 				Scene = title;
+				audio->LoopWave(0, 0.3);
 				ResetFlag = 0;
+				GameClearCount = 0;
 				SpaceCount = 0;
 			}
 		}
