@@ -39,6 +39,7 @@
 #include "Gear.h"
 #include "under.h"
 #include "Area.h"
+#include "vinet.h"
 #include "DirectXTex/d3dx12.h"
 
 #include "imgui\imgui.h"
@@ -424,6 +425,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	XMFLOAT3 underPos;
 	underPos = { -100,-50.0f,-70.0f };
 	under->SetPosition(underPos);
+
+	Vinet* vinet;
+	if (!vinet->StaticInitialize(dxCommon->GetDev(), WinApp::window_width, WinApp::window_height)) {
+		assert(0);
+		return 1;
+	}
+	vinet = Vinet::Create();
+	vinet->Update(matview);
+
+	XMFLOAT3 vinetPos;
+	vinetPos = { -100,-50.0f,-70.0f };
+	vinet->SetPosition(vinetPos);
+
 	XMFLOAT3 leverRota = lever->GetRotaition();
 	Gear* gear[2];
 	XMFLOAT3 gearPos[2];
@@ -1894,6 +1908,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		screen->Update(matview);
 		projector->Update(matview);
 		under->Update(matview);
+		vinet->Update(matview);
 		lever->Update(matview);
 		goal->Update(matview);
 		area->Update(matview);
@@ -1911,6 +1926,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		screen->SetPosition({ 0,0,135 });
 		projector->SetPosition({ 0,-20,-70 });
 		under->SetPosition({ -32,135,150 });
+		vinet->SetPosition({ 0,-60,-110 });
 		lever->SetPosition(leverPos);
 		lever->SetRotaition(leverRota);
 		goal->SetPosition(GoalPosition);
@@ -1964,12 +1980,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Screen::PreDraw(dxCommon->GetCmdList());
 		Projector::PreDraw(dxCommon->GetCmdList());
 		Under::PreDraw(dxCommon->GetCmdList());
+		Vinet::PreDraw(dxCommon->GetCmdList());
 		Lever::PreDraw(dxCommon->GetCmdList());
 		Gear::PreDraw(dxCommon->GetCmdList());
 		Goal::PreDraw(dxCommon->GetCmdList());
 		Area::PreDraw(dxCommon->GetCmdList());
 		LightSource::PreDraw(dxCommon->GetCmdList());
 		Item::PreDraw(dxCommon->GetCmdList());
+		vinet->Draw();
 		if ((Scene == appearance) || (Scene == gamePlay)) {
 			//スクリーン関係
 			screen->Draw();
@@ -1977,8 +1995,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			if ((mode == 1) || (LightFlag == 1) && (LightCount != 80)) {
 				lightSource->Draw();
 			}
-
+	
 			//プロジェクター関係
+	
 			projector->Draw();
 			lever->Draw();
 			for (int i = 0; i < 2; i++) {
@@ -2174,6 +2193,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Screen::PostDraw();
 		Projector::PostDraw();
 		Under::PostDraw();
+		Vinet::PostDraw();
 		Lever::PostDraw();
 		Gear::PostDraw();
 		Goal::PostDraw();
@@ -2216,6 +2236,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	delete screen;
 	delete projector;
 	delete under;
+	delete vinet;
 	delete lever;
 	delete lightSource;
 	delete goal;

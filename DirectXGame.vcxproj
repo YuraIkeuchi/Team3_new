@@ -180,6 +180,7 @@
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="under.cpp" />
+    <ClCompile Include="vinet.cpp" />
     <ClCompile Include="WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -270,6 +271,7 @@
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="under.h" />
+    <ClInclude Include="vinet.h" />
     <ClInclude Include="WinApp.h" />
     <ClInclude Include="Area.h" />
   </ItemGroup>
