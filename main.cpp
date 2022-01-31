@@ -858,6 +858,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (input->TriggerKey(DIK_R)) {
 				ResetFlag = 1;
+				audio->StopWave(1);
+				audio->LoopWave(2, ProjectorVolume);
 			}
 
 			//画面外で死
