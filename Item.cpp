@@ -246,7 +246,6 @@ bool Item::InitializeGraphicsPipeline() {
 	//gpipeline.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	//時計回り(clockwise)の頂点を持つ面を表と見なす(デフォルト)
 	//gpipeline.RasterizerState.FrontCounterClockwise = FALSE;
-	// レンダーターゲットのブレンド設定
 	D3D12_RENDER_TARGET_BLEND_DESC blenddesc{};
 	blenddesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;	// RBGA全てのチャンネルを描画
 	blenddesc.BlendEnable = true;
