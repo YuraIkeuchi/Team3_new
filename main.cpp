@@ -213,11 +213,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SpriteSceneCutNumber[9] = Sprite::Create(39, { 0.0f,0.0f });
 	SpriteSceneCutNumber[10] = Sprite::Create(40, { 0.0f,0.0f });
 	SpriteSceneCutNumber[11] = Sprite::Create(41, { 0.0f,0.0f });
-	sprite[2]->SetPosition({ 100.0f,0.0f });
+	sprite[2]->SetPosition({ 200.0f,0.0f });
 	for (int i = 0; i < SpriteNumberMax; i++) {
 		//spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
 		spriteNumber[i]->SetSize({ 120.0f,120.0f });
-		spriteNumber[i]->SetPosition({ 310,0 });
+		spriteNumber[i]->SetPosition({ 290,0 });
 	}
 
 	sprite[8]->SetPosition({ 0.0f,605.0f });
@@ -1941,7 +1941,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		dxCommon->PreDraw();
 		////4.描画コマンドここから
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		ImGui::Begin("test");
+	/*	ImGui::Begin("test");
 		if (ImGui::TreeNode("Debug"))
 		{
 			if (ImGui::TreeNode("Film"))
@@ -1962,7 +1962,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			ImGui::TreePop();
 		}
-		ImGui::End();
+		ImGui::End();*/
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		Sprite::PostDraw();
