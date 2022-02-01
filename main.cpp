@@ -257,7 +257,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		assert(0);
 		return 1;
 	}
-	audio->LoadSound(0, "Resources/Sound/BGM/TitleBGM.wav");
+	audio->LoadSound(0, "Resources/Sound/BGM/loop3.wav");
 	audio->LoadSound(1, "Resources/Sound/BGM/nc63527.wav");
 	audio->LoadSound(2, "Resources/Sound/BGM/fc.wav");
 	audio->LoopWave(0, 0.3);
@@ -815,38 +815,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			OldPlayerPosition.x = PlayerPosition.x;
 			OldPlayerPosition.y = PlayerPosition.y;
 			OldPlayerPosition.z = PlayerPosition.z;
-			//プレイ中のプレイヤー移動
-			if ((mode == 0) && (modeflag == 1) && (SceneCutFlag == 0)) {
-				//移動処理
-				if (input->PushKey(DIK_LEFT) && (PlayerPosition.x >= -135.0f)) {
-					PlayerPosition.x -= 1.0f;
-					AnimetionTimer++;
-					PlayerDirectionNumber = 1;
-				}
-				if (input->PushKey(DIK_RIGHT) && (PlayerPosition.x <= 135.0f)) {
-					PlayerPosition.x += 1.0f;
-					AnimetionTimer++;
-					PlayerDirectionNumber = 0;
-				}
-				if (JumpFlag == 1) {
-					if (input->PushKey(DIK_RIGHT) && (PlayerPosition.x <= 135.0f)) {
-						PlayerPosition.x += 0.1f;
-					}
+			if ((input->PushKey(DIK_LEFT)) || (input->PushKey(DIK_RIGHT))) {
+				//プレイ中のプレイヤー移動
+				if ((mode == 0) && (modeflag == 1) && (SceneCutFlag == 0)) {
+					//移動処理
 					if (input->PushKey(DIK_LEFT) && (PlayerPosition.x >= -135.0f)) {
-						PlayerPosition.x -= 0.1f;
+						PlayerPosition.x -= 1.0f;
+						AnimetionTimer++;
+						PlayerDirectionNumber = 1;
 					}
+					if (input->PushKey(DIK_RIGHT) && (PlayerPosition.x <= 135.0f)) {
+						PlayerPosition.x += 1.0f;
+						AnimetionTimer++;
+						PlayerDirectionNumber = 0;
+					}
+					if (JumpFlag == 1) {
+						if (input->PushKey(DIK_RIGHT) && (PlayerPosition.x <= 135.0f)) {
+							PlayerPosition.x += 0.1f;
+						}
+						if (input->PushKey(DIK_LEFT) && (PlayerPosition.x >= -135.0f)) {
+							PlayerPosition.x -= 0.1f;
+						}
+					}
+				
 				}
-				//ジャンプ処理
-				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && (JumpG >= 0.0f) && (JumpG <= 0.1f)) {
-					JumpG = -1.5f;
-					JumpFlag = 1;
-				}
-
-				//ジャンプ処理
-				PlayerPosition.y -= JumpG;
-				JumpG += 0.05f;
+			} else {
+				AnimetionTimer = 0;
+				AnimetionCount = 0;
 			}
 
+			//ジャンプ処理
+			if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && (JumpG >= 0.0f) && (JumpG <= 0.1f)) {
+				JumpG = -1.5f;
+				JumpFlag = 1;
+			}
+
+			//ジャンプ処理
+			PlayerPosition.y -= JumpG;
+			JumpG += 0.05f;
 			//アニメーションタイマー
 			if (AnimetionTimer >= 8) {
 				AnimetionCount++;
@@ -865,6 +871,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//画面外で死
 			if ((PlayerPosition.y <= -135) || (PlayerHP <= 0)) {
 				PlayerAlive = 0;
+				audio->StopWave(1);
+				audio->LoopWave(2, ProjectorVolume);
 			}
 
 			if (PlayerAlive == 0) {
@@ -1209,9 +1217,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 
-			//プレイヤーとカゲの当たり判定
+			//プレイヤーとエリアブロックの当たり判定
 			for (int i = 0; i < _countof(AreaBlock); i++) {
-				if ((Boxcollision->CircleCollision(AreaBlockPosition[i].x, AreaBlockPosition[i].y, 2.5, PlayerPosition.x, PlayerPosition.y, 2.5) == 1)
+				if ((Boxcollision->CircleCollision(AreaBlockPosition[i].x, AreaBlockPosition[i].y, 3, PlayerPosition.x, PlayerPosition.y, 3) == 1)
 					&& (AreaFlag == 0)) {
 					ResetFlag = 1;
 				}
@@ -1237,7 +1245,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					ResetFlag = 1;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 13) {
+					if (StageNumber == 2) {
 						Scene = gameClear;
 						audio->StopWave(2);
 					}
@@ -1282,6 +1290,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				Scene = title;
 				audio->LoopWave(0, 0.3);
 				ResetFlag = 0;
+				SceneCutFlag = 1;
 				GameClearCount = 0;
 				SpaceCount = 0;
 			}
@@ -1498,7 +1507,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightMoveNumber[3] = 2;
 			}
 			else if (StageNumber == 7) {
-				GoalPosition = { 110.0f,10.0f,134.0f };
+				GoalPosition = { 100.0f,10.0f,134.0f };
 				PlayerPosition = { -130.0f,20.0f,135.0f };
 				for (int i = 0; i < 25; i++) {
 					FieldBlockPosition[i] = { -135 + ((float)i * 10),0,134 };
@@ -1512,7 +1521,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				AreaPosition = { -80.0f,40.0f,134 };
 			}
 			else if (StageNumber == 8) {
-				GoalPosition = { -120.0f,20.0f,134.0f };
+				GoalPosition = { -110.0f,20.0f,134.0f };
 				PlayerPosition = { -130.0f,-50.0f,135.0f };
 				for (int i = 0; i < 8; i++) {
 					FieldBlockPosition[i] = { -135 + ((float)i * 10),-70,134 };
@@ -1837,6 +1846,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightMoveCount[3] = 50;
 				AreaPosition = { -130.0f,-70.0f,134.0f };
 			}
+		
 			ResetFlag = 0;
 		}
 #pragma endregion
