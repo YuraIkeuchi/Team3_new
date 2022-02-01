@@ -815,9 +815,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			OldPlayerPosition.x = PlayerPosition.x;
 			OldPlayerPosition.y = PlayerPosition.y;
 			OldPlayerPosition.z = PlayerPosition.z;
-			if ((input->PushKey(DIK_LEFT)) || (input->PushKey(DIK_RIGHT))) {
+			
 				//プレイ中のプレイヤー移動
-				if ((mode == 0) && (modeflag == 1) && (SceneCutFlag == 0)) {
+			if ((mode == 0) && (modeflag == 1) && (SceneCutFlag == 0)) {
+				if ((input->PushKey(DIK_LEFT)) || (input->PushKey(DIK_RIGHT))) {
 					//移動処理
 					if (input->PushKey(DIK_LEFT) && (PlayerPosition.x >= -135.0f)) {
 						PlayerPosition.x -= 1.0f;
@@ -837,22 +838,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 							PlayerPosition.x -= 0.1f;
 						}
 					}
-				
+
 				}
-			} else {
-				AnimetionTimer = 0;
-				AnimetionCount = 0;
+				else {
+					AnimetionTimer = 0;
+					AnimetionCount = 0;
+				}
+				//ジャンプ処理
+				if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && (JumpG >= 0.0f) && (JumpG <= 0.1f)) {
+					JumpG = -1.5f;
+					JumpFlag = 1;
+				}
+
+				//ジャンプ処理
+				PlayerPosition.y -= JumpG;
+				JumpG += 0.05f;
 			}
 
-			//ジャンプ処理
-			if (input->TriggerKey(DIK_SPACE) && (JumpFlag == 0) && (JumpG >= 0.0f) && (JumpG <= 0.1f)) {
-				JumpG = -1.5f;
-				JumpFlag = 1;
-			}
-
-			//ジャンプ処理
-			PlayerPosition.y -= JumpG;
-			JumpG += 0.05f;
+			
 			//アニメーションタイマー
 			if (AnimetionTimer >= 8) {
 				AnimetionCount++;
@@ -1245,7 +1248,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					ResetFlag = 1;
 					CutCount = 0;
 					SceneCutPos = { 1280.0f,0.0f };
-					if (StageNumber == 2) {
+					if (StageNumber == 13) {
 						Scene = gameClear;
 						audio->StopWave(2);
 					}
@@ -1635,10 +1638,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
 			}
 
-			for (int i = 50; i < 52; i++) {
+			/*for (int i = 50; i < 52; i++) {
 				FieldBlockPosition[i] = { 10,-460 + ((float)i * 10),134 };
 				FieldBlock[i]->SetPosition({ FieldBlockPosition[i] });
-			}
+			}*/
 
 			for (int i = 52; i < 55; i++) {
 				FieldBlockPosition[i] = { 60,-480 + ((float)i * 10),134 };
@@ -1660,8 +1663,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			ItemPosition[0] = { -70,10,134 };
 			ItemPosition[1] = { -60,10,134 };
-			ItemPosition[2] = { -100,40,134 };
-			ItemPosition[3] = {  30,10,134 };
+			//ItemPosition[2] = { -100,40,134 };
+			ItemPosition[3] = {  80,40,134 };
 			ItemPosition[4] = {  50,10,134 };
 			LightPosition[0] = { -50.0f, 33.0f ,134 };
 			LightPosition[1] = { -130.0f, 20.0f ,134 };
@@ -1678,6 +1681,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 			for (int i = 10; i < 16; i++) {
 				AreaBlockPosition[i] = { 10.0f,-130.0f + ((float)i * 10),134.0f };
+				AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
+			}
+
+			for (int i = 16; i < 18; i++) {
+				AreaBlockPosition[i] = { 10.0f,-120.0f + ((float)i * 10),134.0f };
 				AreaBlock[i]->SetPosition({ AreaBlockPosition[i] });
 			}
 			AreaPosition = { -130.0f,10.0f,134.0f };
