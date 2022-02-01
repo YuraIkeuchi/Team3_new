@@ -244,7 +244,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	for (int i = 17; i < 22; i++) {
-		sprite[i]->SetPosition({ 60.0f,20.0f });
+		sprite[i]->SetPosition({120.0f,20.0f });
 	}
 	int SceneCutFlag = 1;
 #pragma endregion
