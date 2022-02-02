@@ -177,6 +177,7 @@
     <ClCompile Include="PlayerRightWalk4.cpp" />
     <ClCompile Include="PlayerJump.cpp" />
     <ClCompile Include="Projector.cpp" />
+    <ClCompile Include="RealBlock.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="under.cpp" />
@@ -268,6 +269,7 @@
     <ClInclude Include="PlayerRightWalk4.h" />
     <ClInclude Include="PlayerJump.h" />
     <ClInclude Include="Projector.h" />
+    <ClInclude Include="RealBlock.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="under.h" />
