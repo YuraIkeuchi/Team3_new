@@ -162,6 +162,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Sprite::LoadTexture(45, L"Resources/UI/PlayerHPUI4.png");
 	Sprite::LoadTexture(46, L"Resources/UI/PlayerHPUI5.png");
 	Sprite::LoadTexture(47, L"Resources/UI/ResetUI.png");
+	Sprite::LoadTexture(48, L"Resources/SceneCut/LastSceneCutNumber.png");
 	sprite[0] = Sprite::Create(0, { 0.0f,0.0f });
 	sprite[1] = Sprite::Create(1, { 0.0f,0.0f });
 	sprite[2] = Sprite::Create(2, { 0.0f,0.0f });
@@ -202,7 +203,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SpriteSceneCut[1] = Sprite::Create(25, { 0.0f,0.0f });
 	SpriteSceneCut[2] = Sprite::Create(26, { 0.0f,0.0f });
 	SpriteSceneCut[3] = Sprite::Create(27, { 0.0f,0.0f });
-	const int SceneCutNumberMax = 12;
+	const int SceneCutNumberMax = 13;
 	Sprite* SpriteSceneCutNumber[SceneCutNumberMax] = { nullptr };
 	SpriteSceneCutNumber[0] = Sprite::Create(30, { 0.0f,0.0f });
 	SpriteSceneCutNumber[1] = Sprite::Create(31, { 0.0f,0.0f });
@@ -216,6 +217,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SpriteSceneCutNumber[9] = Sprite::Create(39, { 0.0f,0.0f });
 	SpriteSceneCutNumber[10] = Sprite::Create(40, { 0.0f,0.0f });
 	SpriteSceneCutNumber[11] = Sprite::Create(41, { 0.0f,0.0f });
+	SpriteSceneCutNumber[12] = Sprite::Create(48, { 0.0f,0.0f });
 	sprite[2]->SetPosition({ 200.0f,0.0f });
 	for (int i = 0; i < SpriteNumberMax; i++) {
 		//spriteNumber[i]->SetColor({ 0.0f,0.0f,0.0f,1.0f });
@@ -648,7 +650,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 6;
+	int StageNumber = 12;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
@@ -1964,28 +1966,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		dxCommon->PreDraw();
 		////4.描画コマンドここから
 		dxCommon->GetCmdList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		ImGui::Begin("test");
-		if (ImGui::TreeNode("Debug"))
-		{
-		/*	if (ImGui::TreeNode("Film"))
-			{
-				ImGui::SliderFloat("Position.x", &SetBlockColor[0].w, 50, -50);
-				ImGui::Text("HP,%d", PlayerHP);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}*/
+		//ImGui::Begin("test");
+		//if (ImGui::TreeNode("Debug"))
+		//{
+		///*	if (ImGui::TreeNode("Film"))
+		//	{
+		//		ImGui::SliderFloat("Position.x", &SetBlockColor[0].w, 50, -50);
+		//		ImGui::Text("HP,%d", PlayerHP);
+		//		ImGui::Unindent();
+		//		ImGui::TreePop();
+		//	}*/
 
-			if (ImGui::TreeNode("Field"))
-			{
-				ImGui::SliderFloat("Position.x", &ImageBlockPosition[0].x, 50, -50);
-				ImGui::SliderFloat("Position.y", &ImageBlockPosition[0].y, 50, -50);
-				ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
-				ImGui::Unindent();
-				ImGui::TreePop();
-			}
-			ImGui::TreePop();
-		}
-		ImGui::End();
+		//	if (ImGui::TreeNode("Field"))
+		//	{
+		//		ImGui::SliderFloat("Position.x", &ImageBlockPosition[0].x, 50, -50);
+		//		ImGui::SliderFloat("Position.y", &ImageBlockPosition[0].y, 50, -50);
+		//		ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
+		//		ImGui::Unindent();
+		//		ImGui::TreePop();
+		//	}
+		//	ImGui::TreePop();
+		//}
+		//ImGui::End();
 		//背景スプライト描画前処理
 		Sprite::PreDraw(dxCommon->GetCmdList());
 		Sprite::PostDraw();

@@ -332,7 +332,7 @@ bool BackGround::LoadTexture()
 	ScratchImage scratchImg{};
 
 	result = LoadFromWICFile(
-		L"Resources/8cc00185e48f9eadcd3b6cf61673451f_t.jpeg", WIC_FLAGS_NONE,
+		L"Resources/RealBlock.png", WIC_FLAGS_NONE,
 		&metadata, scratchImg);
 	if (FAILED(result)) {
 		return result;
