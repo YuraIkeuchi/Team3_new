@@ -7,7 +7,6 @@
 #include<DirectXMath.h>
 #include<d3dcompiler.h>
 #define DIRECTiNPUT_VERSION 
-
 #include<DirectXTex.h>
 #include<wrl.h>
 #include <stdio.h>
@@ -251,7 +250,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	for (int i = 17; i < 22; i++) {
-		sprite[i]->SetPosition({120.0f,20.0f });
+		sprite[i]->SetPosition({120.0f,30.0f });
 	}
 	int SceneCutFlag = 1;
 #pragma endregion
@@ -573,7 +572,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int PlayerAlive = 1;
 	int PlayerDirectionNumber = 0;
 	int PlayerHitFlag = 0;
-	int PlayerHP = 160;
+	int PlayerHP = 240;
 #pragma endregion
 #pragma region//ライト変数
 	const int Light_NUM = 10;
@@ -787,8 +786,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 #pragma region//プレイ画面
 			if (mode == 0) {
-				v0.m128_f32[1] -= 3.0f;
-				v0.m128_f32[2] += 2.7f;
+				v0.m128_f32[1] -= 2.0f;
+				v0.m128_f32[2] += 1.7f;
 				if (v0.m128_f32[2] >= -20.0f) {
 					v0.m128_f32[2] = -20.0f;
 				}
@@ -803,8 +802,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			}
 			if (mode == 1) {
-				v0.m128_f32[2] -= 4.5f;
-				v0.m128_f32[1] += 1.5f;
+				v0.m128_f32[2] -= 3.5f;
+				v0.m128_f32[1] += 0.5f;
 				if (v0.m128_f32[2] <= -135.0f) {
 					v0.m128_f32[2] = -135.0f;
 
@@ -826,12 +825,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				if ((input->PushKey(DIK_LEFT)) || (input->PushKey(DIK_RIGHT))) {
 					//移動処理
 					if (input->PushKey(DIK_LEFT) && (PlayerPosition.x >= -135.0f)) {
-						PlayerPosition.x -= 1.0f;
+						PlayerPosition.x -= 0.8f;
 						AnimetionTimer++;
 						PlayerDirectionNumber = 1;
 					}
 					if (input->PushKey(DIK_RIGHT) && (PlayerPosition.x <= 135.0f)) {
-						PlayerPosition.x += 1.0f;
+						PlayerPosition.x += 0.8f;
 						AnimetionTimer++;
 						PlayerDirectionNumber = 0;
 					}
@@ -857,7 +856,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 				//ジャンプ処理
 				PlayerPosition.y -= JumpG;
-				JumpG += 0.05f;
+				JumpG += 0.045f;
 			}
 
 			
@@ -890,25 +889,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			//光動く
 			for (int i = 0; i < Light_NUM; i++) {
 				if (LightMoveNumber[i] == 1) {
-					LightPosition[i].y += 1.2f;
+					LightPosition[i].y += 0.8f;
 					LightMoveCount[i]++;
 					if (LightMoveCount[i] >= 100) {
 						LightMoveNumber[i] = 2;
 					}
 				}else if (LightMoveNumber[i] == 2) {
-					LightPosition[i].y -= 1.2f;
+					LightPosition[i].y -= 0.8f;
 					LightMoveCount[i]--;
 					if (LightMoveCount[i] <= 0) {
 						LightMoveNumber[i] = 1;
 					}
 				}else if (LightMoveNumber[i] == 3) {
-					LightPosition[i].x += 1.2f;
+					LightPosition[i].x += 1.0f;
 					LightMoveCount[i]++;
 					if (LightMoveCount[i] >= 100) {
 						LightMoveNumber[i] = 4;
 					}
 				} else if (LightMoveNumber[i] == 4) {
-					LightPosition[i].x -= 1.2f;
+					LightPosition[i].x -= 1.0f;
 					LightMoveCount[i]--;
 					if (LightMoveCount[i] <= 0) {
 						LightMoveNumber[i] = 3;
@@ -916,7 +915,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 			}
 			for (int i = 0; i < 2; i++) {
-				FilmPos[i].y += 4.0f;
+				FilmPos[i].y += 3.0f;
 
 				if (FilmPos[i].y >= 720) {
 					FilmPos[i].y = -720;
@@ -1030,19 +1029,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					if (SetFlag[i] == 0) {
 						//移動処理
 						if (input->PushKey(DIK_UP) && (ImageBlockPosition[i].y <= 27.0f)) {
-							ImageBlockPosition[i].y += 1.5f;
+							ImageBlockPosition[i].y += 1.0f;
 						}
 
 						if (input->PushKey(DIK_DOWN) && (ImageBlockPosition[i].y >= -63.0f)) {
-							ImageBlockPosition[i].y -= 1.5f;
+							ImageBlockPosition[i].y -= 1.0f;
 						}
 
 						if (input->PushKey(DIK_LEFT) && (ImageBlockPosition[i].x >= -95.0f)) {
-							ImageBlockPosition[i].x -= 1.5f;
+							ImageBlockPosition[i].x -= 1.0f;
 							//PlayerRotation.z = 270;
 						}
 						if (input->PushKey(DIK_RIGHT) && (ImageBlockPosition[i].x <= 75.0f)) {
-							ImageBlockPosition[i].x += 1.5f;
+							ImageBlockPosition[i].x += 1.0f;
 						}
 						MarkBlockPosition[i].x = kage[0].x;
 						MarkBlockPosition[i].y = kage[0].y;
@@ -1063,7 +1062,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 				//ジャンプ処理
 				PlayerPosition.y -= JumpG;
-				JumpG += 0.05f;
+				JumpG += 0.045f;
 				leverRota.z -= 3.0f;
 				for (int i = 0; i < 2; i++) {
 					gearRota[i].x += 3.0f;
@@ -1180,9 +1179,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 					if (SetFlag[i] == 1) {
 						if (Boxcollision->CircleCollision(SetBlockPosition[i].x, SetBlockPosition[i].y, 7.5, LightPosition[j].x, LightPosition[j].y, 7.5) == 1) {
 							if (LightMoveNumber[j] == 0) {
-								SetBlockColor[i].w -= 0.0020;
+								SetBlockColor[i].w -= 0.0010;
 							} else {
-								SetBlockColor[i].w -= 0.005;
+								SetBlockColor[i].w -= 0.0025;
 							}
 						}
 					}
@@ -1197,7 +1196,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			}
 
 			for (int i = 17; i < 22; i++) {
-				if ((PlayerHP % 40 == 0) && (PlayerHP != 160)) {
+				if ((PlayerHP % 60 == 0) && (PlayerHP != 240)) {
 					sprite[i]->SetColor({ 1.0f,0.0f,0.0f,1.0f }); 
 					audio->PlayWave("Resources/Sound/action1, damage1.wav", 0.4f);
 					PlayerHP--;
@@ -1235,7 +1234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			if (SceneCutFlag == 1) {
 				if (SceneCutPos.x != 0.0f) {
-					SceneCutPos.x -= 20.0f;
+					SceneCutPos.x -= 16.0f;
 				}
 
 				else if (SceneCutPos.x == 0.0f) {
@@ -1243,7 +1242,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				
 				}
 
-				if (CutTimer == 5 && CutCount != 4) {
+				if (CutTimer == 6 && CutCount != 4) {
 					CutCount++;
 					CutTimer = 0;
 				}
@@ -1267,7 +1266,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 #pragma region//ステージクリア
 		if (Scene == stageClear) {
-			
 			ResetFlag = 1;
 			if (input->TriggerKey(DIK_SPACE)) {
 				Scene = title;
@@ -1308,7 +1306,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			ExplanationNumber = 0;
 			JumpG = 0.0f;
 			PlayerAlive = 1;
-			PlayerHP = 160;
+			PlayerHP = 240;
 			PlayerDirectionNumber = 0;
 			ItemCount = 0;
 			mode = 0;
@@ -1769,7 +1767,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				ItemPosition[7] = { 50,-70,134 };
 				ItemPosition[8] = { 70,-70,134 };
 				LightPosition[0] = { -130.0f, -60.0f ,134 };
-				LightPosition[1] = { -150.0f, -30.0f ,134 };
+				LightPosition[1] = { -125.0f, -30.0f ,134 };
 				LightPosition[2] = { -90.0f, 20.0f ,134 };
 				LightPosition[3] = { -100.0f, 10.0f ,134 };
 				LightPosition[4] = { 30.0f, -30.0f ,134 };
@@ -1783,7 +1781,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				LightMoveNumber[5] = 4;
 				LightMoveNumber[6] = 1;
 				LightMoveNumber[7] = 2;
-				LightMoveCount[1] = 10;
+				LightMoveCount[1] = 20;
 				LightMoveCount[2] = 70;
 				LightMoveCount[3] = 50;
 				AreaPosition = { -130.0f,-70.0f,134.0f };
@@ -1969,22 +1967,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//ImGui::Begin("test");
 		//if (ImGui::TreeNode("Debug"))
 		//{
-		///*	if (ImGui::TreeNode("Film"))
+		//	if (ImGui::TreeNode("Film"))
 		//	{
 		//		ImGui::SliderFloat("Position.x", &SetBlockColor[0].w, 50, -50);
 		//		ImGui::Text("HP,%d", PlayerHP);
 		//		ImGui::Unindent();
 		//		ImGui::TreePop();
-		//	}*/
-
-		//	if (ImGui::TreeNode("Field"))
-		//	{
-		//		ImGui::SliderFloat("Position.x", &ImageBlockPosition[0].x, 50, -50);
-		//		ImGui::SliderFloat("Position.y", &ImageBlockPosition[0].y, 50, -50);
-		//		ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
-		//		ImGui::Unindent();
-		//		ImGui::TreePop();
 		//	}
+
+		//	//if (ImGui::TreeNode("Field"))
+		//	//{
+		//	//	ImGui::SliderFloat("Position.x", &ImageBlockPosition[0].x, 50, -50);
+		//	//	ImGui::SliderFloat("Position.y", &ImageBlockPosition[0].y, 50, -50);
+		//	//	ImGui::SliderFloat("JumpG", &JumpG, 50, -50);
+		//	//	ImGui::Unindent();
+		//	//	ImGui::TreePop();
+		//	//}
 		//	ImGui::TreePop();
 		//}
 		//ImGui::End();
@@ -2177,13 +2175,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				}
 				sprite[2]->Draw();
 				spriteNumber[ItemCount]->Draw();
-				if (PlayerHP > 120) {
+				if (PlayerHP > 180) {
 					sprite[17]->Draw();
-				} else if ((PlayerHP <= 120) && (PlayerHP > 80)) {
+				} else if ((PlayerHP <= 180) && (PlayerHP > 120)) {
 					sprite[18]->Draw();
-				} else if ((PlayerHP <= 80) && (PlayerHP > 40)) {
+				} else if ((PlayerHP <= 120) && (PlayerHP > 60)) {
 					sprite[19]->Draw();
-				} else if ((PlayerHP <= 40) && (PlayerHP > 0)) {
+				} else if ((PlayerHP <= 60) && (PlayerHP > 0)) {
 					sprite[20]->Draw();
 				} else {
 					sprite[21]->Draw();
