@@ -650,7 +650,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #pragma endregion
 #pragma region//シーン変数
 	int Scene = 0;
-	int StageNumber = 12;
+	int StageNumber = 1;
 	int ResetFlag = 0;
 	int SpaceCount = 0;
 	int CutTimer = 0;
